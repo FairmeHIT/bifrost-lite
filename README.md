@@ -47,7 +47,7 @@ curl -i POST http://localhost:8090/v1/models
 ```bash
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk-bf-74fb9156-d57c-4ee1-ad19-6893d0a5344d" 
+  -H "Authorization: Bearer sk-bf-<your-virtual-key>" 
   -d '{
     "model": "shangtang/deepseek-v4-flash",
     "messages": [{"role": "user", "content": "Hello, Bifrost!"}]
