@@ -992,6 +992,7 @@ func (m *AuthMiddleware) APIMiddleware() schemas.BifrostHTTPMiddleware {
 		"/api/session/login",
 		"/api/oauth/callback",
 		"/health",
+		"/health/readiness",
 		"/login",
 		"/favicon.ico",
 		"/assets/*",

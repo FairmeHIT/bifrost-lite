@@ -1,6 +1,14 @@
 import {
 	ArrowUpRight,
 	BadgeInfo,
+	BookUser,
+	Building,
+	Building2,
+	Landmark,
+	ScrollText,
+	UserRoundCheck,
+	Users,
+	WalletCards,
 	Boxes,
 	BoxIcon,
 	BugIcon,
@@ -526,6 +534,24 @@ export default function AppSidebar() {
 	const hasSettingsAccess = useRbac(RbacResource.Settings, RbacOperation.View);
 	const hasFeatureFlagsAccess = useRbac(RbacResource.FeatureFlags, RbacOperation.View);
 	const hasAPIKeyAccess = useRbac(RbacResource.APIKeys, RbacOperation.View);
+	const hasUsersAccess = useRbac(RbacResource.Users, RbacOperation.View);
+	const hasUserProvisioningAccess = useRbac(RbacResource.UserProvisioning, RbacOperation.View);
+	const hasAuditLogsAccess = useRbac(RbacResource.AuditLogs, RbacOperation.View);
+	const hasCustomersAccess = useRbac(RbacResource.Customers, RbacOperation.View);
+	const hasTeamsAccess = useRbac(RbacResource.Teams, RbacOperation.View);
+	const hasBusinessUnitsAccess = useRbac(RbacResource.UserProvisioning, RbacOperation.View);
+	const hasRbacAccess = useRbac(RbacResource.RBAC, RbacOperation.View);
+	const hasVirtualKeysAccess = useRbac(RbacResource.VirtualKeys, RbacOperation.View);
+	const hasAccessProfilesAccess = useRbac(RbacResource.AccessProfiles, RbacOperation.View);
+	const hasAnyGovernanceAccess =
+		hasVirtualKeysAccess ||
+		hasTeamsAccess ||
+		hasUsersAccess ||
+		hasCustomersAccess ||
+		hasBusinessUnitsAccess ||
+		hasRbacAccess ||
+		hasAccessProfilesAccess ||
+		hasGovernanceLegacyAccess;
 	const { t } = useI18n();
 	const { data: coreConfig } = useGetCoreConfigQuery({});
 	const isDbConnected = coreConfig?.is_db_connected ?? false;
@@ -660,6 +686,78 @@ export default function AppSidebar() {
 				],
 			},
 			{
+				title: t("sidebar.governance"),
+				url: "/workspace/governance",
+				icon: Landmark,
+				description: t("sidebar.descGovernance"),
+				hasAccess: hasAnyGovernanceAccess,
+				subItems: [
+					{
+						title: t("sidebar.virtualKeys"),
+						url: "/workspace/governance/virtual-keys",
+						icon: KeyRound,
+						description: t("sidebar.descVirtualKeys"),
+						hasAccess: hasVirtualKeysAccess,
+					},
+					{
+						title: t("sidebar.users"),
+						url: "/workspace/governance/users",
+						icon: Users,
+						description: t("sidebar.descUsers"),
+						hasAccess: hasUsersAccess,
+					},
+					{
+						title: t("sidebar.teams"),
+						url: "/workspace/governance/teams",
+						icon: Building,
+						description: t("sidebar.descTeams"),
+						hasAccess: hasTeamsAccess,
+					},
+					{
+						title: t("sidebar.businessUnits"),
+						url: "/workspace/governance/business-units",
+						icon: Building2,
+						description: t("sidebar.descBusinessUnits"),
+						hasAccess: hasBusinessUnitsAccess,
+					},
+					{
+						title: t("sidebar.customers"),
+						url: "/workspace/governance/customers",
+						icon: WalletCards,
+						description: t("sidebar.descCustomers"),
+						hasAccess: hasCustomersAccess,
+					},
+					{
+						title: t("sidebar.userProvisioning"),
+						url: "/workspace/scim",
+						icon: BookUser,
+						description: t("sidebar.descUserProvisioning"),
+						hasAccess: hasUserProvisioningAccess,
+					},
+					{
+						title: t("sidebar.rolesAndPermissions"),
+						url: "/workspace/governance/rbac",
+						icon: UserRoundCheck,
+						description: t("sidebar.descRolesAndPermissions"),
+						hasAccess: hasRbacAccess,
+					},
+					{
+						title: t("sidebar.accessProfiles"),
+						url: "/workspace/governance/access-profiles",
+						icon: ShieldCheck,
+						description: t("sidebar.descAccessProfiles"),
+						hasAccess: hasAccessProfilesAccess,
+					},
+					{
+						title: t("sidebar.auditLogs"),
+						url: "/workspace/audit-logs",
+						icon: ScrollText,
+						description: t("sidebar.descAuditLogs"),
+						hasAccess: hasAuditLogsAccess,
+					},
+				],
+			},
+			{
 				title: t("sidebar.evals"),
 				url: "https://www.getmaxim.ai",
 				icon: FlaskConical,
@@ -672,7 +770,7 @@ export default function AppSidebar() {
 				url: "/workspace/config",
 				icon: Settings2Icon,
 				description: t("sidebar.descSettings"),
-				hasAccess: hasSettingsAccess,
+				hasAccess: hasSettingsAccess || hasAuditLogsAccess || hasUserProvisioningAccess,
 				subItems: [
 					{
 						title: t("sidebar.clientSettings"),
@@ -762,6 +860,16 @@ export default function AppSidebar() {
 			hasDashboardAccess,
 			hasModelProvidersAccess,
 			hasGovernanceLegacyAccess,
+			hasUsersAccess,
+			hasUserProvisioningAccess,
+			hasAuditLogsAccess,
+			hasCustomersAccess,
+			hasTeamsAccess,
+			hasBusinessUnitsAccess,
+			hasRbacAccess,
+			hasVirtualKeysAccess,
+			hasAccessProfilesAccess,
+			hasAnyGovernanceAccess,
 			hasRoutingRulesAccess,
 			hasCircuitBreakerAccess,
 			hasSettingsAccess,

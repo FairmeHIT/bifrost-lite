@@ -76,4 +76,8 @@ registerModelLimitScope({
 	value: "virtual_key",
 	label: "Virtual Key",
 	PickerComponent: VirtualKeySelector,
+	buildDeepLink: (scopeId) => ({
+		to: "/workspace/governance/virtual-keys",
+		search: { vk: scopeId },
+	}),
 });

@@ -1,6 +1,7 @@
 import { IS_ENTERPRISE } from "@/lib/constants/config";
 import { useGetCoreConfigQuery } from "@/lib/store";
-import { useGetModelConfigsQuery } from "@/lib/store/apis/governanceApi";
+import { useGetModelConfigsQuery, useGetVirtualKeysQuery } from "@/lib/store/apis/governanceApi";
+import { useGetSCIMProvidersQuery } from "@enterprise/lib/store/apis/scimApi";
 import { useGetAllKeysQuery } from "@/lib/store/apis/providersApi";
 import { useMemo } from "react";
 
@@ -45,8 +46,17 @@ export function useOnboardingChecklist({ skip = false }: { skip?: boolean } = {}
 	const { data: modelConfigsResponse } = useGetModelConfigsQuery(undefined, {
 		skip: shouldSkipChecklistQueries || !IS_ENTERPRISE,
 	});
+	const { data: vksResponse } = useGetVirtualKeysQuery(undefined, {
+		skip: shouldSkipChecklistQueries || !IS_ENTERPRISE,
+	});
+	const { data: scimProviders } = useGetSCIMProvidersQuery(undefined, {
+		skip: shouldSkipChecklistQueries || !IS_ENTERPRISE,
+	});
 
-	const checklistReady = bifrostConfig !== undefined && allKeys !== undefined && (!IS_ENTERPRISE || modelConfigsResponse !== undefined);
+	const checklistReady =
+		bifrostConfig !== undefined &&
+		allKeys !== undefined &&
+		(!IS_ENTERPRISE || (vksResponse !== undefined && modelConfigsResponse !== undefined && scimProviders !== undefined));
 
 	const skippedIds = useMemo<string[]>(() => {
 		return parseSkippedIds(bifrostConfig?.metadata?.[METADATA_SKIPPED_KEY]);
@@ -93,16 +103,30 @@ export function useOnboardingChecklist({ skip = false }: { skip?: boolean } = {}
 		const enterprise: OnboardingStep[] = IS_ENTERPRISE
 			? [
 					{
+						id: "scim",
+						title: "Configure SCIM provisioning",
+						route: "/workspace/scim",
+						section: "Everything Else",
+						complete: (scimProviders?.length ?? 0) > 0,
+					},
+					{
 						id: "models",
 						title: "Configure governance model catalog",
 						route: "/workspace/model-catalog",
 						section: "Everything Else",
 						complete: (modelConfigsResponse?.total_count ?? 0) > 0,
 					},
+					{
+						id: "virtual-keys",
+						title: "Set up virtual keys / access profiles",
+						route: "/workspace/virtual-keys",
+						section: "Everything Else",
+						complete: (vksResponse?.total_count ?? 0) > 0,
+					},
 				]
 			: [];
 		return [...common, ...enterprise];
-	}, [allKeys, clientConfig, authConfig, modelConfigsResponse]);
+	}, [allKeys, clientConfig, authConfig, scimProviders, modelConfigsResponse, vksResponse]);
 
 	return { bifrostConfig, steps, skippedIds, checklistReady, isDismissedForAll };
 }

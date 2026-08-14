@@ -41,10 +41,14 @@ open http://localhost:8080
 **Step 3:** Make your first API call
 
 ```bash
+curl -i POST http://localhost:8090/v1/models
+```
+
+```bash
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "openai/gpt-4o-mini",
+    "model": "shangtang/deepseek-v4-flash",
     "messages": [{"role": "user", "content": "Hello, Bifrost!"}]
   }'
 ```

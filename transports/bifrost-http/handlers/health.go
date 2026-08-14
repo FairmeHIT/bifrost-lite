@@ -26,6 +26,10 @@ func NewHealthHandler(config *lib.Config) *HealthHandler {
 // RegisterRoutes registers the health-related routes.
 func (h *HealthHandler) RegisterRoutes(r *router.Router, middlewares ...schemas.BifrostHTTPMiddleware) {
 	r.GET("/health", lib.ChainMiddlewares(h.getHealth, middlewares...))
+	// Alias used by the local Service Console contract, which requires
+	// /health/readiness as the standard readiness path. Same handler, no
+	// semantic difference.
+	r.GET("/health/readiness", lib.ChainMiddlewares(h.getHealth, middlewares...))
 }
 
 // getHealth handles GET /api/health - Get the health status of the server.
