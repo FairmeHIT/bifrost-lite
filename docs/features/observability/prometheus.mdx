@@ -1,0 +1,367 @@
+---
+title: "Prometheus"
+description: "Monitor Bifrost metrics with Prometheus scraping or Push Gateway for multi-node deployments"
+icon: "chart-line"
+---
+
+## Overview
+
+Bifrost exposes Prometheus metrics via two methods:
+
+1. **Pull-based (Scraping)**: Traditional `/metrics` endpoint that Prometheus can scrape
+2. **Push-based (Push Gateway)**: Push metrics to a Prometheus Push Gateway for cluster deployments
+
+<Note>
+  **For multi-node deployments**: Use the Push Gateway method to ensure accurate metric aggregation. Traditional scraping may miss nodes behind load balancers.
+</Note>
+
+---
+
+## Pull-based Scraping
+
+Bifrost automatically exposes a `/metrics` endpoint when the telemetry plugin is enabled (enabled by default). No additional configuration is needed.
+
+<Info>
+  When Bifrost's authentication is enabled (`auth_config.is_enabled = true`), the `/metrics` endpoint requires Basic auth credentials. You must include the same `admin_username` and `admin_password` from your `auth_config` in the Prometheus scrape configuration. Without this, Prometheus will receive `401 Unauthorized` responses and scraping will silently fail.
+</Info>
+
+### Prometheus Configuration
+
+Add Bifrost to your Prometheus `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: 'bifrost'
+    static_configs:
+      - targets: ['bifrost-host:8080']
+    scrape_interval: 15s
+```
+
+If Bifrost authentication is enabled, add `basic_auth` to your scrape config:
+
+```yaml
+scrape_configs:
+  - job_name: 'bifrost'
+    static_configs:
+      - targets: ['bifrost-host:8080']
+    scrape_interval: 15s
+    basic_auth:
+      username: '<admin_username>'
+      password: '<admin_password>'
+```
+
+### Endpoint
+
+```
+GET /metrics
+```
+
+Returns metrics in Prometheus exposition format.
+
+---
+
+## Push-based (Push Gateway)
+
+For multi-node cluster deployments, the Prometheus plugin pushes metrics to a [Prometheus Push Gateway](https://github.com/prometheus/pushgateway). This ensures all nodes' metrics are captured regardless of load balancer routing.
+
+### Configuration
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `push_gateway_url` | `string \| EnvVar` | ✅ Yes | - | Push Gateway URL — supports `env.VAR_NAME` |
+| `job_name` | `string` | ❌ No | `bifrost` | Job label for pushed metrics |
+| `instance_id` | `string` | ❌ No | hostname | Instance identifier for metric grouping |
+| `push_interval` | `integer` | ❌ No | `15` | Push interval in seconds (1-300) |
+| `basic_auth` | `object` | ❌ No | - | Basic auth credentials |
+
+### Basic Auth Configuration
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `username` | `string \| EnvVar` | ✅ Yes | Basic auth username — supports `env.VAR_NAME` |
+| `password` | `string \| EnvVar` | ✅ Yes | Basic auth password — supports `env.VAR_NAME` |
+
+
+---
+
+## Setup
+
+<Tabs group="setup-method">
+<Tab title="UI">
+
+1. Navigate to **Observability** → **Prometheus** in the Bifrost UI
+2. The `/metrics` endpoint is shown at the top for scraping configuration
+3. To enable Push Gateway:
+   - Enter the **Push Gateway URL**
+   - Configure **Job Name** and **Push Interval** as needed
+   - Optionally set a custom **Instance ID**
+   - Enable **Basic Authentication** if required
+   - Toggle **Enable Push Gateway** on
+   - Click **Save Prometheus Configuration**
+
+</Tab>
+<Tab title="Config File">
+
+```json
+{
+  "plugins": [
+    {
+      "name": "telemetry",
+      "enabled": true,
+      "config": {
+        "push_gateway": {
+          "enabled": true,
+          "push_gateway_url": "http://pushgateway:9091",
+          "job_name": "bifrost",
+          "push_interval": 15
+        }
+      }
+    }
+  ]
+}
+```
+
+### With Basic Auth
+
+```json
+{
+  "plugins": [
+    {
+      "name": "telemetry",
+      "enabled": true,
+      "config": {
+        "push_gateway": {
+          "enabled": true,
+          "push_gateway_url": "http://pushgateway:9091",
+          "job_name": "bifrost",
+          "push_interval": 15,
+          "instance_id": "bifrost-node-1",
+          "basic_auth": {
+            "username": "admin",
+            "password": "secret"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+### With Environment Variables
+
+Use `env.VAR_NAME` to reference environment variables for the Push Gateway URL and credentials:
+
+```json
+{
+  "plugins": [
+    {
+      "name": "telemetry",
+      "enabled": true,
+      "config": {
+        "push_gateway": {
+          "enabled": true,
+          "push_gateway_url": "env.PUSHGATEWAY_URL",
+          "job_name": "bifrost",
+          "push_interval": 15,
+          "basic_auth": {
+            "username": "env.PUSHGATEWAY_USER",
+            "password": "env.PUSHGATEWAY_PASS"
+          }
+        }
+      }
+    }
+  ]
+}
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Available Metrics
+
+The following metrics are available from both the `/metrics` endpoint and Push Gateway:
+
+### HTTP Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `http_requests_total` | Counter | Total HTTP requests by path, method, status |
+| `http_request_duration_seconds` | Histogram | HTTP request latency |
+| `http_request_size_bytes` | Histogram | Request body size |
+| `http_response_size_bytes` | Histogram | Response body size |
+
+<Note>
+The `path` label contains the matched route template (e.g. `/genai/v1beta/models/{model:*}`, `/v1/messages/batches/{batch_id}`), not the raw URL path. This keeps metric cardinality bounded by the number of registered routes instead of growing with every model name or resource ID that appears in a URL. For per-model breakdowns, use the `model` and `provider` labels on the `bifrost_*` metrics.
+</Note>
+
+### Bifrost LLM Metrics
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `bifrost_upstream_requests_total` | Counter | Total requests to LLM providers |
+| `bifrost_upstream_latency_seconds` | Histogram | Provider request latency |
+| `bifrost_success_requests_total` | Counter | Successful provider requests |
+| `bifrost_error_requests_total` | Counter | Failed provider requests |
+| `bifrost_input_tokens_total` | Counter | Total input tokens processed |
+| `bifrost_output_tokens_total` | Counter | Total output tokens generated |
+| `bifrost_cost_total` | Counter | Total cost in USD |
+| `bifrost_cache_hits_total` | Counter | Cache hits by type |
+| `bifrost_stream_first_token_latency_seconds` | Histogram | Time to first token (streaming) |
+| `bifrost_stream_inter_token_latency_seconds` | Histogram | Inter-token latency (streaming) |
+| `bifrost_active_requests` | Gauge | LLM requests currently in-flight (labeled by `method` only) |
+| `bifrost_provider_key_up` | Gauge | Per-key health. `1` after a successful attempt, `0` after a failed attempt. Labels: `provider`, `key_id`, `key_name`. |
+| `bifrost_key_rotation_events_total` | Counter | Key rotations triggered by per-key failures — rate-limit (429), auth (401/403), or billing (402) — see below <sup>v1.5.0-prerelease4+</sup> |
+| `bifrost_request_retries` | Histogram | Number of retries used per request (observed once per request; buckets `0,1,2,3,5,10`). |
+
+### Bifrost MCP Metrics
+
+Emitted for MCP (Model Context Protocol) tool calls executed through Bifrost:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `bifrost_mcp_client_operation_duration_seconds` | Histogram | Duration of an MCP tool call, observed by Bifrost (the MCP client). `_count` is call volume; a non-empty `error_type` marks failures. |
+
+Labels: `mcp_client` (server label), `mcp_tool_name`, `mcp_method` (`tools/call`), `error_type` (`auth_required` / `_OTHER` on failure, empty on success), plus the governance labels `virtual_key_id`/`virtual_key_name`, `team_id`/`team_name`, `customer_id`/`customer_name`, `business_unit_id`/`business_unit_name`, and any custom labels. Only tool executions are recorded (lifecycle `ping`/`list_tools` and codemode tools are skipped); provider/model and `network_transport` are not labels here.
+
+### Default Labels
+
+Most request-level Bifrost LLM metrics include these labels (the `bifrost_key_rotation_events_total` counter is an exception — see [Key Rotation Events](#key-rotation-events) below for its narrower label set):
+
+- `provider` - LLM provider name
+- `model` - Model identifier
+- `alias` - Alias resolved to this model (empty if none)
+- `method` - Request type (chat, completion, embedding, etc.)
+- `virtual_key_id` / `virtual_key_name` - Virtual key identifiers
+- `routing_engine_used` - Comma-separated list of routing engines that contributed to the decision (e.g. `governance`, `routing-rule`, `loadbalancing`, `model-catalog`, `core`). `core` is emitted when the Bifrost orchestrator itself makes a routing decision — fallback transitions or retry transitions.
+- `routing_rule_id` / `routing_rule_name` - Routing rule that matched the request
+- `selected_key_id` / `selected_key_name` - API key that successfully served the request (`""` when all attempts failed)
+- `fallback_index` - Fallback position
+- `team_id` / `team_name` - Team identifiers (empty when governance is not used)
+- `customer_id` / `customer_name` - Customer identifiers (empty when governance is not used)
+
+<Note>
+  **v1.5.0-prerelease4+**: `selected_key_id` / `selected_key_name` are only populated when the request succeeds. On final errors both are empty — use the `attempt_trail` log field to see which keys were tried.
+</Note>
+
+### Key Rotation Events <sup>v1.5.0-prerelease4+</sup>
+
+`bifrost_key_rotation_events_total` is incremented once per **actual key rotation** — i.e. when a per-key failure causes the next retry to switch to a different key. Rotation-triggering failures are bound to the specific key/account rather than the request:
+
+- `429 Too Many Requests` — this key is rate-limited; another may have capacity.
+- `401 Unauthorized` / `403 Forbidden` — bad / revoked key, or key lacks permission.
+- `402 Payment Required` — billing issue on this key's account.
+
+It is **not** incremented for:
+
+- terminal failures (no retry happens, including `max_retries = 0` or every key permanently dead),
+- same-key retries on transient 5xx / network errors,
+- non-retryable request-bound 4xx (400/404/422/...).
+
+Labels are attributed to the key that failed and triggered the rotation:
+
+| Label | Values | Description |
+|-------|--------|-------------|
+| `provider` | e.g. `openai` | LLM provider |
+| `requested_model` | e.g. `gpt-4o` | Model as requested (before any alias resolution) |
+| `key_id` | UUID | The provider API key that failed and was rotated away from |
+| `key_name` | string | Human-readable name of the provider API key |
+| `fail_reason` | error type string | Reason the rotation fired: `rate_limit_error` (429), `authentication_error` (401/403), `billing_error` (402), or a provider-supplied error type for non-status-coded rate-limit messages |
+
+To inspect every attempted key on a failed request (including terminal failures that did not rotate), read the `attempt_trail` field on the corresponding log entry instead.
+
+**Example queries:**
+
+```promql
+# Rate of key rotations per provider
+sum by (provider) (
+  rate(bifrost_key_rotation_events_total[5m])
+)
+
+# Which specific keys are hitting rate limits most often
+topk(5, sum by (provider, key_name) (
+  rate(bifrost_key_rotation_events_total[1h])
+))
+```
+
+---
+
+## Push Gateway Setup
+
+If you don't have a Push Gateway running, deploy one:
+
+### Docker
+
+```bash
+docker run -d -p 9091:9091 prom/pushgateway
+```
+
+### Kubernetes (Helm)
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm install pushgateway prometheus-community/prometheus-pushgateway
+```
+
+### Configure Prometheus to Scrape Push Gateway
+
+Add to your `prometheus.yml`:
+
+```yaml
+scrape_configs:
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']
+```
+
+<Note>
+  The `honor_labels: true` setting is important - it preserves the `job` and `instance` labels pushed by Bifrost instead of overwriting them with the Push Gateway's labels.
+</Note>
+
+---
+
+## Pull vs Push: When to Use Each
+
+| Scenario | Recommended Method |
+|----------|-------------------|
+| Single Bifrost instance | Pull (scraping) |
+| Multiple instances, direct access | Pull (scraping) |
+| Multiple instances behind load balancer | **Push (Push Gateway)** |
+| Kubernetes with service mesh | Pull or Push |
+| Serverless / ephemeral instances | **Push (Push Gateway)** |
+
+### Why Push for Clusters?
+
+When multiple Bifrost instances run behind a load balancer:
+
+1. **Scraping randomness**: Each scrape may hit different nodes, missing metrics from others
+2. **Instance tracking**: Push Gateway properly tracks per-instance metrics via `instance` label
+3. **Aggregation**: Downstream tools (Grafana, Datadog) can aggregate across all instances
+
+---
+
+## Troubleshooting
+
+### Push Gateway Connection Failed
+
+```
+failed to push metrics to push gateway: connection refused
+```
+
+- Verify the Push Gateway URL is correct and reachable from Bifrost
+- Check firewall rules between Bifrost and Push Gateway
+- Ensure Push Gateway is running: `curl http://pushgateway:9091/metrics`
+
+### Metrics Not Appearing
+
+- Verify the telemetry plugin is enabled (required for metrics collection)
+- Check Bifrost logs for push errors
+- Verify Prometheus is scraping the Push Gateway with `honor_labels: true`
+
+### Authentication Failed
+
+- Double-check username and password
+- Ensure basic auth is configured on the Push Gateway side
+- Check for special characters that may need escaping
