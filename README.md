@@ -1,6 +1,6 @@
 # Bifrost AI Gateway
 
-> **Bifrost Lite**: This repository is a trimmed-down fork of [maximhq/bifrost](https://github.com/maximhq/bifrost) — several features (MCP Gateway, Plugins management UI, Alerting, Governance UI, Guardrails, Webhooks, Edge Control, Cluster Config, Adaptive Routing, Prompt Repository, Skills Repository) have been removed, while all core gateway functionality is preserved and the UI adds built-in English/Chinese language switching.
+> **Bifrost Lite**: This repository is a trimmed-down fork of [maximhq/bifrost](https://github.com/maximhq/bifrost) — several features (MCP Gateway, Plugins management UI, Alerting, Guardrails, Webhooks management, Edge Control, Cluster Config, Adaptive Routing, Prompt Repository, Skills Repository) have been removed, while all core gateway functionality is preserved — including Governance (virtual keys, teams, customers, budgets) — and the UI adds built-in English/Chinese language switching.
 
 <a href="https://trendshift.io/repositories/14529?utm_source=repository-badge&amp;utm_medium=badge&amp;utm_campaign=badge-repository-14529" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/repositories/14529" alt="maximhq%2Fbifrost | Trendshift" width="250" height="55"/></a>
 
