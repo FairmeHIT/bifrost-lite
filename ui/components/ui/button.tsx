@@ -6,23 +6,24 @@ import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
 const buttonVariants = cva(
-	"inline-flex items-center ring-none justify-center gap-2 whitespace-nowrap rounded-sm text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-1 focus-visible:ring-offset-1 aria-invalid:border-destructive active:scale-[0.99] transition-transform duration-100",
+	"inline-flex items-center ring-none justify-center gap-2 whitespace-nowrap chamfer-sm text-sm font-medium tracking-wide transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-1 focus-visible:ring-offset-1 aria-invalid:border-destructive active:scale-[0.99] transition-transform duration-100",
 	{
 		variants: {
 			variant: {
-				default: "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-primary/50",
+				default:
+					"bg-primary text-primary-foreground font-semibold hover:bg-accent-bright hover:text-primary-foreground focus-visible:ring-primary/50 shadow-[0_0_14px_color-mix(in_srgb,var(--primary)_35%,transparent)]",
 				destructive:
 					"bg-destructive text-white font-normal hover:bg-destructive/90 focus-visible:ring-destructive/50 dark:bg-destructive/60",
 				outline:
-					"border bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring/50 dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
+					"border border-input bg-transparent text-secondary-foreground hover:border-primary/60 hover:bg-accent hover:text-primary focus-visible:ring-ring/50",
 				secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 focus-visible:ring-secondary-foreground/30",
-				ghost: "hover:bg-accent hover:text-accent-foreground focus-visible:ring-accent-foreground/30 dark:hover:bg-accent/50",
+				ghost: "hover:bg-accent hover:text-primary focus-visible:ring-accent-foreground/30",
 				link: "text-primary underline-offset-4 hover:underline focus-visible:ring-primary/50",
 			},
 			size: {
 				default: "h-7.5 px-2 py-1 has-[>svg]:px-2",
-				sm: "h-8 rounded-sm gap-1.5 px-3 has-[>svg]:px-2.5",
-				lg: "h-10 rounded-sm px-6 has-[>svg]:px-4",
+				sm: "h-8 gap-1.5 px-3 has-[>svg]:px-2.5",
+				lg: "h-10 px-6 has-[>svg]:px-4",
 				icon: "size-9",
 			},
 		},

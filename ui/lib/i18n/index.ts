@@ -5,8 +5,8 @@
 //   t("common.save");                    // "Save" / "保存"
 //   t("dashboard.period", { p: "24h" }); // interpolation: {placeholder}
 //
-// Language is persisted in localStorage ("bifrost_lang") and defaults to the
-// browser language (zh* → 中文, everything else → English).
+// Language is persisted in localStorage ("bifrost_lang") and defaults to
+// 中文 unless the browser language is English.
 
 import type { Lang, Dict } from "./types";
 import { en } from "./en";
@@ -31,10 +31,10 @@ export function detectInitialLang(): Lang {
 	} catch {
 		// localStorage unavailable — fall through to browser language
 	}
-	if (typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("zh")) {
-		return "zh";
+	if (typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("en")) {
+		return "en";
 	}
-	return "en";
+	return "zh";
 }
 
 function resolvePath(dict: Dict, path: string): string | undefined {

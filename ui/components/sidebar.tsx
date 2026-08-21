@@ -11,13 +11,11 @@ import {
 	WalletCards,
 	Boxes,
 	BoxIcon,
-	BugIcon,
 	ChartColumnBig,
 	ChevronsLeftRightEllipsis,
 	CircuitBoard,
 	DatabaseZap,
 	Flag,
-	FlaskConical,
 	GitCompareArrows,
 	Globe,
 	KeyRound,
@@ -62,11 +60,10 @@ import { useWebSocket } from "@/hooks/useWebSocket";
 import { IS_ENTERPRISE } from "@/lib/constants/config";
 import { useBranding } from "@/lib/hooks/useBranding";
 import { useI18n } from "@/lib/i18n/context";
-import { useGetCoreConfigQuery, useGetLatestReleaseQuery, useGetVersionQuery, useLogoutMutation } from "@/lib/store";
+import { useGetCoreConfigQuery, useGetVersionQuery, useLogoutMutation } from "@/lib/store";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import type { UserInfo } from "@enterprise/lib/store/utils/tokenManager";
 import { getUserInfo } from "@enterprise/lib/store/utils/tokenManager";
-import { BooksIcon, DiscordLogoIcon, GithubLogoIcon } from "@phosphor-icons/react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -85,32 +82,6 @@ const PRODUCTION_SETUP_DISMISSED_COOKIE = "bifrost_production_setup_dismissed";
 const ONBOARDING_CARD_DISMISSED_COOKIE = "bifrost_onboarding_card_dismissed";
 
 // Main navigation items
-
-// External links
-const externalLinks = [
-	{
-		title: "Discord Server",
-		url: "https://discord.gg/exN5KAydbU",
-		icon: DiscordLogoIcon,
-	},
-	{
-		title: "GitHub Repository",
-		url: "https://github.com/maximhq/bifrost",
-		icon: GithubLogoIcon,
-	},
-	{
-		title: "Report a bug",
-		url: "https://github.com/maximhq/bifrost/issues/new?title=[Bug Report]&labels=bug&type=bug&projects=maximhq/1",
-		icon: BugIcon,
-		strokeWidth: 1.5,
-	},
-	{
-		title: "Full Documentation",
-		url: "https://docs.getbifrost.ai",
-		icon: BooksIcon,
-		strokeWidth: 1,
-	},
-];
 
 // Base promotional card (memoized outside component to prevent recreation)
 const productionSetupHelpCard = {
@@ -459,45 +430,6 @@ const SidebarItemView = ({
 	);
 };
 
-// Helper function to compare semantic versions
-const compareVersions = (v1: string, v2: string): number => {
-	// Remove 'v' prefix if present
-	const cleanV1 = v1.startsWith("v") ? v1.slice(1) : v1;
-	const cleanV2 = v2.startsWith("v") ? v2.slice(1) : v2;
-
-	// Split into main version and prerelease
-	const [mainV1, prereleaseV1] = cleanV1.split("-");
-	const [mainV2, prereleaseV2] = cleanV2.split("-");
-
-	// Compare main version numbers (major.minor.patch)
-	const partsV1 = mainV1.split(".").map(Number);
-	const partsV2 = mainV2.split(".").map(Number);
-
-	for (let i = 0; i < Math.max(partsV1.length, partsV2.length); i++) {
-		const num1 = partsV1[i] || 0;
-		const num2 = partsV2[i] || 0;
-
-		if (num1 > num2) return 1;
-		if (num1 < num2) return -1;
-	}
-
-	// If main versions are equal, check prerelease
-	// Version without prerelease is higher than version with prerelease
-	if (!prereleaseV1 && prereleaseV2) return 1;
-	if (prereleaseV1 && !prereleaseV2) return -1;
-
-	// Both have prereleases, compare them
-	if (prereleaseV1 && prereleaseV2) {
-		// Extract prerelease number (e.g., "prerelease1" -> 1)
-		const prereleaseNum1 = parseInt(prereleaseV1.replace(/\D/g, "")) || 0;
-		const prereleaseNum2 = parseInt(prereleaseV2.replace(/\D/g, "")) || 0;
-
-		if (prereleaseNum1 > prereleaseNum2) return 1;
-		if (prereleaseNum1 < prereleaseNum2) return -1;
-	}
-	return 0;
-};
-
 export default function AppSidebar() {
 	const pathname = useLocation({ select: (l) => l.pathname });
 	const search = useLocation({ select: (l) => l.searchStr ?? "" });
@@ -521,9 +453,6 @@ export default function AppSidebar() {
 	]);
 	const isProductionSetupDismissed = !!cookies[PRODUCTION_SETUP_DISMISSED_COOKIE];
 	const isOnboardingCardDismissed = !!cookies[ONBOARDING_CARD_DISMISSED_COOKIE];
-	const { data: latestRelease } = useGetLatestReleaseQuery(undefined, {
-		skip: !mounted, // Only fetch after component is mounted
-	});
 	const hasLogsAccess = useRbac(RbacResource.Logs, RbacOperation.View);
 	const hasObservabilityAccess = useRbac(RbacResource.Observability, RbacOperation.View);
 	const hasDashboardAccess = useRbac(RbacResource.Dashboard, RbacOperation.View);
@@ -758,14 +687,6 @@ export default function AppSidebar() {
 				],
 			},
 			{
-				title: t("sidebar.evals"),
-				url: "https://www.getmaxim.ai",
-				icon: FlaskConical,
-				isExternal: true,
-				description: t("sidebar.descEvals"),
-				hasAccess: true,
-			},
-			{
 				title: t("sidebar.settings"),
 				url: "/workspace/config",
 				icon: Settings2Icon,
@@ -928,13 +849,6 @@ export default function AppSidebar() {
 		}
 	}, []);
 
-	const showNewReleaseBanner = useMemo(() => {
-		if (IS_ENTERPRISE) return false;
-		if (latestRelease && version) {
-			return compareVersions(latestRelease.name, version) > 0;
-		}
-		return false;
-	}, [latestRelease, version]);
 	const isAuthEnabled = coreConfig?.auth_config?.is_enabled || false;
 
 	useEffect(() => {
@@ -1103,9 +1017,6 @@ export default function AppSidebar() {
 
 	const { isConnected: isWebSocketConnected } = useWebSocket();
 
-	// New release image - based on theme
-	const newReleaseImage = mounted && resolvedTheme === "dark" ? "/images/new-release-image-dark.webp" : "/images/new-release-image.webp";
-
 	// Memoize promo cards array to prevent duplicates and unnecessary re-renders
 	const promoCards = useMemo(() => {
 		const cards = [];
@@ -1150,26 +1061,6 @@ export default function AppSidebar() {
 				variant: "warning" as const,
 			});
 		}
-		if (showNewReleaseBanner && latestRelease) {
-			cards.push({
-				id: "new-release",
-				title: `${latestRelease.name} is now available.`,
-				description: (
-					<div className="flex h-full flex-col gap-2">
-						<img src={newReleaseImage} alt="Bifrost" className="h-[95px] rounded-md object-cover" />
-						<a
-							href={`https://docs.getbifrost.ai/changelogs/${latestRelease.name}`}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-primary mt-auto pb-1 font-medium underline"
-						>
-							View release notes
-						</a>
-					</div>
-				),
-				dismissible: true,
-			});
-		}
 		// Only show after mounted to ensure cookie is properly hydrated and avoid flash
 		if (!IS_ENTERPRISE && mounted && !isProductionSetupDismissed) {
 			cards.push(productionSetupHelpCard);
@@ -1177,9 +1068,6 @@ export default function AppSidebar() {
 		return cards;
 	}, [
 		coreConfig?.restart_required,
-		showNewReleaseBanner,
-		latestRelease,
-		newReleaseImage,
 		isProductionSetupDismissed,
 		mounted,
 		showOnboardingResumeCard,
@@ -1364,26 +1252,6 @@ export default function AppSidebar() {
 					</div>
 					<div className="flex flex-row">
 						<div className="mx-auto flex flex-row gap-4 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
-							{sidebarState !== "collapsed" &&
-								externalLinks.map((item, index) => (
-									<a
-										key={index}
-										href={item.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="group flex w-full items-center justify-between"
-										title={item.title}
-									>
-										<div className="flex items-center space-x-3">
-											<item.icon
-												className="hover:text-primary text-muted-foreground h-5 w-5"
-												size={22}
-												weight="regular"
-												strokeWidth={item.strokeWidth}
-											/>
-										</div>
-									</a>
-								))}
 							<LanguageToggle />
 							<ThemeToggle />
 							{IS_ENTERPRISE && userInfo ? (

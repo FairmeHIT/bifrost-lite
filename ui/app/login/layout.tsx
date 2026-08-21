@@ -11,7 +11,7 @@ import LoginPage from "./page";
 
 function RouteComponent() {
 	return (
-		<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
 			<I18nProvider>
 			<ReduxProvider>
 				<NuqsAdapter>
@@ -51,7 +51,7 @@ function PendingCard() {
 
 function PendingComponent() {
 	return (
-		<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
 			<I18nProvider>
 			<ReduxProvider>
 				<PendingCard />

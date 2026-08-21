@@ -24,6 +24,6 @@ port="${BIFROST_PORT:-8090}"
 printf '%s\n' "Starting Bifrost AI Gateway on :$port (app-dir: $ROOT/bifrost-data)"
 exec "$BINARY" \
   -port "$port" \
-  -host 127.0.0.1 \
+  -host "${BIFROST_HOST:-127.0.0.1}" \
   -app-dir "$ROOT/bifrost-data" \
   -log-style pretty

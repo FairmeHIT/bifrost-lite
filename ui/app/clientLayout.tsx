@@ -155,7 +155,7 @@ function FullPage({ config, children }: { config: BifrostConfig | undefined; chi
 export function ClientLayout({ children }: { children: React.ReactNode }) {
 	return (
 		<ProgressProvider>
-			<ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+			<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
 				<Toaster closeButton />
 				<ReduxProvider>
 					<NuqsAdapter>

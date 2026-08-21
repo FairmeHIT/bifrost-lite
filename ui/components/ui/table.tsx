@@ -15,7 +15,16 @@ function Table({ className, containerClassName, ...props }: TableProps) {
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-	return <thead data-slot="table-header" className={cn("bg-muted/50 [&_tr]:border-b", className)} {...props} />;
+	return (
+		<thead
+			data-slot="table-header"
+			className={cn(
+				"bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),color-mix(in_srgb,var(--primary)_4%,transparent))] [&_tr]:border-b [&_tr]:border-b-primary/35 [&_th]:text-title [&_th]:tracking-wider",
+				className,
+			)}
+			{...props}
+		/>
+	);
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
@@ -30,7 +39,7 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
 	return (
 		<tr
 			data-slot="table-row"
-			className={cn("hover:bg-muted/50 dark:hover:bg-muted/75 data-[state=selected]:bg-muted border-b transition-colors", className)}
+			className={cn("hover:bg-primary/8 data-[state=selected]:bg-accent border-border/60 border-b transition-colors", className)}
 			{...props}
 		/>
 	);
