@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { resetDurationLabels, supportsCalendarAlignment } from "@/lib/constants/governance";
@@ -23,6 +24,7 @@ const formatResetDuration = (duration?: string | null, calendarAligned?: boolean
  * the exact current/max spend. Mirrors RateLimitDisplay for visual consistency across tables.
  */
 export function BudgetDisplay({ budgets, calendarAligned }: BudgetDisplayProps) {
+	const { t } = useI18n();
 	if (!budgets || budgets.length === 0) {
 		return <span className="text-muted-foreground text-sm">-</span>;
 	}
@@ -43,7 +45,7 @@ export function BudgetDisplay({ budgets, calendarAligned }: BudgetDisplayProps) 
 								<div className="flex items-center justify-between gap-4">
 									<span className="font-medium">
 										{formatCurrency(effectiveMaxLimit)}
-										{hasOverride ? <span className="text-muted-foreground ml-1 text-[10px]">override</span> : null}
+										{hasOverride ? <span className="text-muted-foreground ml-1 text-[10px]">{t("budget.override")}</span> : null}
 									</span>
 									<span className="text-muted-foreground text-xs">{formatResetDuration(b.reset_duration, calendarAligned)}</span>
 								</div>
@@ -56,11 +58,11 @@ export function BudgetDisplay({ budgets, calendarAligned }: BudgetDisplayProps) 
 							</p>
 							{hasOverride ? (
 								<p className="text-primary-foreground/80 text-xs">
-									Base {formatCurrency(b.max_limit)} + {formatCurrency(b.override_amount ?? 0)} override
+									{t("budget.base")} {formatCurrency(b.max_limit)} + {formatCurrency(b.override_amount ?? 0)} {t("budget.override")}
 								</p>
 							) : null}
 							{b.reset_duration ? (
-								<p className="text-primary-foreground/80 text-xs">Resets {formatResetDuration(b.reset_duration, calendarAligned)}</p>
+								<p className="text-primary-foreground/80 text-xs">{t("budget.resets")} {formatResetDuration(b.reset_duration, calendarAligned)}</p>
 							) : null}
 						</TooltipContent>
 					</Tooltip>

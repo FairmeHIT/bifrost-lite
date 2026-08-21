@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "@/components/ui/codeEditor";
@@ -74,6 +75,7 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ error }: EmptyStateProps) {
+	const { t } = useI18n();
 	const [language, setLanguage] = useState<Language>("python");
 
 	// Generate examples dynamically using the port utility
@@ -245,7 +247,7 @@ const result = await chain.invoke({ input: "What is LangChain?" });`,
 				<Alert>
 					<AlertTriangle className="h-4 w-4" />
 					<AlertDescription>
-						{isUnexpectedError ? "Looks like you haven't configured the log store in your config file." : error}
+						{isUnexpectedError ? t("logs.logStoreNotConfigured") : error}
 					</AlertDescription>
 				</Alert>
 			)}
@@ -253,8 +255,8 @@ const result = await chain.invoke({ input: "What is LangChain?" });`,
 			<div className="w-full space-y-6 p-4">
 				<div className="flex flex-row items-center gap-2">
 					<div>
-						<h3 className="text-lg font-semibold">Integrate under 60 seconds</h3>
-						<p className="text-muted-foreground text-sm">Send your first request to get started</p>
+						<h3 className="text-lg font-semibold">{t("logs.integrateUnder60s")}</h3>
+						<p className="text-muted-foreground text-sm">{t("logs.sendFirstRequest")}</p>
 					</div>
 				</div>
 

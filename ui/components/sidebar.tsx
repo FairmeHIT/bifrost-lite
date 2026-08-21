@@ -83,29 +83,9 @@ const ONBOARDING_CARD_DISMISSED_COOKIE = "bifrost_onboarding_card_dismissed";
 
 // Main navigation items
 
-// Base promotional card (memoized outside component to prevent recreation)
-const productionSetupHelpCard = {
-	id: "production-setup",
-	title: "Need help with production setup?",
-	description: (
-		<>
-			We offer help with production setup including custom integrations and dedicated support.
-			<br />
-			<br />
-			Book a demo with our team{" "}
-			<a
-				href="https://calendly.com/maximai/bifrost-demo?utm_source=bfd_sdbr"
-				target="_blank"
-				className="text-primary font-medium underline"
-				rel="noopener noreferrer"
-			>
-				here
-			</a>
-			.
-		</>
-	),
-	dismissible: true,
-};
+// Base promotional card factory — moved inside component so it can use t()
+// The dismissible card is only shown in non-enterprise builds when the production
+// setup cookie hasn't been dismissed.
 
 // Sidebar item interface
 interface SidebarItem {
@@ -1024,10 +1004,10 @@ export default function AppSidebar() {
 		if (coreConfig?.restart_required?.required) {
 			cards.push({
 				id: "restart-required",
-				title: "Restart Required",
+				title: t("sidebar.restartRequired"),
 				description: (
 					<div className="text-xs text-amber-700 dark:text-amber-300/80">
-						{coreConfig.restart_required.reason || "Configuration changes require a server restart to take effect."}
+						{coreConfig.restart_required.reason || t("sidebar.restartRequiredDesc")}
 					</div>
 				),
 				dismissible: false,
@@ -1040,12 +1020,11 @@ export default function AppSidebar() {
 			const remainingSteps = onboardingSteps.length - onboardingDoneCount;
 			cards.push({
 				id: "onboarding-incomplete",
-				title: "Setup checklist incomplete",
+				title: t("sidebar.setupChecklistIncomplete"),
 				description: (
 					<div className="flex h-full flex-col gap-2 text-xs text-amber-700 dark:text-amber-300/80">
 						<p>
-							{remainingSteps} setup step{remainingSteps === 1 ? "" : "s"} left. Not completing these steps keeps your Bifrost setup
-							vulnerable.
+							{t("sidebar.stepsRemaining", { count: remainingSteps })}
 						</p>
 						<button
 							type="button"
@@ -1053,7 +1032,7 @@ export default function AppSidebar() {
 							data-testid="onboarding-resume-btn"
 							className="text-primary mt-auto self-start pb-1 font-medium underline"
 						>
-							Resume setup
+							{t("sidebar.resumeSetup")}
 						</button>
 					</div>
 				),
@@ -1063,7 +1042,28 @@ export default function AppSidebar() {
 		}
 		// Only show after mounted to ensure cookie is properly hydrated and avoid flash
 		if (!IS_ENTERPRISE && mounted && !isProductionSetupDismissed) {
-			cards.push(productionSetupHelpCard);
+			cards.push({
+				id: "production-setup",
+				title: t("sidebar.needHelpProduction"),
+				description: (
+					<>
+						{t("sidebar.productionHelpDesc")}
+						<br />
+						<br />
+						{t("sidebar.bookDemo")}{" "}
+						<a
+							href="https://calendly.com/maximai/bifrost-demo?utm_source=bfd_sdbr"
+							target="_blank"
+							className="text-primary font-medium underline"
+							rel="noopener noreferrer"
+						>
+							{t("sidebar.here")}
+						</a>
+						.
+					</>
+				),
+				dismissible: true,
+			});
 		}
 		return cards;
 	}, [
@@ -1074,6 +1074,7 @@ export default function AppSidebar() {
 		onboardingSteps.length,
 		onboardingDoneCount,
 		handleResumeOnboarding,
+		t,
 	]);
 
 	// Reset areCardsEmpty when promoCards changes

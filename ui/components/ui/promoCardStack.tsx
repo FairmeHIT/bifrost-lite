@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ interface PromoCardStackProps {
 }
 
 export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss }: PromoCardStackProps) {
+	const { t } = useI18n();
 	const [items, setItems] = useState(() => {
 		// Sort so non-dismissible cards appear at the top
 		return [...cards].sort((a, b) => {
@@ -120,7 +122,7 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 									<div className="min-w-0 flex-1">{typeof card.title === "string" ? card.title : card.title}</div>
 									{card.dismissible !== false && isTopCard && (
 										<button
-											aria-label="Dismiss"
+											aria-label={t("ui.promoCard.dismiss")}
 											type="button"
 											onClick={() => handleDismiss(card.id)}
 											disabled={isAnimating}

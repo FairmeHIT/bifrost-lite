@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useI18n } from "@/lib/i18n/context";
 import { resetDurationLabels } from "@/lib/constants/governance";
 import { getErrorMessage, useDeleteTeamMutation } from "@/lib/store";
 import { Team } from "@/lib/types/governance";
@@ -49,6 +50,7 @@ function TeamActionsMenu({
 	onEdit: (team: Team) => void;
 	onDelete: (teamId: string) => void;
 }) {
+	const { t } = useI18n();
 	const [isOpen, setIsOpen] = useState(false);
 	const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -60,7 +62,7 @@ function TeamActionsMenu({
 						variant="ghost"
 						size="icon"
 						className="h-8 w-8"
-						aria-label={`Team actions for ${team.name}`}
+						aria-label={t("teams.actionsFor", { name: team.name })}
 						data-testid={`team-actions-btn-${team.name}`}
 					>
 						<MoreHorizontal className="h-4 w-4" />
@@ -78,12 +80,12 @@ function TeamActionsMenu({
 						}}
 					>
 						<Edit className="h-4 w-4" />
-						Edit
+						{t("common.edit")}
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild className="cursor-pointer" data-testid={`team-view-logs-btn-${team.name}`}>
 						<Link to="/workspace/logs" search={{ team_ids: [team.id] }} onClick={() => setIsOpen(false)}>
 							<ScrollText className="h-4 w-4" />
-							View logs
+							{t("common.viewLogs")}
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem
@@ -98,23 +100,22 @@ function TeamActionsMenu({
 						}}
 					>
 						<Trash2 className="h-4 w-4" />
-						Delete
+						{t("common.delete")}
 					</DropdownMenuItem>
 				</DropdownMenuContent>
 			</DropdownMenu>
 			<AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Team</AlertDialogTitle>
+						<AlertDialogTitle>{t("teams.deleteTitle")}</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to delete &quot;{team.name}&quot;? This will also unassign any virtual keys from this team. This action
-							cannot be undone.
+							{t("teams.deleteConfirm", { name: team.name })}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
 						<AlertDialogAction onClick={() => onDelete(team.id)} disabled={isDeleting} className="bg-red-600 hover:bg-red-700">
-							{isDeleting ? "Deleting..." : "Delete"}
+							{isDeleting ? t("governance.deleting") : t("common.delete")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>
@@ -154,6 +155,7 @@ export default function TeamsTable({
 	onDialogClose,
 	isLoading,
 }: TeamsTableProps) {
+	const { t } = useI18n();
 	const showTeamSheet = selectedTeamId !== null && selectedTeamId !== "";
 	const editingTeam = selectedTeamId && selectedTeamId !== "new" ? (teams.find((t) => t.id === selectedTeamId) ?? null) : null;
 
@@ -174,7 +176,7 @@ export default function TeamsTable({
 	const handleDelete = async (teamId: string) => {
 		try {
 			await deleteTeam(teamId).unwrap();
-			toast.success("Team deleted successfully");
+			toast.success(t("teams.deleted"));
 		} catch (error) {
 			toast.error(getErrorMessage(error));
 		}
@@ -197,7 +199,7 @@ export default function TeamsTable({
 	// via a correlated subquery, so neither needs a client-side join.
 	const getCustomerName = (team: Team) => {
 		if (!team.customer_id) return "-";
-		return team.customer?.name ?? "Unknown Customer";
+		return team.customer?.name ?? t("teams.unknownCustomer");
 	};
 
 	const hasActiveFilters = debouncedSearch;
@@ -222,12 +224,12 @@ export default function TeamsTable({
 				<div className="flex grow flex-col overflow-y-auto">
 					<div className="mb-4 flex items-center justify-between">
 						<div>
-							<h2 className="text-lg font-semibold">Teams</h2>
-							<p className="text-muted-foreground text-sm">Organize users into teams with shared budgets and access controls.</p>
+							<h2 className="text-lg font-semibold">{t("teams.title")}</h2>
+							<p className="text-muted-foreground text-sm">{t("teams.subtitle")}</p>
 						</div>
 						<Button data-testid="create-team-btn" onClick={handleAddTeam} disabled={!hasCreateAccess}>
 							<Plus className="h-4 w-4" />
-							Add Team
+							{t("teams.add")}
 						</Button>
 					</div>
 
@@ -235,8 +237,8 @@ export default function TeamsTable({
 						<div className="relative max-w-sm flex-1">
 							<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 							<Input
-								aria-label="Search teams by name"
-								placeholder="Search by name..."
+								aria-label={t("teams.searchAria")}
+								placeholder={t("governance.searchByName")}
 								value={search}
 								onChange={(e) => onSearchChange(e.target.value)}
 								className="pl-9"
@@ -249,11 +251,11 @@ export default function TeamsTable({
 						<Table className="min-w-[1100px]" containerClassName="h-full">
 							<TableHeader className="bg-background sticky top-0">
 								<TableRow>
-									<TableHead>Name</TableHead>
-									<TableHead>Customer</TableHead>
-									<TableHead>Budget</TableHead>
-									<TableHead>Rate Limit</TableHead>
-									<TableHead>Virtual Keys</TableHead>
+									<TableHead>{t("common.name")}</TableHead>
+									<TableHead>{t("customers.customer")}</TableHead>
+									<TableHead>{t("governance.budget")}</TableHead>
+									<TableHead>{t("governance.rateLimit")}</TableHead>
+									<TableHead>{t("sidebar.virtualKeys")}</TableHead>
 									<TableHead className={`bg-muted sticky right-0 z-10 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
 								</TableRow>
 							</TableHeader>
@@ -261,7 +263,7 @@ export default function TeamsTable({
 								{teams.length === 0 ? (
 									<TableRow>
 										<TableCell colSpan={6} className="h-24 text-center">
-											<span className="text-muted-foreground text-sm">No matching teams found.</span>
+											<span className="text-muted-foreground text-sm">{t("teams.noMatches")}</span>
 										</TableCell>
 									</TableRow>
 								) : (
@@ -305,7 +307,7 @@ export default function TeamsTable({
 														<span className="truncate font-medium">{team.name}</span>
 														{isExhausted && (
 															<Badge variant="destructive" className="w-fit text-xs">
-																Limit Reached
+																{t("governance.limitReached")}
 															</Badge>
 														)}
 													</div>
@@ -346,7 +348,9 @@ export default function TeamsTable({
 																			<p className="font-medium">
 																				{formatCurrency(b.current_usage)} / {formatCurrency(b.max_limit)}
 																			</p>
-																			<p className="text-primary-foreground/80 text-xs">Resets {formatResetDuration(b.reset_duration)}</p>
+																			<p className="text-primary-foreground/80 text-xs">
+																				{t("governance.resets", { duration: formatResetDuration(b.reset_duration) })}
+																			</p>
 																		</TooltipContent>
 																	</Tooltip>
 																);
@@ -388,7 +392,7 @@ export default function TeamsTable({
 																			{team.rate_limit.token_max_limit.toLocaleString()} tokens
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			Resets {formatResetDuration(team.rate_limit.token_reset_duration || "1h")}
+																			{t("governance.resets", { duration: formatResetDuration(team.rate_limit.token_reset_duration || "1h") })}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -422,7 +426,7 @@ export default function TeamsTable({
 																			{team.rate_limit.request_max_limit.toLocaleString()} requests
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			Resets {formatResetDuration(team.rate_limit.request_reset_duration || "1h")}
+																			{t("governance.resets", { duration: formatResetDuration(team.rate_limit.request_reset_duration || "1h") })}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -436,7 +440,7 @@ export default function TeamsTable({
 													{vkCount > 0 ? (
 														<div className="flex items-center gap-2">
 															<Badge variant="outline" className="text-xs">
-																{vkCount} {vkCount === 1 ? "key" : "keys"}
+																{vkCount} {vkCount === 1 ? t("governance.key") : t("governance.keys")}
 															</Badge>
 														</div>
 													) : (
@@ -467,8 +471,11 @@ export default function TeamsTable({
 					{totalCount > 0 && (
 						<div className="flex shrink-0 items-center justify-between text-xs" data-testid="pagination">
 							<div className="text-muted-foreground flex items-center gap-2">
-								{(offset + 1).toLocaleString()}-{Math.min(offset + limit, totalCount).toLocaleString()} of {totalCount.toLocaleString()}{" "}
-								entries
+								{t("governance.entriesOf", {
+									start: (offset + 1).toLocaleString(),
+									end: Math.min(offset + limit, totalCount).toLocaleString(),
+									total: totalCount.toLocaleString(),
+								})}
 							</div>
 
 							<div className="flex items-center gap-2">
@@ -478,15 +485,15 @@ export default function TeamsTable({
 									onClick={() => onOffsetChange(Math.max(0, offset - limit))}
 									disabled={offset === 0}
 									data-testid="teams-pagination-prev-btn"
-									aria-label="Previous page"
+									aria-label={t("governance.previousPage")}
 								>
 									<ChevronLeft className="size-3" />
 								</Button>
 
 								<div className="flex items-center gap-1">
-									<span>Page</span>
+									<span>{t("governance.page")}</span>
 									<span>{Math.floor(offset / limit) + 1}</span>
-									<span>of {Math.ceil(totalCount / limit)}</span>
+									<span>{t("governance.pageOf", { total: Math.ceil(totalCount / limit) })}</span>
 								</div>
 
 								<Button
@@ -495,7 +502,7 @@ export default function TeamsTable({
 									onClick={() => onOffsetChange(offset + limit)}
 									disabled={offset + limit >= totalCount}
 									data-testid="teams-pagination-next-btn"
-									aria-label="Next page"
+									aria-label={t("governance.nextPage")}
 								>
 									<ChevronRight className="size-3" />
 								</Button>

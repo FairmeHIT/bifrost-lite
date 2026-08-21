@@ -1,4 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useI18n } from "@/lib/i18n/context";
 import { COMPACT_NUMBER_FORMAT } from "@/lib/utils/numbers";
 import NumberFlow from "@number-flow/react";
 import { memo, useMemo } from "react";
@@ -109,6 +110,7 @@ function ProviderUsageTabImpl({
 	onProviderLatencyProviderChange,
 	onProviderThroughputProviderChange,
 }: ProviderUsageTabProps) {
+	const { t } = useI18n();
 	const providerCostTotal = useMemo(() => {
 		if (!providerCostData?.buckets) return null;
 		if (providerCostProvider === "all") {
@@ -169,10 +171,10 @@ function ProviderUsageTabImpl({
 		<div className="grid grid-cols-1 gap-2 lg:grid-cols-2 2xl:grid-cols-3">
 			{/* Provider Cost Chart */}
 			<ChartCard
-				title="Provider Cost"
+				title={t("dashboardCharts.providerCost")}
 				loading={loadingProviderCost}
 				testId="chart-provider-cost"
-				totalLabel="Total"
+				totalLabel={t("dashboardCharts.total")}
 				total={
 					providerCostTotal !== null ? (
 						<NumberFlow value={providerCostTotal} format={{ ...COMPACT_NUMBER_FORMAT, style: "currency", currency: "USD" }} />
@@ -205,7 +207,7 @@ function ProviderUsageTabImpl({
 													data-testid="provider-cost-legend-more-trigger"
 													className="text-muted-foreground cursor-default"
 												>
-													+{providerCostProviders.length - 1} more
+													+{providerCostProviders.length - 1} {t("dashboardCharts.more")}
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -265,10 +267,10 @@ function ProviderUsageTabImpl({
 
 			{/* Provider Token Usage Chart */}
 			<ChartCard
-				title="Provider Token Usage"
+				title={t("dashboardCharts.providerTokenUsage")}
 				loading={loadingProviderTokens}
 				testId="chart-provider-tokens"
-				totalLabel="Total"
+				totalLabel={t("dashboardCharts.total")}
 				total={providerTokenTotal !== null ? <NumberFlow value={providerTokenTotal} format={COMPACT_NUMBER_FORMAT} /> : undefined}
 				totalTooltip={providerTokenTotal !== null ? providerTokenTotal.toLocaleString("en-US") : undefined}
 				legend={
@@ -293,7 +295,7 @@ function ProviderUsageTabImpl({
 													data-testid="provider-token-legend-more-trigger"
 													className="text-muted-foreground cursor-default"
 												>
-													+{providerTokenProviders.length - 1} more
+													+{providerTokenProviders.length - 1} {t("dashboardCharts.more")}
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -317,11 +319,11 @@ function ProviderUsageTabImpl({
 							<>
 								<span className="flex items-center gap-1">
 									<span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: CHART_COLORS.promptTokens }} />
-									<span className="text-muted-foreground">Input</span>
+									<span className="text-muted-foreground">{t("dashboardCharts.input")}</span>
 								</span>
 								<span className="flex items-center gap-1">
 									<span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: CHART_COLORS.completionTokens }} />
-									<span className="text-muted-foreground">Output</span>
+									<span className="text-muted-foreground">{t("dashboardCharts.output")}</span>
 								</span>
 							</>
 						)}
@@ -388,7 +390,7 @@ function ProviderUsageTabImpl({
 													data-testid="provider-latency-legend-more-trigger"
 													className="text-muted-foreground cursor-default"
 												>
-													+{providerLatencyProviders.length - 1} more
+													+{providerLatencyProviders.length - 1} {t("dashboardCharts.more")}
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -490,7 +492,7 @@ function ProviderUsageTabImpl({
 													data-testid="provider-throughput-legend-more-trigger"
 													className="text-muted-foreground cursor-default"
 												>
-													+{providerThroughputProviders.length - 1} more
+													+{providerThroughputProviders.length - 1} {t("dashboardCharts.more")}
 												</button>
 											</TooltipTrigger>
 											<TooltipContent>

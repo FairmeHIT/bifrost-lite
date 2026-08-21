@@ -1,6 +1,7 @@
 import CustomersTable from "@/app/workspace/governance/views/customerTable";
 import FullPageLoader from "@/components/fullPageLoader";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { parseAsSafeString } from "@/lib/queryParamsParser";
 import { getErrorMessage, useGetCustomersQuery, useGetTeamsQuery } from "@/lib/store";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -12,6 +13,7 @@ const POLLING_INTERVAL = 5000;
 const PAGE_SIZE = 25;
 
 export default function GovernanceCustomersPage() {
+	const { t } = useI18n();
 	const hasTeamsAccess = useRbac(RbacResource.Teams, RbacOperation.View);
 	const hasCustomersAccess = useRbac(RbacResource.Customers, RbacOperation.View);
 	const shownErrorsRef = useRef(new Set<string>());
@@ -67,12 +69,12 @@ export default function GovernanceCustomersPage() {
 		if (shownErrorsRef.current.has(errorKey)) return;
 		shownErrorsRef.current.add(errorKey);
 		if (teamsError && customersError) {
-			toast.error("Failed to load governance data.");
+			toast.error(t("customers.loadGovernanceFailed"));
 		} else {
-			if (teamsError) toast.error(`Failed to load teams: ${getErrorMessage(teamsError)}`);
-			if (customersError) toast.error(`Failed to load customers: ${getErrorMessage(customersError)}`);
+			if (teamsError) toast.error(t("customers.loadTeamsFailed", { error: getErrorMessage(teamsError) }));
+			if (customersError) toast.error(t("customers.loadCustomersFailed", { error: getErrorMessage(customersError) }));
 		}
-	}, [teamsError, customersError]);
+	}, [teamsError, customersError, t]);
 
 	if (isLoading) {
 		return <FullPageLoader />;

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLazyGetLogsStatsQuery } from "@/lib/store/apis/logsApi";
@@ -19,6 +20,7 @@ interface RecalculateCostDialogProps {
 }
 
 export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, onConfirm }: RecalculateCostDialogProps) {
+	const { t } = useI18n();
 	const [mode, setMode] = useState<RecalculateCostMode>("missing");
 	// Lazy query for the missing-cost count: triggered imperatively on open and on
 	// selecting "Missing cost only", so there is no data-fetching effect to manage.
@@ -50,9 +52,9 @@ export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, 
 				}}
 			>
 				<DialogHeader className="pb-2">
-					<DialogTitle>Recalculate costs</DialogTitle>
+					<DialogTitle>{t("logs.recalculate")}</DialogTitle>
 					<DialogDescription>
-						The current time window and filters will be applied. Choose which logs to recompute cost for.
+						{t("logs.recalculateDialog.desc")}
 					</DialogDescription>
 				</DialogHeader>
 
@@ -60,33 +62,33 @@ export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, 
 					<RecalculateModeOption
 						selected={mode === "missing"}
 						onSelect={() => selectMode("missing")}
-						title="Missing cost only"
-						description="Only recompute logs that don't have a cost yet."
+						title={t("logs.recalcMissing")}
+						description={t("logs.recalculateDialog.missingDesc")}
 					/>
 					<RecalculateModeOption
 						selected={mode === "all"}
 						onSelect={() => selectMode("all")}
-						title="All selected logs"
-						description="Recompute cost for every log matching the current filters."
+						title={t("logs.recalcAll")}
+						description={t("logs.recalculateDialog.allDesc")}
 					/>
 				</div>
 
 				<p className="text-muted-foreground text-xs">
 					{mode === "all" ? (
 						<>
-							<span className="text-foreground font-medium">{formatCompactNumber(totalLogs)}</span> logs match the current filters and will be
-							recalculated.
+							<span className="text-foreground font-medium">{formatCompactNumber(totalLogs)}</span>{" "}
+							{t("logs.recalculateDialog.logsMatchCount")}
 						</>
 					) : isFetching ? (
-						"Checking how many logs are missing a cost…"
+						t("logs.recalculateDialog.checking")
 					) : isError || missingCount === null ? (
-						"Logs in the current window that don't have a cost yet will be recalculated."
+						t("logs.recalculateDialog.fallbackInfo")
 					) : missingCount === 0 ? (
-						"All logs in the current window already have a cost."
+						t("logs.recalculateDialog.allHaveCost")
 					) : (
 						<>
-							<span className="text-foreground font-medium">{formatCompactNumber(missingCount)}</span> {missingCount === 1 ? "log" : "logs"} in the
-							current window {missingCount === 1 ? "doesn't have" : "don't have"} a cost yet and will be recalculated.
+							<span className="text-foreground font-medium">{formatCompactNumber(missingCount)}</span>{" "}
+							{t("logs.recalculateDialog.logsWithoutCost", { count: missingCount })}
 						</>
 					)}
 				</p>

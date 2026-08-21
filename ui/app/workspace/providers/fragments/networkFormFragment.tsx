@@ -14,6 +14,7 @@ import { networkOnlyFormSchema, type SecretVar, type NetworkOnlyFormSchema } fro
 import { toSecretVarFormValue, toOptionalSecretVarPayload } from "@/lib/utils/secretVarForm";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useI18n } from "@/lib/i18n/context";
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,29 +25,29 @@ interface NetworkFormFragmentProps {
 }
 
 // seconds to human readable time
-const secondsToHumanReadable = (seconds: number) => {
+const secondsToHumanReadable = (seconds: number, t: (path: string, params?: Record<string, string | number>) => string) => {
 	// Handle edge cases
 	if (!seconds || seconds < 0 || isNaN(seconds)) {
-		return "0 seconds";
+		return t("providers.network.timeZero");
 	}
 	seconds = Math.floor(seconds);
 	if (seconds < 60) {
-		return `${seconds} ${seconds === 1 ? "second" : "seconds"}`;
+		return `${seconds} ${t(seconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`;
 	}
 	if (seconds < 3600) {
 		const minutes = Math.floor(seconds / 60);
 		const remainingSeconds = seconds % 60;
-		const parts: string[] = [`${minutes} ${minutes === 1 ? "minute" : "minutes"}`];
-		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${remainingSeconds === 1 ? "second" : "seconds"}`);
+		const parts: string[] = [`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`];
+		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 		return parts.join(" ");
 	}
 	if (seconds < 86400) {
 		const hours = Math.floor(seconds / 3600);
 		const minutes = Math.floor((seconds % 3600) / 60);
 		const remainingSeconds = seconds % 60;
-		const parts: string[] = [`${hours} ${hours === 1 ? "hour" : "hours"}`];
-		if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? "minute" : "minutes"}`);
-		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${remainingSeconds === 1 ? "second" : "seconds"}`);
+		const parts: string[] = [`${hours} ${t(hours === 1 ? "providers.network.timeHour" : "providers.network.timeHours")}`];
+		if (minutes > 0) parts.push(`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`);
+		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 		return parts.join(" ");
 	}
 	// For >= 1 day, only show non-zero components
@@ -55,14 +56,15 @@ const secondsToHumanReadable = (seconds: number) => {
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const remainingSeconds = seconds % 60;
 	const parts: string[] = [];
-	parts.push(`${days} ${days === 1 ? "day" : "days"}`);
-	if (hours > 0) parts.push(`${hours} ${hours === 1 ? "hour" : "hours"}`);
-	if (minutes > 0) parts.push(`${minutes} ${minutes === 1 ? "minute" : "minutes"}`);
-	if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${remainingSeconds === 1 ? "second" : "seconds"}`);
+	parts.push(`${days} ${t(days === 1 ? "providers.network.timeDay" : "providers.network.timeDays")}`);
+	if (hours > 0) parts.push(`${hours} ${t(hours === 1 ? "providers.network.timeHour" : "providers.network.timeHours")}`);
+	if (minutes > 0) parts.push(`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`);
+	if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 	return parts.join(" ");
 };
 
 export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
+	const { t } = useI18n();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -223,7 +225,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 												}}
 											/>
 										</FormControl>
-										<FormDescription>{secondsToHumanReadable(field.value)}</FormDescription>
+										<FormDescription>{secondsToHumanReadable(field.value, t)}</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
@@ -256,7 +258,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 											/>
 										</FormControl>
 										<FormDescription>
-											{field.value ? secondsToHumanReadable(field.value) : ""} Max time to wait for next chunk before closing a stalled
+											{field.value ? secondsToHumanReadable(field.value, t) : ""} Max time to wait for next chunk before closing a stalled
 											stream
 										</FormDescription>
 										<FormMessage />
@@ -420,7 +422,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 											/>
 										</FormControl>
 										<FormDescription>
-											{field.value ? secondsToHumanReadable(field.value) : ""} Idle keep-alive for pooled connections. Set below the
+											{field.value ? secondsToHumanReadable(field.value, t) : ""} Idle keep-alive for pooled connections. Set below the
 											upstream server&apos;s keep-alive to avoid reusing connections it has already closed.
 										</FormDescription>
 										<FormMessage />

@@ -1,6 +1,7 @@
 import VirtualKeysTable from "@/app/workspace/virtual-keys/views/virtualKeysTable";
 import FullPageLoader from "@/components/fullPageLoader";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { parseAsSafeString } from "@/lib/queryParamsParser";
 import { getErrorMessage, useGetVirtualKeysQuery } from "@/lib/store";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -12,6 +13,7 @@ const POLLING_INTERVAL = 5000;
 const PAGE_SIZE = 25;
 
 export default function GovernanceVirtualKeysPage() {
+	const { t } = useI18n();
 	const hasVirtualKeysAccess = useRbac(RbacResource.VirtualKeys, RbacOperation.View);
 	const shownErrorsRef = useRef(new Set<string>());
 
@@ -72,8 +74,8 @@ export default function GovernanceVirtualKeysPage() {
 		const errorKey = `${!!vkError}`;
 		if (shownErrorsRef.current.has(errorKey)) return;
 		shownErrorsRef.current.add(errorKey);
-		toast.error(`Failed to load virtual keys: ${getErrorMessage(vkError)}`);
-	}, [vkError]);
+		toast.error(t("virtualKeys.loadFailed", { error: getErrorMessage(vkError) }));
+	}, [vkError, t]);
 
 	if (isLoading) {
 		return <FullPageLoader />;

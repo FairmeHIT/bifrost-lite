@@ -1,9 +1,11 @@
 import { createFileRoute, Outlet, useChildMatches } from "@tanstack/react-router";
 import { NoPermissionView } from "@/components/noPermissionView";
+import { useI18n } from "@/lib/i18n/context";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import GovernancePage from "./page";
 
 function RouteComponent() {
+	const { t } = useI18n();
 	const hasVirtualKeysAccess = useRbac(RbacResource.VirtualKeys, RbacOperation.View);
 	const hasTeamsAccess = useRbac(RbacResource.Teams, RbacOperation.View);
 	const hasUsersAccess = useRbac(RbacResource.Users, RbacOperation.View);
@@ -23,7 +25,7 @@ function RouteComponent() {
 
 	const childMatches = useChildMatches();
 	if (!hasAnyGovernanceAccess) {
-		return <NoPermissionView entity="governance" />;
+		return <NoPermissionView entity={t("sidebar.governance")} />;
 	}
 	return childMatches.length === 0 ? <GovernancePage /> : <Outlet />;
 }

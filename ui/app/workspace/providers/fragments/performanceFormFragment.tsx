@@ -8,6 +8,7 @@ import { ModelProvider } from "@/lib/types/config";
 import { performanceFormSchema, type PerformanceFormSchema } from "@/lib/types/schemas";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useI18n } from "@/lib/i18n/context";
 import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,6 +19,7 @@ interface PerformanceFormFragmentProps {
 }
 
 export function PerformanceFormFragment({ provider }: PerformanceFormFragmentProps) {
+	const { t } = useI18n();
 	const dispatch = useAppDispatch();
 	const hasUpdateProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Update);
 	const [updateProvider, { isLoading: isUpdatingProvider }] = useUpdateProviderMutation();
@@ -58,11 +60,11 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 		updateProvider(updatedProvider)
 			.unwrap()
 			.then(() => {
-				toast.success("Provider configuration updated successfully");
+				toast.success(t("toast.saved"));
 				form.reset(data);
 			})
 			.catch((err) => {
-				toast.error("Failed to update provider configuration", {
+				toast.error(t("toast.error"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -80,7 +82,7 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 								name="concurrency_and_buffer_size.concurrency"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Concurrency</FormLabel>
+										<FormLabel>{t("providers.performance.concurrency")}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -113,7 +115,7 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 								name="concurrency_and_buffer_size.buffer_size"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Buffer Size</FormLabel>
+										<FormLabel>{t("providers.performance.bufferSize")}</FormLabel>
 										<FormControl>
 											<Input
 												type="number"
@@ -150,7 +152,7 @@ export function PerformanceFormFragment({ provider }: PerformanceFormFragmentPro
 						disabled={!form.formState.isDirty || !hasUpdateProviderAccess || isUpdatingProvider}
 						isLoading={isUpdatingProvider}
 					>
-						Save Performance Configuration
+						{t("providers.performance.saveConfiguration")}
 					</Button>
 				</div>
 			</form>

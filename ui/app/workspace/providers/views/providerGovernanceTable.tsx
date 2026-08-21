@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { resetDurationLabels } from "@/lib/constants/governance";
+import { useI18n } from "@/lib/i18n/context";
 import { useGetProviderGovernanceQuery } from "@/lib/store";
 import { ModelProvider } from "@/lib/types/config";
 import { cn } from "@/lib/utils";
@@ -94,6 +95,7 @@ function MetricCard({
 	resetDuration: string;
 	isExhausted: boolean;
 }) {
+	const { t } = useI18n();
 	// Compute safe percentage to avoid division by zero
 	const percentage = max > 0 ? Math.round((value / max) * 100) : 0;
 	const clampedPercentage = Math.max(0, Math.min(100, percentage));
@@ -115,7 +117,7 @@ function MetricCard({
 						<span className="text-muted-foreground text-sm font-medium whitespace-nowrap">{title}</span>
 						{isExhausted && (
 							<Badge variant="destructive" className="text-xs whitespace-nowrap">
-								Exhausted
+								{t("providers.governanceTable.exhausted")}
 							</Badge>
 						)}
 					</div>
@@ -133,13 +135,13 @@ function MetricCard({
 										</span>
 									</div>
 									<div className="text-xs">
-										<span className="text-muted-foreground">Resets {formatResetDuration(resetDuration)}</span>
+										<span className="text-muted-foreground">{t("providers.governanceTable.resets", { duration: formatResetDuration(resetDuration) })}</span>
 									</div>
 								</div>
 							</TooltipTrigger>
 							<TooltipContent side="bottom">
 								<p className="font-medium">
-									{clampedPercentage}% of {title.toLowerCase()} used
+									{t("providers.governanceTable.percentageUsed", { percentage: clampedPercentage, title: title.toLowerCase() })}
 								</p>
 							</TooltipContent>
 						</Tooltip>
@@ -153,6 +155,7 @@ function MetricCard({
 }
 
 export default function ProviderGovernanceTable({ provider, className }: Props) {
+	const { t } = useI18n();
 	const hasViewAccess = useRbac(RbacResource.Governance, RbacOperation.View);
 	const { data: providerGovernanceData, isLoading } = useGetProviderGovernanceQuery(undefined, {
 		skip: !hasViewAccess,
@@ -170,7 +173,7 @@ export default function ProviderGovernanceTable({ provider, className }: Props) 
 			<div className={cn("w-full", className)}>
 				<CardHeader className="mb-4 px-0">
 					<CardTitle className="flex items-center justify-between">
-						<div className="flex items-center gap-2">Governance</div>
+						<div className="flex items-center gap-2">{t("providers.governanceTable.governance")}</div>
 					</CardTitle>
 				</CardHeader>
 				<div className="flex items-center justify-center py-12">
@@ -203,7 +206,7 @@ export default function ProviderGovernanceTable({ provider, className }: Props) 
 		<div className={cn("w-full", className)}>
 			<CardHeader className="mb-4 px-0">
 				<CardTitle className="flex items-center justify-between">
-					<div className="flex items-center gap-2">Governance</div>
+					<div className="flex items-center gap-2">{t("providers.governanceTable.governance")}</div>
 				</CardTitle>
 			</CardHeader>
 
@@ -212,7 +215,7 @@ export default function ProviderGovernanceTable({ provider, className }: Props) 
 				{budgets.map((budget) => (
 					<MetricCard
 						key={budget.id}
-						title={`Budget (${formatResetDuration(budget.reset_duration)})`}
+						title={t("providers.governanceTable.budgetTitle", { duration: formatResetDuration(budget.reset_duration) })}
 						value={budget.current_usage}
 						max={budget.max_limit}
 						unit="$"
@@ -224,7 +227,7 @@ export default function ProviderGovernanceTable({ provider, className }: Props) 
 				{/* Token Rate Limit Card */}
 				{rateLimit?.token_max_limit && (
 					<MetricCard
-						title="Token Limit"
+						title={t("providers.governanceTable.tokenLimit")}
 						value={rateLimit.token_current_usage}
 						max={rateLimit.token_max_limit}
 						unit="tokens"
@@ -236,7 +239,7 @@ export default function ProviderGovernanceTable({ provider, className }: Props) 
 				{/* Request Rate Limit Card */}
 				{rateLimit?.request_max_limit && (
 					<MetricCard
-						title="Request Limit"
+						title={t("providers.governanceTable.requestLimit")}
 						value={rateLimit.request_current_usage}
 						max={rateLimit.request_max_limit}
 						unit="requests"

@@ -1,5 +1,6 @@
 import FullPageLoader from "@/components/fullPageLoader";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { getErrorMessage, useGetModelConfigsQuery, useGetProvidersQuery } from "@/lib/store";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { useEffect, useRef, useState } from "react";
@@ -10,6 +11,7 @@ const POLLING_INTERVAL = 5000;
 const PAGE_SIZE = 25;
 
 export default function ModelLimitsView() {
+	const { t } = useI18n();
 	const hasGovernanceAccess = useRbac(RbacResource.Governance, RbacOperation.View);
 
 	const [search, setSearch] = useState("");
@@ -58,7 +60,7 @@ export default function ModelLimitsView() {
 	// Handle query errors
 	useEffect(() => {
 		if (modelConfigsError) {
-			toast.error(`Failed to load model configs: ${getErrorMessage(modelConfigsError)}`);
+			toast.error(t("modelLimits.view.loadFailed", { error: getErrorMessage(modelConfigsError) }));
 		}
 	}, [modelConfigsError]);
 

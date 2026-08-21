@@ -9,6 +9,7 @@ import { ModelMultiselect } from "@/components/ui/modelMultiselect";
 import { Textarea } from "@/components/ui/textarea";
 import { ProviderIconType, RenderProviderIcon } from "@/lib/constants/icons";
 import { getProviderLabel } from "@/lib/constants/logs";
+import { useI18n } from "@/lib/i18n/context";
 import { useEffect, useState } from "react";
 import { ValueEditorProps, ValueEditorType } from "react-querybuilder";
 

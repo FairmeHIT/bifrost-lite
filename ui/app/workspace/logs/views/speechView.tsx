@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { BifrostSpeech, SpeechInput } from "@/lib/types/logs";
 import { AlertCircle, Play, Volume2 } from "lucide-react";
 import React, { Component } from "react";
@@ -10,8 +11,13 @@ interface SpeechViewProps {
 }
 
 // Error boundary specifically for audio player errors
-class AudioErrorBoundary extends Component<{ children: React.ReactNode }, { hasError: boolean; error: Error | null }> {
-	constructor(props: { children: React.ReactNode }) {
+interface AudioErrorBoundaryProps {
+	children: React.ReactNode;
+	t: (path: string, params?: Record<string, string | number>) => string;
+}
+
+class AudioErrorBoundary extends Component<AudioErrorBoundaryProps, { hasError: boolean; error: Error | null }> {
+	constructor(props: AudioErrorBoundaryProps) {
 		super(props);
 		this.state = { hasError: false, error: null };
 	}
@@ -29,7 +35,9 @@ class AudioErrorBoundary extends Component<{ children: React.ReactNode }, { hasE
 			return (
 				<div className="flex items-center gap-2 rounded-sm border border-red-200 bg-red-50 p-4 text-sm text-red-800">
 					<AlertCircle className="h-4 w-4" />
-					<span>Failed to load audio player: {this.state.error?.message || "Unknown error"}</span>
+					<span>
+						{this.props.t("logs.failedToLoadAudioPlayer")}: {this.state.error?.message || this.props.t("logs.unknownError")}
+					</span>
 				</div>
 			);
 		}
@@ -39,6 +47,7 @@ class AudioErrorBoundary extends Component<{ children: React.ReactNode }, { hasE
 }
 
 export default function SpeechView({ speechInput, speechOutput, isStreaming }: SpeechViewProps) {
+	const { t } = useI18n();
 	return (
 		<div className="space-y-4">
 			{/* Speech Input */}
@@ -46,7 +55,7 @@ export default function SpeechView({ speechInput, speechOutput, isStreaming }: S
 				<div className="w-full rounded-sm border">
 					<div className="flex items-center gap-2 border-b px-6 py-2 text-sm font-medium">
 						<Volume2 className="h-4 w-4" />
-						Speech Input
+						{t("logs.speechInput")}
 					</div>
 					<div className="space-y-4 p-6">
 						<div className="font-mono text-xs">{speechInput.input}</div>
@@ -59,10 +68,10 @@ export default function SpeechView({ speechInput, speechOutput, isStreaming }: S
 				<div className="w-full rounded-sm border">
 					<div className="flex items-center gap-2 border-b px-6 py-2 text-sm font-medium">
 						<Play className="h-4 w-4" />
-						Speech Output
+						{t("logs.speechOutput")}
 					</div>
 					<div className="space-y-4 p-6">
-						<AudioErrorBoundary>
+						<AudioErrorBoundary t={t}>
 							<AudioPlayer src={speechOutput?.audio || ""} />
 						</AudioErrorBoundary>
 					</div>

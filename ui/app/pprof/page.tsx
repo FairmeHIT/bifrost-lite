@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { useGetDevGoroutinesQuery, useGetDevPprofQuery } from "@/lib/store";
 import type { AllocationInfo, GoroutineGroup } from "@/lib/store/apis/devApi";
 import {
@@ -276,6 +277,7 @@ function AllocationTable({
 	bytesColorClass?: string;
 	testIdPrefix?: string;
 }) {
+	const { t } = useI18n();
 	const SortIcon = sortDirection === "asc" ? ArrowUp : ArrowDown;
 
 	const SortHeader = ({ field, children }: { field: AllocationSortField; children: React.ReactNode }) => (
@@ -301,11 +303,11 @@ function AllocationTable({
 			<table className="w-full">
 				<thead>
 					<tr className="border-b border-zinc-800">
-						<th scope="col" className="w-8 px-2 py-3" aria-label="Expand" />
-						<SortHeader field="function">Function</SortHeader>
-						<SortHeader field="file">File:Line</SortHeader>
-						<SortHeader field="bytes">Bytes</SortHeader>
-						<SortHeader field="count">Count</SortHeader>
+						<th scope="col" className="w-8 px-2 py-3" aria-label={t("pprof.expand")} />
+						<SortHeader field="function">{t("pprof.function")}</SortHeader>
+						<SortHeader field="file">{t("pprof.fileLine")}</SortHeader>
+						<SortHeader field="bytes">{t("pprof.bytes")}</SortHeader>
+						<SortHeader field="count">{t("pprof.count")}</SortHeader>
 					</tr>
 				</thead>
 				<tbody>
@@ -361,7 +363,7 @@ function AllocationTable({
 									<tr className="border-b border-zinc-800/50 bg-zinc-900/50">
 										<td />
 										<td colSpan={4} className="px-4 py-3">
-											<div className="mb-2 text-xs font-medium text-zinc-500">Stack Trace</div>
+											<div className="mb-2 text-xs font-medium text-zinc-500">{t("pprof.stackTrace")}</div>
 											<div className="space-y-0.5 font-mono text-xs">
 												{alloc.stack.map((line, j) => (
 													<div key={j} className="break-all text-zinc-400">
@@ -378,7 +380,7 @@ function AllocationTable({
 					{allocations.length === 0 && (
 						<tr>
 							<td colSpan={5} className="px-4 py-8 text-center text-zinc-500">
-								No allocations data available
+								{t("pprof.noAllocationsData")}
 							</td>
 						</tr>
 					)}
@@ -398,32 +400,33 @@ function LeakTable({
 	expandedKeys: Set<string>;
 	onToggle: (key: string) => void;
 }) {
+	const { t } = useI18n();
 	return (
 		<div className="overflow-x-auto">
 			<table className="w-full">
 				<thead>
 					<tr className="border-b border-zinc-800">
-						<th scope="col" className="w-8 px-2 py-3" aria-label="Expand" />
+						<th scope="col" className="w-8 px-2 py-3" aria-label={t("pprof.expand")} />
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Severity
+							{t("pprof.severity")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Function
+							{t("pprof.function")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							File:Line
+							{t("pprof.fileLine")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Live
+							{t("pprof.live")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Retention
+							{t("pprof.retention")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Trend
+							{t("pprof.trend")}
 						</th>
 						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-zinc-400">
-							Live Count
+							{t("pprof.liveCount")}
 						</th>
 					</tr>
 				</thead>
@@ -475,7 +478,7 @@ function LeakTable({
 												<TrendingUp className="h-3 w-3" />+{formatBytes(c.growthBytes)}
 											</span>
 										) : (
-											<span className="text-xs text-zinc-500">stable</span>
+											<span className="text-xs text-zinc-500">{t("pprof.stable")}</span>
 										)}
 									</td>
 									<td className="px-4 py-3">
@@ -488,14 +491,14 @@ function LeakTable({
 										<td colSpan={7} className="px-4 py-3">
 											<div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-zinc-500">
 												<span>
-													Cumulative: <span className="text-zinc-300">{formatBytes(c.cumulativeBytes)}</span>
+													{t("pprof.cumulative")}: <span className="text-zinc-300">{formatBytes(c.cumulativeBytes)}</span>
 												</span>
 												<span>
-													Retained: <span className="text-zinc-300">{(c.retention * 100).toFixed(1)}%</span>
+													{t("pprof.retained")}: <span className="text-zinc-300">{(c.retention * 100).toFixed(1)}%</span>
 												</span>
 												{c.samples.length >= 2 && (
 													<span>
-														Last {c.samples.length * 10}s:{" "}
+														{t("pprof.lastSeconds", { n: c.samples.length * 10 })}:{" "}
 														<span className="text-zinc-300">{c.samples.map((b) => formatBytes(b)).join(" → ")}</span>
 													</span>
 												)}

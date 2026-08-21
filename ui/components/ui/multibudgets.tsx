@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import NumberAndSelect from "@/components/ui/numberAndSelect";
@@ -28,14 +29,15 @@ interface MultiBudgetLinesProps {
 
 export default function MultiBudgetLines({
 	"data-testid": testId,
-	label = "Budget Configuration",
+	label,
 	lines,
 	onChange,
 	options = budgetResetDurationOptions,
 	onReset,
 	showReset,
 }: MultiBudgetLinesProps) {
-	// Track which reset durations are already used (for duplicate detection)
+	const { t } = useI18n();
+	const resolvedLabel = label ?? t("ui.multibudgets.budgetConfig");
 	const usedDurations = useMemo(() => {
 		const counts = new Map<string, number>();
 		for (const line of lines) {
@@ -86,7 +88,7 @@ export default function MultiBudgetLines({
 	return (
 		<div className="space-y-3" data-testid={testId}>
 			<div className="flex items-center justify-between">
-				<Label className="text-sm font-medium">{label}</Label>
+				<Label className="text-sm font-medium">{resolvedLabel}</Label>
 				<div className="flex items-center gap-2">
 					{onReset && (showReset ?? true) && (
 						<Button data-testid={`${testId}-reset-btn`} type="button" variant="ghost" size="sm" onClick={onReset}>

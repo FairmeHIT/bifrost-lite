@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select";
@@ -15,6 +16,7 @@ interface TimePickerProps {
 }
 
 export const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>((props, forwardedRef) => {
+	const { t } = useI18n();
 	const { value, onChange, className } = props;
 
 	// Convert 24-hour to 12-hour format
@@ -56,7 +58,7 @@ export const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>((pro
 		<div ref={forwardedRef} className={cn("inline-flex h-9 w-full items-center gap-1", className)}>
 			<Select value={hour12.toString()} onValueChange={handleHourChange}>
 				<SelectTrigger size="sm" className="h-9 w-[70px]">
-					<SelectValue placeholder="HH" />
+					<SelectValue placeholder={t("ui.timePicker.hour")} />
 				</SelectTrigger>
 				<SelectContent>
 					{Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
@@ -69,7 +71,7 @@ export const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>((pro
 			<span className="text-muted-foreground">:</span>
 			<Select value={minute.toString()} onValueChange={handleMinuteChange}>
 				<SelectTrigger size="sm" className="h-9 w-[70px]">
-					<SelectValue placeholder="MM" />
+					<SelectValue placeholder={t("ui.timePicker.minute")} />
 				</SelectTrigger>
 				<SelectContent>
 					{Array.from({ length: 60 }, (_, i) => i).map((m) => (
@@ -81,7 +83,7 @@ export const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>((pro
 			</Select>
 			<Select value={period} onValueChange={(v) => handlePeriodChange(v as "AM" | "PM")}>
 				<SelectTrigger size="sm" className="h-9 w-[70px]">
-					<SelectValue placeholder="AM" />
+					<SelectValue placeholder={t("ui.timePicker.amPeriod")} />
 				</SelectTrigger>
 				<SelectContent>
 					<SelectItem value="AM">AM</SelectItem>

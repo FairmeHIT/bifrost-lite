@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useGetCoreConfigQuery } from "@/lib/store";
@@ -8,6 +9,7 @@ import { useMemo } from "react";
 import ContactUsView from "../views/contactUsView";
 
 export default function APIKeysView() {
+	const { t } = useI18n();
 	const { data: bifrostConfig, isLoading } = useGetCoreConfigQuery({ fromDB: true });
 	const isAuthConfigure = useMemo(() => {
 		return bifrostConfig?.auth_config?.is_enabled;
@@ -32,7 +34,7 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 	const { copy: copyToClipboard } = useCopyToClipboard();
 
 	if (isLoading) {
-		return <div>Loading...</div>;
+		return <div>{t("common.loading")}</div>;
 	}
 	if (!isAuthConfigure) {
 		return (
@@ -40,13 +42,13 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 				<InfoIcon className="text-muted h-4 w-4" />
 				<AlertDescription>
 					<p className="text-md text-muted-foreground">
-						To generate API keys, you need to set up admin username and password first.{" "}
+						{t("enterprise.apiKeysSetup")}{" "}
 						<Link to="/workspace/config/security" className="text-md text-primary underline">
-							Configure Security Settings
+							{t("enterprise.apiKeysConfigure")}
 						</Link>
 						.<br />
 						<br />
-						Once generated you will need to use this API key for all API calls to the Bifrost admin APIs and UI.
+						{t("enterprise.apiKeysUsage")}
 					</p>
 				</AlertDescription>
 			</Alert>
@@ -63,14 +65,11 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 					<p className="text-md text-muted-foreground">
 						{isInferenceAuthDisabled ? (
 							<>
-								Authentication is currently <strong>disabled for inference API calls</strong>. You can make inference requests without
-								authentication. Dashboard and admin API calls still require Basic auth with your admin credentials encoded in the standard{" "}
-								<code className="bg-muted rounded px-1 py-0.5 text-sm">username:password</code> format with base64 encoding.
+								{t("enterprise.apiKeysAuthDisabled")}
 							</>
 						) : (
 							<>
-								Use Basic auth with your admin credentials when making API calls to Bifrost. Encode your credentials in the standard{" "}
-								<code className="bg-muted rounded px-1 py-0.5 text-sm">username:password</code> format with base64 encoding.
+								{t("enterprise.apiKeysAuthEnabled")}
 							</>
 						)}
 					</p>
@@ -78,7 +77,7 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 						<>
 							<br />
 							<p className="text-md text-muted-foreground">
-								<strong>Example:</strong>
+								<strong>{t("enterprise.example")}:</strong>
 							</p>
 
 							<div className="relative mt-2 w-full min-w-0 overflow-x-auto">
@@ -95,8 +94,8 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 			<ContactUsView
 				className="mt-4 rounded-md border px-3 py-8"
 				icon={<KeyRound size={48} />}
-				title="Scope Based API Keys"
-				description="Need granular access control with scope-based API keys? Enterprise customers can create multiple API keys with specific permissions for different services, teams, or environments."
+				title={t("enterprise.scopeApiKeysTitle")}
+				description={t("enterprise.scopeApiKeysDesc")}
 				readmeLink="https://docs.getbifrost.io/enterprise/api-keys"
 			/>
 		</div>

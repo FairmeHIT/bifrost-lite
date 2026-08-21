@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import Provider from "@/components/provider";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ModelProvider } from "@/lib/types/config";
@@ -13,14 +14,19 @@ interface Props {
 }
 
 export default function AddNewKeySheet({ show, onCancel, provider, keyId, providerName }: Props) {
+	const { t } = useI18n();
 	const isEditing = keyId !== null;
 	const resolvedProviderName = (providerName ?? provider.name).toLowerCase();
 	const isVLLM = resolvedProviderName === "vllm";
 	const isOllamaOrSGL = resolvedProviderName === "ollama" || resolvedProviderName === "sgl";
-	const entityLabel = isVLLM ? "model" : isOllamaOrSGL ? "server" : "key";
+	const entityLabel = isVLLM ? t("providers.entity.model") : isOllamaOrSGL ? t("providers.entity.server") : t("providers.entity.key");
 	const EntityLabel = entityLabel.charAt(0).toUpperCase() + entityLabel.slice(1);
-	const dialogTitle = isEditing ? `Edit ${entityLabel}` : `Add new ${entityLabel}`;
-	const successMessage = isEditing ? `${EntityLabel} updated successfully` : `${EntityLabel} added successfully`;
+	const dialogTitle = isEditing
+		? t("providers.addNewKey.editTitle", { entity: entityLabel })
+		: t("providers.addNewKey.addTitle", { entity: entityLabel });
+	const successMessage = isEditing
+		? t("providers.addNewKey.editSuccess", { Entity: EntityLabel })
+		: t("providers.addNewKey.addSuccess", { Entity: EntityLabel });
 
 	return (
 		<Sheet

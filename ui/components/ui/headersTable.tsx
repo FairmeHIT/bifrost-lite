@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { SecretVarInput } from "@/components/ui/secretVarInput";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useI18n } from "@/lib/i18n/context";
 import { SecretVar } from "@/lib/types/schemas";
 import { cn } from "@/lib/utils";
 import { Trash } from "lucide-react";
@@ -66,15 +67,19 @@ const isValueEmpty = (val: HeaderValue): boolean => {
 export function HeadersTable<T extends HeaderValue>({
 	value,
 	onChange,
-	keyPlaceholder = "Header name",
-	valuePlaceholder = "Header value",
-	label = "Headers",
+	keyPlaceholder,
+	valuePlaceholder,
+	label,
 	disabled = false,
 	useSecretVarInput,
 	fixedKeys,
 	renderKeyInput,
 	renderValueInput,
 }: HeadersTableProps<T>) {
+	const { t } = useI18n();
+	const resolvedKeyPlaceholder = keyPlaceholder ?? t("ui.headersTable.headerName");
+	const resolvedValuePlaceholder = valuePlaceholder ?? t("ui.headersTable.headerValue");
+	const resolvedLabel = label ?? t("ui.headersTable.headers");
 	// Use explicit prop if provided, otherwise detect from existing values
 	const isSecretVarMode = useSecretVarInput ?? Object.values(value || {}).some((v) => isSecretVar(v));
 
@@ -205,20 +210,20 @@ export function HeadersTable<T extends HeaderValue>({
 
 	return (
 		<div className="w-full">
-			{label && (
+			{resolvedLabel && (
 				<label className="mb-2 block text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-					{label}
+					{resolvedLabel}
 				</label>
 			)}
 			<div className="rounded-md border">
 				<Table className="table-fixed">
 					<TableHeader>
 						<TableRow>
-							<TableHead className="w-[40%] px-4 py-2">Name</TableHead>
-							<TableHead className="px-4 py-2">Value</TableHead>
+							<TableHead className="w-[40%] px-4 py-2">{t("ui.headersTable.name")}</TableHead>
+							<TableHead className="px-4 py-2">{t("ui.headersTable.value")}</TableHead>
 							{!isFixedKeys && (
 								<TableHead className="w-10 p-0">
-									<span className="sr-only">Actions</span>
+									<span className="sr-only">{t("ui.headersTable.actions")}</span>
 								</TableHead>
 							)}
 						</TableRow>
@@ -248,7 +253,7 @@ export function HeadersTable<T extends HeaderValue>({
 												renderKeyInput({
 													value: hasConflict ? (conflictKey ?? "") : key,
 													onChange: (newKey) => handleKeyChange(key, newKey, headerValue, index),
-													placeholder: keyPlaceholder,
+													placeholder: resolvedKeyPlaceholder,
 													disabled,
 													rowKey: key,
 												})
@@ -262,7 +267,7 @@ export function HeadersTable<T extends HeaderValue>({
 												/>
 											) : (
 												<Input
-													placeholder={keyPlaceholder}
+													placeholder={resolvedKeyPlaceholder}
 													value={hasConflict ? conflictKey : key}
 													data-row={index}
 													data-column="key"
@@ -272,7 +277,7 @@ export function HeadersTable<T extends HeaderValue>({
 													disabled={disabled}
 												/>
 											)}
-											{hasConflict && <span className="text-destructive px-3 text-xs">Duplicate key</span>}
+											{hasConflict && <span className="text-destructive px-3 text-xs">{t("ui.headersTable.duplicateKey")}</span>}
 										</div>
 									</TableCell>
 									<TableCell className="p-2">
@@ -280,13 +285,13 @@ export function HeadersTable<T extends HeaderValue>({
 											renderValueInput({
 												value: getDisplayValue(headerValue),
 												onChange: (newVal) => handleValueChange(key, newVal, index),
-												placeholder: valuePlaceholder,
+												placeholder: resolvedValuePlaceholder,
 												disabled,
 												rowKey: key,
 											})
 										) : isHeaderSecretVar ? (
 											<SecretVarInput
-												placeholder={valuePlaceholder}
+												placeholder={resolvedValuePlaceholder}
 												value={headerValue as SecretVar}
 												data-row={index}
 												data-column="value"
@@ -297,7 +302,7 @@ export function HeadersTable<T extends HeaderValue>({
 											/>
 										) : (
 											<Input
-												placeholder={valuePlaceholder}
+												placeholder={resolvedValuePlaceholder}
 												value={getDisplayValue(headerValue)}
 												data-row={index}
 												data-column="value"

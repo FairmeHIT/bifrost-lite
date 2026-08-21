@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useI18n } from "@/lib/i18n/context";
 import { prometheusFormSchema, type SecretVar, type PrometheusFormSchema } from "@/lib/types/schemas";
 import { emptySecretVar, toSecretVarFormValue } from "@/lib/utils/secretVarForm";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -73,6 +74,7 @@ export function PrometheusFormFragment({
 	isLoading = false,
 	metricsEndpoint,
 }: PrometheusFormFragmentProps) {
+	const { t } = useI18n();
 	const hasPrometheusAccess = useRbac(RbacResource.Observability, RbacOperation.Update);
 	const [isSaving, setIsSaving] = useState(false);
 	const { copy, copied } = useCopyToClipboard();

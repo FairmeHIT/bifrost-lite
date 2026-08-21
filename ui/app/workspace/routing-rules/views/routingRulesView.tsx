@@ -5,6 +5,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { useGetRoutingRulesQuery } from "@/lib/store/apis/routingRulesApi";
 import { RoutingRule } from "@/lib/types/routingRules";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -20,6 +21,7 @@ const POLLING_INTERVAL = 5000;
 const PAGE_SIZE = 25;
 
 export function RoutingRulesView() {
+	const { t } = useI18n();
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingRule, setEditingRule] = useState<RoutingRule | null>(null);
 	const [infoSheetOpen, setInfoSheetOpen] = useState(false);
@@ -117,20 +119,20 @@ export function RoutingRulesView() {
 			{/* Header */}
 			<div className="mb-4 flex items-center justify-between">
 				<div>
-					<h1 className="text-foreground text-lg font-semibold">Routing Rules</h1>
-					<p className="text-muted-foreground text-sm">Manage CEL-based routing rules for intelligent request routing across providers</p>
+					<h1 className="text-foreground text-lg font-semibold">{t("routingRules.title")}</h1>
+					<p className="text-muted-foreground text-sm">{t("routingRules.description")}</p>
 				</div>
 				<div className="flex items-center gap-2">
 					<Button variant="outline" size="sm" asChild className="gap-2">
 						<Link to="/workspace/routing-rules/tree">
 							<GitBranch className="h-4 w-4" />
-							<span className="hidden sm:inline">View Tree</span>
+							<span className="hidden sm:inline">{t("routingRules.viewTree")}</span>
 						</Link>
 					</Button>
 					{canCreate && (
 						<Button data-testid="create-routing-rule-btn" onClick={handleCreateNew} disabled={isLoading} className="gap-2">
 							<Plus className="h-4 w-4" />
-							<span className="hidden sm:inline">New Rule</span>
+							<span className="hidden sm:inline">{t("routingRules.newRule")}</span>
 						</Button>
 					)}
 				</div>

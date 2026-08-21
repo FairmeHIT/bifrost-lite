@@ -35,6 +35,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { resetDurationOptions, supportsCalendarAlignment } from "@/lib/constants/governance";
 import { ProviderIconType, RenderProviderIcon } from "@/lib/constants/icons";
 import { ProviderLabels, ProviderName } from "@/lib/constants/logs";
+import { useI18n } from "@/lib/i18n/context";
 import { getUserPicker } from "@/lib/registries/userPicker";
 import {
 	getErrorMessage,
@@ -65,7 +66,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { formatDistanceToNow } from "date-fns";
 import { Info, Lock, RotateCcw, Trash2, Users } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 // Side-effect import: registers the enterprise user picker so "Assign to User"
 // becomes available. Resolves to an empty module on OSS builds.
 import "@enterprise/lib/registrations/userPicker";
@@ -82,119 +83,125 @@ interface VirtualKeySheetProps {
 	onCancel: () => void;
 }
 
-// Provider configuration schema
-const providerConfigSchema = z.object({
-	id: z.number().optional(),
-	provider: z.string().min(1, "Provider is required"),
-	weight: z.number().min(0, "Weight must be at least 0").max(1, "Weight must be at most 1").optional(),
-	allowed_models: z.array(z.string()).optional(),
-	blacklisted_models: z.array(z.string()).optional(),
-	key_ids: z.array(z.string()).optional(), // Keys associated with this provider config
-	// Provider-level budget
-	budgets: z
-		.array(
-			z.object({
-				id: z.string().optional(),
-				max_limit: z.number().nonnegative().optional(),
-				reset_duration: z.string().optional(),
-				// Zod strips unknown keys, so the fiscal quarter has to be declared
-				// here or it is erased from form state on every parse.
-				reset_config: z.object({ quarter_start_month: z.number().int().min(1).max(12).optional() }).optional(),
-			}),
-		)
-		.optional(),
-	// Provider-level rate limits
-	rate_limit: z
-		.object({
-			token_max_limit: z.number().int().nonnegative().optional(),
-			token_reset_duration: z.string().optional(),
-			request_max_limit: z.number().int().nonnegative().optional(),
-			request_reset_duration: z.string().optional(),
-		})
-		.optional(),
-	// Per-model budgets/rate-limits under this provider
-	model_budgets: z
-		.array(
-			z.object({
-				model_name: z.string().trim().min(1, "Model name is required"),
-				budgets: z
-					.array(
-						z.object({
-							id: z.string().optional(),
-							max_limit: z.number().nonnegative().optional(),
-							reset_duration: z.string().optional(),
-						}),
-					)
-					.optional(),
-				rate_limit: z
-					.object({
-						token_max_limit: z.number().int().nonnegative().optional(),
-						token_reset_duration: z.string().optional(),
-						request_max_limit: z.number().int().nonnegative().optional(),
-						request_reset_duration: z.string().optional(),
-					})
-					.optional(),
-			}),
-		)
-		.optional(),
-});
+type TFunc = (path: string, params?: Record<string, string | number>) => string;
 
-// Main form schema
-const formSchema = z
-	.object({
-		name: z.string().min(1, "Virtual key name is required"),
-		description: z.string().optional(),
-		providerConfigs: z.array(providerConfigSchema).optional(),
-		entityType: z.enum(["team", "customer", "user", "none"]),
-		teamId: z.string().optional(),
-		customerId: z.string().optional(),
-		// Enterprise-only: a VK can be attached to at most one user, via the
-		// separate /virtual-keys/{id}/users endpoint rather than the VK payload.
-		userId: z.string().optional(),
-		isActive: z.boolean(),
-		expiresAt: z.string().nullable().optional(), // ISO 8601 datetime-local string, or null to clear
-		// Budget
-		budgetCalendarAligned: z.boolean(),
+// Provider configuration schema — factory function so Zod messages can use t()
+const buildProviderConfigSchema = (t: TFunc) =>
+	z.object({
+		id: z.number().optional(),
+		provider: z.string().min(1, t("virtualKeys.providerRequired")),
+		weight: z.number().min(0, t("virtualKeys.weightMin")).max(1, t("virtualKeys.weightMax")).optional(),
+		allowed_models: z.array(z.string()).optional(),
+		blacklisted_models: z.array(z.string()).optional(),
+		key_ids: z.array(z.string()).optional(), // Keys associated with this provider config
+		// Provider-level budget
 		budgets: z
 			.array(
 				z.object({
 					id: z.string().optional(),
 					max_limit: z.number().nonnegative().optional(),
-					reset_duration: z.string(),
+					reset_duration: z.string().optional(),
+					// Zod strips unknown keys, so the fiscal quarter has to be declared
+					// here or it is erased from form state on every parse.
 					reset_config: z.object({ quarter_start_month: z.number().int().min(1).max(12).optional() }).optional(),
 				}),
 			)
 			.optional(),
-		// Token limits
-		tokenMaxLimit: z.number().int().nonnegative().optional(),
-		tokenResetDuration: z.string().optional(),
-		// Request limits
-		requestMaxLimit: z.number().int().nonnegative().optional(),
-		requestResetDuration: z.string().optional(),
-	})
-	.refine(
-		(data) => {
-			// If entityType is "team", teamId must be provided and not empty
-			if (data.entityType === "team") {
-				return data.teamId && data.teamId.trim() !== "";
-			}
-			// If entityType is "customer", customerId must be provided and not empty
-			if (data.entityType === "customer") {
-				return data.customerId && data.customerId.trim() !== "";
-			}
-			// If entityType is "user", userId must be provided and not empty
-			if (data.entityType === "user") {
-				return data.userId && data.userId.trim() !== "";
-			}
-			return true;
-		},
-		{
-			message: "Please select a valid team, customer, or user when assignment type is chosen",
-			path: ["entityType"], // This will show the error on the entityType field
-		},
-	);
+		// Provider-level rate limits
+		rate_limit: z
+			.object({
+				token_max_limit: z.number().int().nonnegative().optional(),
+				token_reset_duration: z.string().optional(),
+				request_max_limit: z.number().int().nonnegative().optional(),
+				request_reset_duration: z.string().optional(),
+			})
+			.optional(),
+		// Per-model budgets/rate-limits under this provider
+		model_budgets: z
+			.array(
+				z.object({
+					model_name: z.string().trim().min(1, t("virtualKeys.modelNameRequired")),
+					budgets: z
+						.array(
+							z.object({
+								id: z.string().optional(),
+								max_limit: z.number().nonnegative().optional(),
+								reset_duration: z.string().optional(),
+							}),
+						)
+						.optional(),
+					rate_limit: z
+						.object({
+							token_max_limit: z.number().int().nonnegative().optional(),
+							token_reset_duration: z.string().optional(),
+							request_max_limit: z.number().int().nonnegative().optional(),
+							request_reset_duration: z.string().optional(),
+						})
+						.optional(),
+				}),
+			)
+			.optional(),
+	});
 
-type FormData = z.infer<typeof formSchema>;
+// Main form schema — factory function so Zod messages can use t()
+const buildFormSchema = (t: TFunc) => {
+	const providerConfigSchema = buildProviderConfigSchema(t);
+	return z
+		.object({
+			name: z.string().min(1, t("virtualKeys.nameRequired")),
+			description: z.string().optional(),
+			providerConfigs: z.array(providerConfigSchema).optional(),
+			entityType: z.enum(["team", "customer", "user", "none"]),
+			teamId: z.string().optional(),
+			customerId: z.string().optional(),
+			// Enterprise-only: a VK can be attached to at most one user, via the
+			// separate /virtual-keys/{id}/users endpoint rather than the VK payload.
+			userId: z.string().optional(),
+			isActive: z.boolean(),
+			expiresAt: z.string().nullable().optional(), // ISO 8601 datetime-local string, or null to clear
+			// Budget
+			budgetCalendarAligned: z.boolean(),
+			budgets: z
+				.array(
+					z.object({
+						id: z.string().optional(),
+						max_limit: z.number().nonnegative().optional(),
+						reset_duration: z.string(),
+						reset_config: z.object({ quarter_start_month: z.number().int().min(1).max(12).optional() }).optional(),
+					}),
+				)
+				.optional(),
+			// Token limits
+			tokenMaxLimit: z.number().int().nonnegative().optional(),
+			tokenResetDuration: z.string().optional(),
+			// Request limits
+			requestMaxLimit: z.number().int().nonnegative().optional(),
+			requestResetDuration: z.string().optional(),
+		})
+		.refine(
+			(data) => {
+				// If entityType is "team", teamId must be provided and not empty
+				if (data.entityType === "team") {
+					return data.teamId && data.teamId.trim() !== "";
+				}
+				// If entityType is "customer", customerId must be provided and not empty
+				if (data.entityType === "customer") {
+					return data.customerId && data.customerId.trim() !== "";
+				}
+				// If entityType is "user", userId must be provided and not empty
+				if (data.entityType === "user") {
+					return data.userId && data.userId.trim() !== "";
+				}
+				return true;
+			},
+			{
+				message: t("virtualKeys.assignmentTypeError"),
+				path: ["entityType"], // This will show the error on the entityType field
+			},
+		);
+};
+
+type FormData = z.infer<ReturnType<typeof buildFormSchema>>;
 
 /**
  * Why the save dialog is asking about existing usage.
@@ -216,12 +223,13 @@ const toDatetimeLocal = (d: Date) =>
 
 const presetFromNow = (offsetMs: number) => toDatetimeLocal(new Date(Date.now() + offsetMs));
 
-const EXPIRY_PRESETS = [
-	{ label: "30 min", ms: 30 * 60_000 },
-	{ label: "1 hour", ms: 60 * 60_000 },
-	{ label: "24 hours", ms: 24 * 60 * 60_000 },
-	{ label: "7 days", ms: 7 * 24 * 60 * 60_000 },
-] as const;
+const getExpiryPresets = (t: TFunc) =>
+	[
+		{ label: t("virtualKeys.expiry30min"), ms: 30 * 60_000 },
+		{ label: t("virtualKeys.expiry1hour"), ms: 60 * 60_000 },
+		{ label: t("virtualKeys.expiry24hours"), ms: 24 * 60 * 60_000 },
+		{ label: t("virtualKeys.expiry7days"), ms: 7 * 24 * 60 * 60_000 },
+	] as const;
 
 interface ExpiryFieldProps {
 	value: string | null | undefined;
@@ -229,15 +237,19 @@ interface ExpiryFieldProps {
 }
 
 function ExpiryPickerField({ value, onChange }: ExpiryFieldProps) {
+	const { t } = useI18n();
 	// Preset timestamps are computed from Date.now() at click time, so the picked
 	// preset can't be derived back from the value; track it for highlighting.
 	const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+	const EXPIRY_PRESETS = useMemo(() => getExpiryPresets(t), [t]);
 
 	return (
 		<FormItem>
-			<FormLabel>Expiry</FormLabel>
+			<FormLabel>{t("virtualKeys.expiry")}</FormLabel>
 			<p className="text-muted-foreground text-xs">
-				{value ? `This key expires ${formatDistanceToNow(new Date(value), { addSuffix: true })}.` : "This key never expires."}
+				{value
+					? t("virtualKeys.expiresIn", { time: formatDistanceToNow(new Date(value), { addSuffix: true }) })
+					: t("virtualKeys.neverExpires")}
 			</p>
 			<div className="flex flex-wrap gap-1.5">
 				<Button
@@ -249,7 +261,7 @@ function ExpiryPickerField({ value, onChange }: ExpiryFieldProps) {
 						onChange(null);
 					}}
 				>
-					Never
+					{t("virtualKeys.never")}
 				</Button>
 				{EXPIRY_PRESETS.map(({ label, ms }) => (
 					<Button
@@ -282,6 +294,7 @@ function ExpiryPickerField({ value, onChange }: ExpiryFieldProps) {
 }
 
 export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onCancel }: VirtualKeySheetProps) {
+	const { t } = useI18n();
 	const [isOpen, setIsOpen] = useState(true);
 	const navigate = useNavigate();
 	const isEditing = !!virtualKey;
@@ -331,7 +344,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const persistedOverrideBudgets = [
 		...(virtualKey?.budgets ?? []).map((budget) => ({
 			budget,
-			label: "Virtual key",
+			label: t("virtualKeys.entityLabel"),
 		})),
 		...(virtualKey?.provider_configs ?? []).flatMap((config) =>
 			(config.budgets ?? []).map((budget) => ({
@@ -352,9 +365,12 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const availableKeys = keysData || [];
 	const availableProviders = providersData || [];
 
+	// Form schema — built with t() for localized error messages
+	const schema = useMemo(() => buildFormSchema(t), [t]);
+
 	// Form setup
-	const form = useForm<z.input<typeof formSchema>, unknown, FormData>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<z.input<ReturnType<typeof buildFormSchema>>, unknown, FormData>({
+		resolver: zodResolver(schema),
 		defaultValues: {
 			name: virtualKey?.name || "",
 			description: virtualKey?.description || "",
@@ -429,16 +445,16 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	// Handle keys loading error
 	useEffect(() => {
 		if (keysError) {
-			toast.error(`Failed to load available keys: ${getErrorMessage(keysError)}`);
+			toast.error(t("virtualKeys.loadKeysFailed", { error: getErrorMessage(keysError) }));
 		}
-	}, [keysError]);
+	}, [keysError, t]);
 
 	// Handle providers loading error
 	useEffect(() => {
 		if (providersError) {
-			toast.error(`Failed to load available providers: ${getErrorMessage(providersError)}`);
+			toast.error(t("virtualKeys.loadProvidersFailed", { error: getErrorMessage(providersError) }));
 		}
-	}, [providersError]);
+	}, [providersError, t]);
 
 	// Clear the ids that don't belong to the selected entity type
 	useEffect(() => {
@@ -502,7 +518,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const handleAddProvider = (provider: string) => {
 		const existingConfig = providerConfigs.find((config) => config.provider === provider);
 		if (existingConfig) {
-			toast.error("This provider is already configured");
+			toast.error(t("virtualKeys.providerAlreadyConfigured"));
 			return;
 		}
 
@@ -656,7 +672,12 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 				if (configChanged && usage >= budget.max_limit) {
 					return {
 						kind: "over-limit" as const,
-						message: `${scopeLabel} ${budget.reset_duration} budget has ${formatBudgetAmount(usage)} usage, which meets or exceeds the new ${formatBudgetAmount(budget.max_limit)} limit.`,
+						message: t("virtualKeys.overLimitUsage", {
+							scope: scopeLabel,
+							duration: budget.reset_duration,
+							usage: formatBudgetAmount(usage),
+							limit: formatBudgetAmount(budget.max_limit),
+						}),
 					};
 				}
 				// Moving the fiscal quarter moves the reset boundary under a live budget.
@@ -666,7 +687,10 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 				if (budget.reset_duration.endsWith("Q") && quarterStartOf(existing) !== quarterStartOf(budget) && usage > 0) {
 					return {
 						kind: "quarter-shift" as const,
-						message: `${scopeLabel} quarterly budget has ${formatBudgetAmount(usage)} of usage. Changing the fiscal quarter moves the reset date and carries that spend into the new quarter.`,
+						message: t("virtualKeys.quarterShiftUsage", {
+							scope: scopeLabel,
+							usage: formatBudgetAmount(usage),
+						}),
 					};
 				}
 				reconciled.push({ ...budget, current_usage: usage });
@@ -689,7 +713,13 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 			if (inheritedUsage >= budget.max_limit) {
 				return {
 					kind: "over-limit" as const,
-					message: `${scopeLabel} ${budget.reset_duration} budget will inherit ${formatBudgetAmount(inheritedUsage)} from the ${closestShorter?.reset_duration} budget, which meets or exceeds the new ${formatBudgetAmount(budget.max_limit)} limit.`,
+					message: t("virtualKeys.inheritOverLimit", {
+						scope: scopeLabel,
+						duration: budget.reset_duration,
+						usage: formatBudgetAmount(inheritedUsage),
+						source: closestShorter?.reset_duration ?? "",
+						limit: formatBudgetAmount(budget.max_limit),
+					}),
 				};
 			}
 			reconciled.push({ ...budget, current_usage: inheritedUsage });
@@ -703,7 +733,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 			return null;
 		}
 
-		const vkWarning = findBudgetUsageWarning(data.budgets, virtualKey.budgets, "Virtual key");
+		const vkWarning = findBudgetUsageWarning(data.budgets, virtualKey.budgets, t("virtualKeys.entityLabel"));
 		if (vkWarning) {
 			return vkWarning;
 		}
@@ -715,7 +745,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 		for (const config of data.providerConfigs || []) {
 			const existingConfig = existingProviderConfigs.get(String(config.id ?? config.provider));
 			const providerLabel = ProviderLabels[config.provider as ProviderName] ?? config.provider;
-			const warning = findBudgetUsageWarning(config.budgets, existingConfig?.budgets, `${providerLabel} provider`);
+			const warning = findBudgetUsageWarning(config.budgets, existingConfig?.budgets, t("virtualKeys.providerScope", { provider: providerLabel }));
 			if (warning) {
 				return warning;
 			}
@@ -772,12 +802,12 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const handleRotateVirtualKey = async () => {
 		if (!virtualKey) return;
 		if (!hasUpdateAccess) {
-			toast.error("You don't have permission to perform this action");
+			toast.error(t("governance.noPermission"));
 			return;
 		}
 		try {
 			await rotateVirtualKey(virtualKey.id).unwrap();
-			toast.success("Virtual key rotated successfully");
+			toast.success(t("virtualKeys.rotated"));
 			setShowRotateWarning(false);
 			onSave();
 		} catch (error) {
@@ -787,7 +817,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 
 	const submitVirtualKeyForm = async (data: FormData, resetBudgetUsage = false) => {
 		if (!canSubmit) {
-			toast.error("You don't have permission to perform this action");
+			toast.error(t("governance.noPermission"));
 			return;
 		}
 		try {
@@ -800,7 +830,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 						description: data.description,
 					},
 				}).unwrap();
-				toast.success("Virtual key updated");
+				toast.success(t("virtualKeys.updated"));
 				onSave();
 				return;
 			}
@@ -894,7 +924,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 						}).unwrap();
 					}
 				}
-				toast.success("Virtual key updated successfully");
+				toast.success(t("virtualKeys.updatedSuccessfully"));
 			} else {
 				// Create new virtual key
 				const createData: CreateVirtualKeyRequest = {
@@ -941,14 +971,14 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 							data: { user_ids: [targetUserId], preserve_usage: false },
 						}).unwrap();
 					} catch (error) {
-						toast.error("Virtual key created, but assigning it to the user failed", {
+						toast.error(t("virtualKeys.createdAssignFailed"), {
 							description: getErrorMessage(error),
 						});
 						onSave();
 						return;
 					}
 				}
-				toast.success("Virtual key created successfully");
+				toast.success(t("virtualKeys.created"));
 			}
 
 			onSave();
@@ -991,11 +1021,13 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 				onEscapeKeyDown={() => handleClose()}
 			>
 				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8">
-					<SheetTitle className="flex items-center gap-2">{isEditing ? virtualKey?.name : "Create Virtual Key"}</SheetTitle>
+					<SheetTitle className="flex items-center gap-2">
+						{isEditing ? virtualKey?.name : t("virtualKeys.createTitle")}
+					</SheetTitle>
 					<SheetDescription>
 						{isEditing
-							? "Update the virtual key configuration and permissions."
-							: "Create a new virtual key with specific permissions, budgets, and rate limits."}
+							? t("virtualKeys.updateDescription")
+							: t("virtualKeys.createDescription")}
 					</SheetDescription>
 				</SheetHeader>
 
@@ -1007,8 +1039,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									<Alert variant="info">
 										<Lock className="h-4 w-4" />
 										<AlertDescription>
-											This virtual key is managed by an access profile. Only the name and description can be modified; providers, budgets,
-											rate limits, and MCP access are controlled by the profile.
+											{t("virtualKeys.managedByProfileAlert")}
 										</AlertDescription>
 									</Alert>
 									<ManagedVirtualKeyActions managingProfile={managingProfile} />
@@ -1019,8 +1050,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<Alert variant="info">
 									<Users className="h-4 w-4" />
 									<AlertDescription>
-										Creating this virtual key under team <span className="font-medium">{attachedTeam?.name ?? attachedTeamId}</span>. Team
-										assignment is pre-set; all other fields are editable.
+										{t("virtualKeys.creatingUnderTeamPrefix")}{" "}
+										<span className="font-medium">{attachedTeam?.name ?? attachedTeamId}</span>
+										{t("virtualKeys.creatingUnderTeamSuffix")}
 									</AlertDescription>
 								</Alert>
 							)}
@@ -1032,9 +1064,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									name="name"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Name *</FormLabel>
+											<FormLabel>{t("common.name")} *</FormLabel>
 											<FormControl>
-												<Input placeholder="e.g., Production API Key" data-testid="vk-name-input" {...field} />
+												<Input placeholder={t("virtualKeys.namePlaceholder")} data-testid="vk-name-input" {...field} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -1046,9 +1078,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									name="description"
 									render={({ field }) => (
 										<FormItem>
-											<FormLabel>Description</FormLabel>
+											<FormLabel>{t("common.description")}</FormLabel>
 											<FormControl>
-												<Textarea placeholder="This key is used for..." data-testid="vk-description-input" {...field} rows={3} />
+												<Textarea placeholder={t("virtualKeys.descriptionPlaceholder")} data-testid="vk-description-input" {...field} rows={3} />
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -1067,7 +1099,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										name="isActive"
 										render={({ field }) => (
 											<FormItem>
-												<Toggle label="Is this key active?" val={field.value} setVal={field.onChange} data-testid="vk-is-active-toggle" />
+												<Toggle label={t("virtualKeys.isActiveLabel")} val={field.value} setVal={field.onChange} data-testid="vk-is-active-toggle" />
 											</FormItem>
 										)}
 									/>
@@ -1080,7 +1112,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								{/* Provider Configurations */}
 								<div className="space-y-2">
 									<div className="flex items-center gap-2">
-										<Label className="text-sm font-medium">Provider Configurations</Label>
+										<Label className="text-sm font-medium">{t("virtualKeys.providerConfigurations")}</Label>
 										<TooltipProvider>
 											<Tooltip>
 												<TooltipTrigger asChild>
@@ -1090,8 +1122,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												</TooltipTrigger>
 												<TooltipContent>
 													<p>
-														Configure which providers this virtual key can use and their specific settings. Leave empty to block all
-														providers. Add providers to allow them.
+														{t("virtualKeys.providerConfigTooltip")}
 													</p>
 												</TooltipContent>
 											</Tooltip>
@@ -1113,7 +1144,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 											}}
 										>
 											<SelectTrigger className="flex-1" data-testid="vk-provider-select">
-												<SelectValue placeholder="Select a provider to add" />
+												<SelectValue placeholder={t("virtualKeys.selectProviderPlaceholder")} />
 											</SelectTrigger>
 											<SelectContent>
 												{(() => {
@@ -1130,7 +1161,8 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 																data-testid="vk-provider-config-link"
 															>
 																<span>
-																	No providers left to configure. <span className="text-primary font-medium underline">Click to add</span>
+																	{t("virtualKeys.noProvidersLeft")}{" "}
+																	<span className="text-primary font-medium underline">{t("virtualKeys.clickToAdd")}</span>
 																</span>
 															</SelectItem>
 														);
@@ -1243,7 +1275,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<div className="space-y-4">
 									<MultiBudgetLines
 										data-testid="vk-budget-lines"
-										label="Budget Configuration"
+										label={t("governance.budgetConfiguration")}
 										lines={form.watch("budgets") ?? []}
 										onChange={(lines) => {
 											form.setValue("budgets", lines, { shouldDirty: true });
@@ -1255,9 +1287,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									{isEditing && !isManagedByProfile && persistedOverrideBudgets.length > 0 ? (
 										<div className="space-y-3 rounded-sm border p-4" data-testid="vk-budget-overrides-section">
 											<div>
-												<h4 className="text-sm font-medium">Budget Overrides</h4>
+												<h4 className="text-sm font-medium">{t("governance.budgetOverrides")}</h4>
 												<p className="text-muted-foreground text-xs">
-													Add temporary capacity without changing the configured base budgets above.
+													{t("governance.budgetOverridesHint")}
 												</p>
 											</div>
 											<div className="divide-y">
@@ -1265,11 +1297,13 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 													<div key={budget.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
 														<div className="min-w-0">
 															<p className="truncate text-sm font-medium">
-																{label} · resets every {parseResetPeriod(budget.reset_duration)}
+																{t("governance.resetsEvery", { label, duration: parseResetPeriod(budget.reset_duration) })}
 															</p>
 															<p className="text-muted-foreground text-xs">
-																Base {formatCurrency(budget.max_limit)}
-																{hasActiveBudgetOverride(budget) ? ` · effective ${formatCurrency(getEffectiveBudgetLimit(budget))}` : ""}
+																{t("governance.baseAmount", { amount: formatCurrency(budget.max_limit) })}
+																{hasActiveBudgetOverride(budget)
+																	? ` · ${t("governance.effectiveAmount", { amount: formatCurrency(getEffectiveBudgetLimit(budget)) })}`
+																	: ""}
 															</p>
 														</div>
 														<BudgetOverrideDialog
@@ -1297,15 +1331,14 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									>
 										<AlertDialogContent>
 											<AlertDialogHeader>
-												<AlertDialogTitle>Reassign to a different team?</AlertDialogTitle>
+												<AlertDialogTitle>{t("virtualKeys.reassignTitle")}</AlertDialogTitle>
 												<AlertDialogDescription>
-													This key is currently assigned to another team. Reassigning it will move budget tracking to this team; future
-													requests through this key will count against this team’s budget, not the previous one.
+													{t("virtualKeys.reassignDescription")}
 												</AlertDialogDescription>
 											</AlertDialogHeader>
 											<AlertDialogFooter>
 												<AlertDialogCancel data-testid="virtual-key-reassign-cancel" onClick={() => setPendingTeamId(null)}>
-													Cancel
+													{t("common.cancel")}
 												</AlertDialogCancel>
 												<AlertDialogAction
 													data-testid="virtual-key-reassign-confirm"
@@ -1320,7 +1353,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 														setShowReassignTeamWarning(false);
 													}}
 												>
-													Reassign
+													{t("virtualKeys.reassign")}
 												</AlertDialogAction>
 											</AlertDialogFooter>
 										</AlertDialogContent>
@@ -1329,7 +1362,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								{/* Rate Limiting Configuration */}
 								<div className="space-y-4">
 									<div className="flex items-center justify-between gap-2">
-										<Label className="text-sm font-medium">Rate Limiting Configuration</Label>
+										<Label className="text-sm font-medium">{t("governance.rateLimitingConfiguration")}</Label>
 										{isEditing && (virtualKey?.rate_limit || watchedTokenMaxLimit || watchedRequestMaxLimit) && (
 											<Button
 												type="button"
@@ -1339,7 +1372,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												data-testid="vk-rate-limit-reset-button"
 											>
 												<RotateCcw className="h-4 w-4" />
-												Reset
+												{t("governance.reset")}
 											</Button>
 										)}
 									</div>
@@ -1352,7 +1385,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												<NumberAndSelect
 													id="tokenMaxLimit"
 													labelClassName="font-normal"
-													label="Maximum Tokens"
+													label={t("governance.maximumTokens")}
 													value={field.value}
 													selectValue={form.watch("tokenResetDuration") || "1h"}
 													onChangeNumber={(value) => {
@@ -1378,7 +1411,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												<NumberAndSelect
 													id="requestMaxLimit"
 													labelClassName="font-normal"
-													label="Maximum Requests"
+													label={t("governance.maximumRequests")}
 													value={field.value}
 													selectValue={form.watch("requestResetDuration") || "1h"}
 													onChangeNumber={(value) => {
@@ -1401,11 +1434,10 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									<div className="flex items-center justify-between gap-4 rounded-md border px-3 py-2">
 										<div className="space-y-0.5">
 											<Label htmlFor="vk-budget-calendar-aligned-toggle" className="text-sm font-normal">
-												Align to calendar cycle
+												{t("governance.calendarAlign")}
 											</Label>
 											<p id="vk-budget-calendar-aligned-description" className="text-muted-foreground text-xs">
-												Reset budgets and rate limits at the start of each period (e.g. 1st of month) instead of rolling from creation date.
-												Applies to durations of a day or longer.
+												{t("governance.calendarAlignDescription")}
 											</p>
 										</div>
 										<Switch
@@ -1422,16 +1454,15 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<AlertDialog open={showCalendarAlignWarning} onOpenChange={setShowCalendarAlignWarning}>
 									<AlertDialogContent>
 										<AlertDialogHeader>
-											<AlertDialogTitle>Reset budget and rate-limit usage?</AlertDialogTitle>
+											<AlertDialogTitle>{t("governance.resetUsageTitle")}</AlertDialogTitle>
 											<AlertDialogDescription>
-												Enabling calendar alignment will reset budget usage to <span className="font-semibold">$0.00</span> and
-												token/request rate-limit counters to <span className="font-semibold">0</span> for this virtual key, then snap each
-												reset date to the start of its current period (e.g. start of day, week, month, or year). The usage reset cannot be
-												undone, but calendar alignment can be turned off later. This will take effect when you save.
+												{t("governance.resetUsagePrefix")} <span className="font-semibold">$0.00</span>
+												{t("governance.resetUsageBetween")} <span className="font-semibold">0</span>
+												{t("governance.resetUsageSuffix")}
 											</AlertDialogDescription>
 										</AlertDialogHeader>
 										<AlertDialogFooter>
-											<AlertDialogCancel data-testid="vk-calendar-align-cancel-btn">Cancel</AlertDialogCancel>
+											<AlertDialogCancel data-testid="vk-calendar-align-cancel-btn">{t("common.cancel")}</AlertDialogCancel>
 											<AlertDialogAction
 												data-testid="vk-calendar-align-enable-btn"
 												onClick={() => {
@@ -1441,7 +1472,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 													setShowCalendarAlignWarning(false);
 												}}
 											>
-												Enable Calendar Alignment
+												{t("governance.enableCalendarAlignment")}
 											</AlertDialogAction>
 										</AlertDialogFooter>
 									</AlertDialogContent>
@@ -1450,7 +1481,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 
 								{/* Entity Assignment */}
 								<div className="space-y-4">
-									<Label className="text-sm font-medium">Entity Assignment</Label>
+									<Label className="text-sm font-medium">{t("virtualKeys.entityAssignment")}</Label>
 
 									<div className="grid grid-cols-1 items-start gap-2 md:grid-cols-2">
 										<FormField
@@ -1458,18 +1489,18 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 											name="entityType"
 											render={({ field }) => (
 												<FormItem>
-													<FormLabel className="font-normal">Assignment Type</FormLabel>
+													<FormLabel className="font-normal">{t("virtualKeys.assignmentType")}</FormLabel>
 													<ComboboxSelect
 														options={[
-															{ value: "none", label: "No Assignment" },
-															{ value: "team", label: "Assign to Team" },
+															{ value: "none", label: t("virtualKeys.noAssignment") },
+															{ value: "team", label: t("virtualKeys.assignToTeam") },
 															{
 																value: "customer",
-																label: "Assign to Customer",
+																label: t("virtualKeys.assignToCustomer"),
 															},
 															// Enterprise-only; also kept visible when the VK is already
 															// user-assigned so the current state is never mislabelled.
-															...(UserPicker || field.value === "user" ? [{ value: "user", label: "Assign to User" }] : []),
+															...(UserPicker || field.value === "user" ? [{ value: "user", label: t("virtualKeys.assignToUser") }] : []),
 														]}
 														value={field.value}
 														onValueChange={(value) => {
@@ -1499,7 +1530,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												name="teamId"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel className="font-normal">Select Team</FormLabel>
+														<FormLabel className="font-normal">{t("virtualKeys.selectTeam")}</FormLabel>
 														<TeamSelector
 															value={field.value || ""}
 															onChange={(newVal) => {
@@ -1539,7 +1570,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												name="customerId"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel className="font-normal">Select Customer</FormLabel>
+														<FormLabel className="font-normal">{t("virtualKeys.selectCustomer")}</FormLabel>
 														<CustomerSelector
 															value={field.value || ""}
 															onChange={(val) => {
@@ -1569,7 +1600,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												name="userId"
 												render={({ field }) => (
 													<FormItem>
-														<FormLabel className="font-normal">Select User</FormLabel>
+														<FormLabel className="font-normal">{t("virtualKeys.selectUser")}</FormLabel>
 														<UserPicker
 															value={field.value || ""}
 															onChange={(val) => {
@@ -1596,8 +1627,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									</div>
 									{form.watch("entityType") === "user" && (
 										<p className="text-muted-foreground text-xs">
-											A virtual key can be assigned to only one user. If that user has an access profile, the key is adopted into it and
-											becomes profile-managed.
+											{t("virtualKeys.singleUserHint")}
 										</p>
 									)}
 								</div>
@@ -1606,17 +1636,15 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 						<AlertDialog open={showRotateWarning} onOpenChange={setShowRotateWarning}>
 							<AlertDialogContent>
 								<AlertDialogHeader>
-									<AlertDialogTitle>Rotate virtual key?</AlertDialogTitle>
+									<AlertDialogTitle>{t("virtualKeys.rotateTitle")}</AlertDialogTitle>
 									<AlertDialogDescription>
-										This will replace the secret value for &quot;
-										{virtualKey?.name}&quot;. The key ID, budgets, rate limits, provider permissions, MCP access, and assignments stay the
-										same. The previous key value will stop working immediately.
+										{t("virtualKeys.rotateDescription", { name: virtualKey?.name ?? "" })}
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
-									<AlertDialogCancel data-testid="vk-rotate-cancel-btn">Cancel</AlertDialogCancel>
+									<AlertDialogCancel data-testid="vk-rotate-cancel-btn">{t("common.cancel")}</AlertDialogCancel>
 									<AlertDialogAction onClick={handleRotateVirtualKey} disabled={isRotating} data-testid="vk-rotate-confirm-btn">
-										{isRotating ? "Rotating..." : "Rotate Key"}
+										{isRotating ? t("virtualKeys.rotating") : t("virtualKeys.rotate")}
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>
@@ -1626,23 +1654,23 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<AlertDialogHeader>
 									<AlertDialogTitle>
 										{pendingBudgetUsageWarning?.kind === "over-limit"
-											? "Preserve over-limit usage?"
+											? t("virtualKeys.preserveOverLimitTitle")
 											: pendingBudgetUsageWarning?.kind === "quarter-shift"
-												? "Carry usage into the new quarter?"
-												: "Reset budget usage?"}
+												? t("virtualKeys.carryIntoQuarterTitle")
+												: t("virtualKeys.resetBudgetUsageTitle")}
 									</AlertDialogTitle>
 									<AlertDialogDescription>
 										{pendingBudgetUsageWarning
-											? `${pendingBudgetUsageWarning.message} You can preserve usage anyway, or reset usage to 0.`
-											: "You changed a budget amount, reset frequency, or calendar alignment. Reset current budget usage to 0, or preserve the existing usage counters."}
+											? t("virtualKeys.preserveOrReset", { message: pendingBudgetUsageWarning.message })
+											: t("virtualKeys.budgetChangePrompt")}
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel onClick={() => handleBudgetResetChoice(false)} data-testid="vk-budget-reset-preserve-btn">
-										{pendingBudgetUsageWarning ? "Preserve Anyway" : "Preserve Usage"}
+										{pendingBudgetUsageWarning ? t("virtualKeys.preserveAnyway") : t("virtualKeys.preserveUsage")}
 									</AlertDialogCancel>
 									<AlertDialogAction onClick={() => handleBudgetResetChoice(true)} data-testid="vk-budget-reset-confirm-btn">
-										Reset Usage
+										{t("virtualKeys.resetUsage")}
 									</AlertDialogAction>
 								</AlertDialogFooter>
 							</AlertDialogContent>
@@ -1664,21 +1692,21 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										data-testid="vk-rotate-btn"
 									>
 										<RotateCcw className="h-4 w-4" />
-										{isRotating ? "Rotating..." : "Rotate Key"}
+										{isRotating ? t("virtualKeys.rotating") : t("virtualKeys.rotate")}
 									</Button>
 								) : (
 									<span />
 								)}
 								<div className="flex justify-end gap-2">
 									<Button type="button" variant="outline" onClick={handleClose} data-testid="vk-cancel-btn">
-										Cancel
+										{t("common.cancel")}
 									</Button>
 									<TooltipProvider>
 										<Tooltip>
 											<TooltipTrigger asChild>
 												<span className="inline-block">
 													<Button type="submit" disabled={isLoading || !form.formState.isDirty || !canSubmit} data-testid="vk-save-btn">
-														{isLoading ? "Saving..." : isEditing ? "Update" : "Create"}
+														{isLoading ? t("common.saving") : isEditing ? t("virtualKeys.update") : t("common.create")}
 													</Button>
 												</span>
 											</TooltipTrigger>
@@ -1686,11 +1714,11 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												<TooltipContent>
 													<p>
 														{!canSubmit
-															? "You don't have permission to perform this action"
+															? t("governance.noPermission")
 															: isLoading
-																? "Saving..."
+																? t("common.saving")
 																: !form.formState.isDirty
-																	? "No changes made"
+																	? t("governance.noChangesMade")
 																	: ""}
 													</p>
 												</TooltipContent>

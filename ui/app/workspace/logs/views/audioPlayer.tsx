@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Button } from "@/components/ui/button";
 import { Pause, Play, Download } from "lucide-react";
 import { useState } from "react";
@@ -8,6 +9,7 @@ interface AudioPlayerProps {
 }
 
 const AudioPlayer = ({ src, format }: AudioPlayerProps) => {
+	const { t } = useI18n();
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [audio] = useState<HTMLAudioElement | null>(typeof window !== "undefined" ? new Audio() : null);
 	const [error, setError] = useState<string | null>(null);
@@ -85,8 +87,8 @@ const AudioPlayer = ({ src, format }: AudioPlayerProps) => {
 				type: mimeType,
 			});
 		} catch (err) {
-			console.error("Failed to decode audio data:", err);
-			setError("Failed to decode audio data. The audio file may be corrupted.");
+			console.error(t("audioPlayer.failedDecode"), err);
+			setError(t("audioPlayer.failedDecode"));
 			return null;
 		}
 	};
@@ -104,8 +106,8 @@ const AudioPlayer = ({ src, format }: AudioPlayerProps) => {
 			const audioUrl = URL.createObjectURL(audioBlob);
 			audio.src = audioUrl;
 			audio.play().catch((err) => {
-				console.error("Failed to play audio:", err);
-				setError("Failed to play audio. Please try again.");
+				console.error(t("audioPlayer.failedPlay"), err);
+				setError(t("audioPlayer.failedPlay"));
 				setIsPlaying(false);
 			});
 			setIsPlaying(true);
@@ -151,13 +153,13 @@ const AudioPlayer = ({ src, format }: AudioPlayerProps) => {
 			<div className="flex items-center gap-2">
 				<Button onClick={handlePlayPause} variant="outline" size="sm" className="flex items-center gap-2" disabled={!!error}>
 					{isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-					{isPlaying ? "Pause" : "Play"}
+					{isPlaying ? t("audioPlayer.pause") : t("audioPlayer.play")}
 				</Button>
 
 				<Button onClick={handleDownload} variant="outline" size="sm" className="flex items-center gap-2" disabled={!!error}>
-					<Download className="h-4 w-4" />
-					Download
-				</Button>
+						<Download className="h-4 w-4" />
+						{t("audioPlayer.download")}
+					</Button>
 			</div>
 			{error && <div className="text-sm text-red-500">{error}</div>}
 		</div>

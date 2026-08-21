@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ interface TagInputProps extends OmittedInputProps {
 
 export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 	({ className, value, onValueChange, collapsedTagLimit, expandButtonTestId, ...props }, ref) => {
+		const { t } = useI18n();
 		const [inputValue, setInputValue] = React.useState("");
 		const [tagsExpanded, setTagsExpanded] = React.useState(false);
 
@@ -65,7 +67,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 						<Badge key={tag} variant="secondary" className="bg-accent dark:bg-card flex items-center gap-1">
 							{tag}
 							<button
-								aria-label={`Remove ${tag}`}
+								aria-label={t("ui.tagInput.removeTag", { tag })}
 								type="button"
 								className="ring-offset-background focus:ring-ring cursor-pointer rounded-sm outline-none focus:ring-2 focus:ring-offset-2"
 								onClick={() => removeTag(tag)}
@@ -102,7 +104,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 						<Badge key={tag} variant="secondary" className="bg-accent dark:bg-card flex items-center gap-1">
 							{tag}
 							<button
-								aria-label={`Remove ${tag}`}
+								aria-label={t("ui.tagInput.removeTag", { tag })}
 								type="button"
 								className="ring-offset-background focus:ring-ring cursor-pointer rounded-sm outline-none focus:ring-2 focus:ring-offset-2"
 								onClick={() => removeTag(tag)}
@@ -127,7 +129,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 							onClick={() => setTagsExpanded(true)}
 							className="text-muted-foreground/70 hover:text-foreground/90 group-hover:text-muted-foreground/85 flex w-full cursor-pointer items-center justify-center py-2.5 text-xs font-medium transition-colors absolute top-4"
 						>
-							Show {hiddenTagCount} more
+							{t("ui.tagInput.showMore", { n: hiddenTagCount })}
 						</button>
 					)}
 
@@ -162,7 +164,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 						onClick={() => setTagsExpanded(false)}
 						className="text-muted-foreground/50 hover:text-muted-foreground/80 hover:bg-muted/15 border-border/40 bg-muted/10 relative z-[2] w-full cursor-pointer border-t py-2 text-xs transition-[color,background-color]"
 					>
-						Show less
+						{t("ui.tagInput.showLess")}
 					</button>
 				)}
 			</div>

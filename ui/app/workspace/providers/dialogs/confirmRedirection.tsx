@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -16,21 +17,22 @@ interface Props {
 }
 
 export default function ConfirmRedirectionDialog({ show, onContinue, onCancel }: Props) {
+	const { t } = useI18n();
 	return (
 		<AlertDialog open={show}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Confirm Redirection</AlertDialogTitle>
-					<AlertDialogDescription>You have unsaved data. Are you sure you want to continue?</AlertDialogDescription>
+					<AlertDialogTitle>{t("providers.confirmRedirection.title")}</AlertDialogTitle>
+					<AlertDialogDescription>{t("providers.confirmRedirection.description")}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter className="mt-4">
-					<AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel onClick={onCancel}>{t("common.cancel")}</AlertDialogCancel>
 					<AlertDialogAction
 						onClick={() => {
 							onContinue();
 						}}
 					>
-						Continue
+						{t("providers.confirmRedirection.continue")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

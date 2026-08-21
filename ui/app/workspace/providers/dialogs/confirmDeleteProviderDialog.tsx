@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export default function ConfirmDeleteProviderDialog({ show, onCancel, onDelete, provider }: Props) {
+	const { t } = useI18n();
 	const [deleteProvider, { isLoading: isDeletingProvider }] = useDeleteProviderMutation();
 	const hasDeleteAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Delete);
 
@@ -31,7 +33,7 @@ export default function ConfirmDeleteProviderDialog({ show, onCancel, onDelete, 
 				onDelete();
 			})
 			.catch((err) => {
-				toast.error("Failed to delete provider", {
+				toast.error(t("providers.confirmDelete.failed"), {
 					description: getErrorMessage(err),
 				});
 			});
@@ -41,13 +43,13 @@ export default function ConfirmDeleteProviderDialog({ show, onCancel, onDelete, 
 		<AlertDialog open={show}>
 			<AlertDialogContent>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Delete Provider</AlertDialogTitle>
-					<AlertDialogDescription>Are you sure you want to delete this provider? This action cannot be undone.</AlertDialogDescription>
+					<AlertDialogTitle>{t("providers.confirmDelete.title")}</AlertDialogTitle>
+					<AlertDialogDescription>{t("providers.confirmDelete.description")}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
-					<AlertDialogCancel onClick={onCancel}>Cancel</AlertDialogCancel>
+					<AlertDialogCancel onClick={onCancel}>{t("common.cancel")}</AlertDialogCancel>
 					<AlertDialogAction onClick={onDeleteHandler} disabled={isDeletingProvider || !hasDeleteAccess}>
-						{isDeletingProvider ? "Deleting..." : "Delete"}
+						{isDeletingProvider ? t("providers.confirmDelete.deleting") : t("common.delete")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

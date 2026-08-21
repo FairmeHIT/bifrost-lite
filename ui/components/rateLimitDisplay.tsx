@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { resetDurationLabels, supportsCalendarAlignment } from "@/lib/constants/governance";
@@ -24,10 +25,10 @@ interface RateLimitDisplayProps {
 	calendarAligned?: boolean;
 }
 
-const formatResetDuration = (duration?: string | null, calendarAligned?: boolean) => {
+const formatResetDuration = (duration?: string | null, calendarAligned?: boolean, t?: (key: string) => string) => {
 	if (!duration) return "";
 	const label = resetDurationLabels[duration] || duration;
-	return calendarAligned && supportsCalendarAlignment(duration) ? `${label} (calendar)` : label;
+	return calendarAligned && supportsCalendarAlignment(duration) ? `${label} ${t?.("rateLimit.calendar")}` : label;
 };
 
 function LimitText({
@@ -35,18 +36,20 @@ function LimitText({
 	max,
 	resetDuration,
 	calendarAligned,
+	t,
 }: {
 	label: string;
 	max: number;
 	resetDuration?: string | null;
 	calendarAligned?: boolean;
+	t: (key: string) => string;
 }) {
 	return (
 		<div className="flex items-center justify-between gap-4 text-xs">
 			<span className="font-mono">
 				{formatCompactNumber(max)} {label}
 			</span>
-			<span className="text-muted-foreground">{formatResetDuration(resetDuration, calendarAligned)}</span>
+			<span className="text-muted-foreground">{formatResetDuration(resetDuration, calendarAligned, t)}</span>
 		</div>
 	);
 }
@@ -58,6 +61,7 @@ function Bar({
 	resetDuration,
 	compact,
 	calendarAligned,
+	t,
 }: {
 	label: string;
 	current: number;
@@ -65,6 +69,7 @@ function Bar({
 	resetDuration?: string | null;
 	compact?: boolean;
 	calendarAligned?: boolean;
+	t: (key: string) => string;
 }) {
 	const pct = max > 0 ? Math.min((current / max) * 100, 100) : 0;
 	const isExhausted = max > 0 && current >= max;
@@ -78,7 +83,7 @@ function Bar({
 						<span className="font-medium">
 							{formatCompactNumber(max)} {label}
 						</span>
-						<span className="text-muted-foreground">{formatResetDuration(resetDuration, calendarAligned)}</span>
+						<span className="text-muted-foreground">{formatResetDuration(resetDuration, calendarAligned, t)}</span>
 					</div>
 					<Progress value={pct} className={cn("bg-muted/70 dark:bg-muted/30 h-1", barClass)} />
 				</div>
@@ -88,7 +93,7 @@ function Bar({
 					{current.toLocaleString()} / {max.toLocaleString()} {label}
 				</p>
 				{resetDuration ? (
-					<p className="text-primary-foreground/80 text-xs">Resets {formatResetDuration(resetDuration, calendarAligned)}</p>
+					<p className="text-primary-foreground/80 text-xs">{t("rateLimit.resets")} {formatResetDuration(resetDuration, calendarAligned, t)}</p>
 				) : null}
 			</TooltipContent>
 		</Tooltip>
@@ -96,6 +101,7 @@ function Bar({
 }
 
 export function RateLimitDisplay({ rateLimits, compact, limitOnly, calendarAligned }: RateLimitDisplayProps) {
+	const { t } = useI18n();
 	if (!rateLimits) {
 		return <span className="text-muted-foreground text-sm">-</span>;
 	}
@@ -116,6 +122,7 @@ export function RateLimitDisplay({ rateLimits, compact, limitOnly, calendarAlign
 						max={rateLimits.token_max_limit!}
 						resetDuration={rateLimits.token_reset_duration}
 						calendarAligned={calendarAligned}
+						t={t}
 					/>
 				) : (
 					<Bar
@@ -125,6 +132,7 @@ export function RateLimitDisplay({ rateLimits, compact, limitOnly, calendarAlign
 						resetDuration={rateLimits.token_reset_duration}
 						compact={compact}
 						calendarAligned={calendarAligned}
+						t={t}
 					/>
 				)
 			) : null}
@@ -135,6 +143,7 @@ export function RateLimitDisplay({ rateLimits, compact, limitOnly, calendarAlign
 						max={rateLimits.request_max_limit!}
 						resetDuration={rateLimits.request_reset_duration}
 						calendarAligned={calendarAligned}
+						t={t}
 					/>
 				) : (
 					<Bar
@@ -144,6 +153,7 @@ export function RateLimitDisplay({ rateLimits, compact, limitOnly, calendarAlign
 						resetDuration={rateLimits.request_reset_duration}
 						compact={compact}
 						calendarAligned={calendarAligned}
+						t={t}
 					/>
 				)
 			) : null}

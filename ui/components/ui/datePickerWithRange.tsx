@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { getSupportedTimezones } from "@/lib/timezones";
 import { TZDate, tz, tzName } from "@date-fns/tz";
@@ -68,6 +69,7 @@ interface DateTimePickerWithRangeProps extends DatePickerWithRangeProps {
 }
 
 export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
+	const { t } = useI18n();
 	const { className, buttonClassName, triggerLabel, onTrigger, dateTime } = props;
 	const activeTimezone = props.showTimezone ? props.timezone : undefined;
 
@@ -201,7 +203,7 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 										formatDate(dateTime.from, "LLL dd, y")
 									)
 								) : (
-									<span>Pick a date</span>
+									<span>{t("ui.datePicker.pickDate")}</span>
 								)}
 							</>
 						)}
@@ -242,9 +244,9 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 							/>
 							<div className="-mt-1 flex flex-row items-center px-2 pb-1">
 								<div className="m-1 flex flex-1 flex-col gap-1">
-									<Label className="ml-0.5">From Time</Label>
+									<Label className="ml-0.5">{t("ui.datePicker.fromTime")}</Label>
 									<TimePicker
-										aria-label="From Time"
+										aria-label={t("ui.datePicker.fromTime")}
 										className=""
 										value={timeValue?.from}
 										onChange={(v) => {
@@ -263,9 +265,9 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 									/>
 								</div>
 								<div className="m-1 flex flex-1 flex-col gap-1">
-									<Label className="ml-0.5">To Time</Label>
+									<Label className="ml-0.5">{t("ui.datePicker.toTime")}</Label>
 									<TimePicker
-										aria-label="To Time"
+										aria-label={t("ui.datePicker.toTime")}
 										className=""
 										value={timeValue?.to}
 										onChange={(v) => {
@@ -307,7 +309,7 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 					{props.showTimezone && (
 						<div className="flex items-center gap-2 border-t px-3 py-2">
 							<Globe className="text-muted-foreground size-4 shrink-0" />
-							<Label className="text-muted-foreground shrink-0 text-xs">Timezone</Label>
+							<Label className="text-muted-foreground shrink-0 text-xs">{t("ui.datePicker.timezone")}</Label>
 							<div className="ml-auto w-[260px]">
 								<ComboboxSelect
 									options={timezoneOptions}
@@ -344,7 +346,7 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 										}
 									}}
 									hideClear
-									placeholder="Select timezone"
+									placeholder={t("ui.datePicker.selectTimezone")}
 									data-testid="datepicker-timezone-select"
 								/>
 							</div>
@@ -385,6 +387,7 @@ interface DateTimePickerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function DateTimePicker(props: DateTimePickerProps) {
+	const { t } = useI18n();
 	const { className, buttonClassName, buttonVariant, triggerLabel, onTrigger, dateTime } = props;
 
 	const initialDate = dateTime ? new Date(dateTime) : new Date();
@@ -453,7 +456,7 @@ export function DateTimePicker(props: DateTimePickerProps) {
 								{format(date, "LLL dd, y")} {printTimeValue(timeValue)}
 							</>
 						) : (
-							<span>Pick a date and time</span>
+							<span>{t("ui.datePicker.pickDateTime")}</span>
 						)}
 					</Button>
 				</PopoverTrigger>
@@ -477,9 +480,9 @@ export function DateTimePicker(props: DateTimePickerProps) {
 							}}
 						/>
 						<div className="mt-3 flex flex-col gap-1 px-2 pb-2">
-							<Label className="ml-0.5">Time</Label>
+							<Label className="ml-0.5">{t("ui.datePicker.time")}</Label>
 							<TimePicker
-								aria-label="Time"
+								aria-label={t("ui.datePicker.time")}
 								className=""
 								value={timeValue}
 								onChange={(v) => {

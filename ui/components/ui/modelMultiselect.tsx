@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/components/ui/utils";
 import { useLazyGetBaseModelsQuery, useLazyGetModelsQuery } from "@/lib/store/apis/providersApi";
 import { X } from "lucide-react";
@@ -63,9 +64,9 @@ interface ModelOption {
 	isDisabled?: boolean;
 }
 
-const ALL_MODELS_OPTION: ModelOption = { label: "All Models", value: "*" };
-
 export function ModelMultiselect(props: ModelMultiselectProps) {
+	const { t } = useI18n();
+	const ALL_MODELS_OPTION: ModelOption = { label: t("ui.modelMultiselect.allModels"), value: "*" };
 	const {
 		provider,
 		keys,
@@ -73,7 +74,7 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 		value,
 		unfiltered = false,
 		onChange,
-		placeholder = "Search models...",
+		placeholder,
 		disabled = false,
 		className,
 		loadModelsOnEmptyProvider = false,
@@ -175,7 +176,7 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 					});
 			}
 		},
-		[getModels, getBaseModels, provider, keys, vks, shouldLoadOnEmpty, shouldUseBaseModels, allowAllOption],
+		[getModels, getBaseModels, provider, keys, vks, shouldLoadOnEmpty, shouldUseBaseModels, allowAllOption, t],
 	);
 
 	// Handle selection change
@@ -215,7 +216,7 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 				});
 			}
 		},
-		[onChange, provider, keys, vks, getModels, getBaseModels, isSingleSelect, shouldLoadOnEmpty, shouldUseBaseModels],
+		[onChange, provider, keys, vks, getModels, getBaseModels, isSingleSelect, shouldLoadOnEmpty, shouldUseBaseModels, t],
 	);
 
 	// Handle input change - track in both state and ref
@@ -254,7 +255,7 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 				isDisabled: model.is_deprecated,
 			})) || []),
 		];
-	}, [modelsData, baseModelsData, shouldUseBaseModels, allowAllOption]);
+	}, [modelsData, baseModelsData, shouldUseBaseModels, allowAllOption, t]);
 
 	const shouldBeDisabled = disabled || (!provider && !shouldLoadOnEmpty);
 	const modelsQueryEnabled = !!provider || shouldLoadOnEmpty;
@@ -276,10 +277,10 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 			debounce={300}
 			isCreatable={true}
 			dynamicOptionCreation={true}
-			createOptionText={"Press enter to add new model"}
+			createOptionText={t("ui.modelMultiselect.pressEnterToAdd")}
 			defaultOptions={defaultOptions.length > 0 ? defaultOptions : ([] as Option<ModelOption>[])}
 			isLoading={activeIsFetching}
-			placeholder={placeholder}
+			placeholder={placeholder || t("ui.modelMultiselect.searchModels")}
 			disabled={shouldBeDisabled}
 			className={cn("!min-h-9 w-full", className)}
 			triggerClassName="!shadow-none !border-border !min-h-9 px-1"
@@ -292,9 +293,9 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 			menuListClassName="mx-1"
 			inputValue={inputValue}
 			onInputChange={handleInputChange}
-			noResultsFoundPlaceholder={modelLoadError ? "Couldn’t load models." : "No matching models."}
+			noResultsFoundPlaceholder={modelLoadError ? t("ui.modelMultiselect.couldNotLoad") : t("ui.modelMultiselect.noMatching")}
 			emptyResultPlaceholder={
-				modelLoadError ? "Couldn’t load models." : provider ? "No models available for this provider." : shouldLoadOnEmpty ? "No models available." : "Select a provider first."
+				modelLoadError ? t("ui.modelMultiselect.couldNotLoad") : provider ? t("ui.modelMultiselect.noModelsForProvider") : shouldLoadOnEmpty ? t("ui.modelMultiselect.noModelsAvailable") : t("ui.modelMultiselect.selectProviderFirst")
 			}
 			views={{
 				dropdownIndicator: isSingleSelect ? undefined : () => <></>,

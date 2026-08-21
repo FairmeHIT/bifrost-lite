@@ -2,6 +2,7 @@ import { CopyableId } from "@/components/copyableId";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { resetDurationLabels } from "@/lib/constants/governance";
+import { useI18n } from "@/lib/i18n/context";
 import { Customer } from "@/lib/types/governance";
 import { cn } from "@/lib/utils";
 import { formatCompactNumber } from "@/lib/utils/numbers";
@@ -90,6 +91,7 @@ function RateLimitBar({ label, current, max, resetDuration }: { label: string; c
 // the Teams / Business Units sections, which depend on enterprise-only APIs.
 
 export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
+	const { t } = useI18n();
 	const budgets = customer?.budgets ?? [];
 	const rateLimit = customer?.rate_limit;
 	const hasRateLimit = rateLimit?.token_max_limit != null || rateLimit?.request_max_limit != null;
@@ -99,26 +101,26 @@ export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
 			<SheetContent className="max-w-[700px] overflow-y-auto p-0 pt-4">
 				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 px-8 sticky -top-4 bg-card z-10">
 					<div className="flex min-w-0 items-center gap-1">
-						<SheetTitle className="truncate text-lg">{customer?.name || "Customer Details"}</SheetTitle>
+						<SheetTitle className="truncate text-lg">{customer?.name || t("enterprise.customerDetails")}</SheetTitle>
 						{customer?.id && <CopyableId id={customer.id} entityLabel="Customer" />}
 					</div>
-					<SheetDescription>Usage details for this customer.</SheetDescription>
+					<SheetDescription>{t("enterprise.customerUsageDetails")}</SheetDescription>
 				</SheetHeader>
 
 				{customer && (
 					<div className="space-y-6 px-8 py-4">
 						{/* ── Info ─────────────────────────────────────────── */}
-						<DetailCard title="Info">
+						<DetailCard title={t("enterprise.info")}>
 							<div className="grid grid-cols-2 gap-x-8 gap-y-4">
 								<div>
-									<Label className="text-muted-foreground text-xs">Name</Label>
+									<Label className="text-muted-foreground text-xs">{t("common.name")}</Label>
 									<p className="mt-0.5 text-sm">{customer.name ?? "—"}</p>
 								</div>
 							</div>
 						</DetailCard>
 
 						{/* ── Budgets ──────────────────────────────────────── */}
-						<DetailCard title="Budgets">
+						<DetailCard title={t("enterprise.budgets")}>
 							{budgets.length > 0 ? (
 								<div className="space-y-3">
 									{[...budgets]
@@ -128,17 +130,17 @@ export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
 										))}
 								</div>
 							) : (
-								<p className="text-muted-foreground py-1 text-center text-sm">No budgets configured</p>
+								<p className="text-muted-foreground py-1 text-center text-sm">{t("enterprise.noBudgets")}</p>
 							)}
 						</DetailCard>
 
 						{/* ── Rate Limits ──────────────────────────────────── */}
-						<DetailCard title="Rate Limits">
+						<DetailCard title={t("enterprise.rateLimits")}>
 							{rateLimit && hasRateLimit ? (
 								<div className="space-y-3">
 									{rateLimit.token_max_limit != null && (
 										<RateLimitBar
-											label="Tokens"
+											label={t("enterprise.tokens")}
 											current={rateLimit.token_current_usage ?? 0}
 											max={rateLimit.token_max_limit}
 											resetDuration={rateLimit.token_reset_duration}
@@ -146,7 +148,7 @@ export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
 									)}
 									{rateLimit.request_max_limit != null && (
 										<RateLimitBar
-											label="Requests"
+											label={t("enterprise.requests")}
 											current={rateLimit.request_current_usage ?? 0}
 											max={rateLimit.request_max_limit}
 											resetDuration={rateLimit.request_reset_duration}
@@ -154,7 +156,7 @@ export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
 									)}
 								</div>
 							) : (
-								<p className="text-muted-foreground py-1 text-center text-sm">No rate limits configured</p>
+								<p className="text-muted-foreground py-1 text-center text-sm">{t("enterprise.noRateLimits")}</p>
 							)}
 						</DetailCard>
 					</div>

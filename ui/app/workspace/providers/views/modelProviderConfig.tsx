@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n/context";
 import { ModelProvider } from "@/lib/types/config";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { SettingsIcon, Trash } from "lucide-react";
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function ModelProviderConfig({ provider, onRequestDelete }: Props) {
+	const { t } = useI18n();
 	const [showConfigSheet, setShowConfigSheet] = useState(false);
 	const hasGovernanceAccess = useRbac(RbacResource.Governance, RbacOperation.View);
 	const hasDeleteProviderAccess = useRbac(RbacResource.ModelProvider, RbacOperation.Delete);
@@ -32,7 +34,7 @@ export default function ModelProviderConfig({ provider, onRequestDelete }: Props
 					variant="outline"
 					onClick={onRequestDelete}
 					className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-					aria-label="Delete provider"
+					aria-label={t("providers.config.deleteProvider")}
 					data-testid="provider-delete-btn"
 				>
 					<Trash className="h-4 w-4" />
@@ -40,7 +42,7 @@ export default function ModelProviderConfig({ provider, onRequestDelete }: Props
 			)}
 			<Button variant="outline" onClick={() => setShowConfigSheet(true)}>
 				<SettingsIcon className="h-4 w-4" />
-				{hasUpdateProviderAccess ? "Edit Provider Config" : "View Provider Config"}
+				{hasUpdateProviderAccess ? t("providers.config.editProviderConfig") : t("providers.config.viewProviderConfig")}
 			</Button>
 		</div>
 	);

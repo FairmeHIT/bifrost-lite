@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { useGetDevGoroutinesQuery, useGetDevPprofQuery } from "@/lib/store";
 import type { GoroutineGroup } from "@/lib/store/apis/devApi";
 import { isDevelopmentMode } from "@/lib/utils/port";
@@ -162,6 +163,7 @@ function GoroutineHealthSection({
 	onSkipGoroutine,
 	onClearSkipped,
 }: GoroutineHealthProps): React.ReactNode {
+	const { t } = useI18n();
 	if (!goroutineData) return null;
 
 	const { summary, total_goroutines } = goroutineData;
@@ -172,11 +174,11 @@ function GoroutineHealthSection({
 			<div className="mb-2 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<Activity className="h-3 w-3 text-emerald-400" />
-					<span className="text-zinc-400">Goroutine Health</span>
+					<span className="text-zinc-400">{t("devProfiler.goroutineHealth")}</span>
 				</div>
 				<div className="flex items-center gap-2">
 					{goroutineTrend?.isGrowing && (
-						<span className="flex items-center gap-1 text-amber-400" title="Goroutine count growing">
+						<span className="flex items-center gap-1 text-amber-400" title={t("devProfiler.goroutineCountGrowing")}>
 							<TrendingUp className="h-3 w-3" />
 							<span className="text-[10px]">+{goroutineTrend.growthPercent.toFixed(0)}%</span>
 						</span>
@@ -184,17 +186,17 @@ function GoroutineHealthSection({
 					{goroutineHealth === "critical" && (
 						<span className="flex items-center gap-1 rounded bg-red-500/20 px-1.5 py-0.5 text-[10px] text-red-400">
 							<AlertTriangle className="h-3 w-3" />
-							Stuck
+							{t("devProfiler.stuck")}
 						</span>
 					)}
 					{goroutineHealth === "warning" && (
 						<span className="flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] text-amber-400">
 							<AlertTriangle className="h-3 w-3" />
-							Long Wait
+							{t("devProfiler.longWait")}
 						</span>
 					)}
 					{goroutineHealth === "healthy" && (
-						<span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">Healthy</span>
+						<span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] text-emerald-400">{t("devProfiler.healthy")}</span>
 					)}
 				</div>
 			</div>
@@ -202,15 +204,15 @@ function GoroutineHealthSection({
 			{/* Summary stats */}
 			<div className="mb-2 grid grid-cols-4 gap-2 rounded bg-zinc-800/50 p-2">
 				<div className="flex flex-col items-center">
-					<span className="text-[10px] text-zinc-500">Total</span>
+					<span className="text-[10px] text-zinc-500">{t("devProfiler.total")}</span>
 					<span className="font-semibold text-emerald-400">{total_goroutines}</span>
 				</div>
 				<div className="flex flex-col items-center">
-					<span className="text-[10px] text-zinc-500">Background</span>
+					<span className="text-[10px] text-zinc-500">{t("devProfiler.background")}</span>
 					<span className="font-semibold text-blue-400">{summary.background}</span>
 				</div>
 				<div className="flex flex-col items-center">
-					<span className="text-[10px] text-zinc-500">Per-Request</span>
+					<span className="text-[10px] text-zinc-500">{t("devProfiler.perRequest")}</span>
 					<span className="font-semibold text-amber-400">{summary.per_request}</span>
 				</div>
 				<div className="flex flex-col items-center">
@@ -330,6 +332,7 @@ function GoroutineHealthSection({
 }
 
 export function DevProfiler(): React.ReactNode {
+	const { t } = useI18n();
 	const [isVisible, setIsVisible] = useState<boolean>(() => loadBooleanFromStorage(PROFILER_VISIBLE_KEY, true));
 	const [isExpanded, setIsExpanded] = useState<boolean>(() => loadBooleanFromStorage(PROFILER_EXPANDED_KEY, true));
 	const [isDismissed, setIsDismissed] = useState(false);

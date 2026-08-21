@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { formatCost, formatLatency } from "@/app/workspace/dashboard/utils/chartUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -270,6 +271,7 @@ export const createColumns = (
 	metadataKeys: string[] = [],
 	customAppIcons: Record<string, string> = {},
 	groupedView = false,
+	t: (key: string, params?: Record<string, unknown>) => string = (k) => k,
 ): ColumnDef<LogEntry>[] => {
 	// Chevron that expands a fallback chain in the grouped view. Child rows get a
 	// corner connector instead so the hierarchy stays readable in any column order.
@@ -293,7 +295,7 @@ export const createColumns = (
 						<button
 							type="button"
 							data-testid="log-chain-expand-btn"
-							aria-label={isExpanded ? "Collapse fallback chain" : `Expand fallback chain (${childCount} attempts)`}
+							aria-label={isExpanded ? t("logs.collapseChain") : t("logs.expandChain", { count: childCount })}
 							aria-expanded={isExpanded}
 							className="text-muted-foreground hover:text-foreground gap-1 rounded-sm transition-colors absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center cursor-pointer"
 							onClick={(event) => {
@@ -329,7 +331,7 @@ export const createColumns = (
 			accessorKey: "timestamp",
 			header: ({ column }) => (
 				<Button variant="ghost" data-testid="logs-time-sort-btn" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-					Time
+					{t("logs.time")}
 					<ArrowUpDown className="ml-2 h-4 w-4" />
 				</Button>
 			),
@@ -339,7 +341,7 @@ export const createColumns = (
 				const date = timestamp ? new Date(timestamp) : null;
 				const isValid = date && date.toString() !== "Invalid Date";
 				if (!isValid) {
-					return <div className="truncate text-xs">N/A</div>;
+					return <div className="truncate text-xs">{t("logs.na")}</div>;
 				}
 				return (
 					<div className="flex flex-col leading-tight">
@@ -351,7 +353,7 @@ export const createColumns = (
 		},
 		{
 			id: "request_type",
-			header: "Type",
+			header: t("logs.type"),
 			size: 150,
 			cell: ({ row }) => {
 				return (
@@ -369,13 +371,13 @@ export const createColumns = (
 		},
 		{
 			accessorKey: "input",
-			header: "Message",
+			header: t("logs.message"),
 			size: 350,
 			cell: ({ row }) => <LogMessageCell log={row.original} />,
 		},
 		{
 			accessorKey: "model",
-			header: "Model",
+			header: t("logs.model"),
 			size: 190,
 			cell: ({ row }) => {
 				const provider = row.original.provider as ProviderName | undefined;
@@ -384,8 +386,8 @@ export const createColumns = (
 					<div className="flex min-w-0 items-center gap-2">
 						{provider ? <RenderProviderIcon provider={provider as ProviderIconType} size="xs" /> : null}
 						<div className="flex min-w-0 flex-col leading-tight">
-							<span className="truncate font-mono text-[12px]">{model || "N/A"}</span>
-							<span className="text-muted-foreground truncate text-[10.5px]">{provider ? getProviderLabel(provider) : "N/A"}</span>
+							<span className="truncate font-mono text-[12px]">{model || t("logs.na")}</span>
+							<span className="text-muted-foreground truncate text-[10.5px]">{provider ? getProviderLabel(provider) : t("logs.na")}</span>
 						</div>
 					</div>
 				);

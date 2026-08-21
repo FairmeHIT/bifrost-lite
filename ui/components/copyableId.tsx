@@ -1,5 +1,6 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { Check, Copy } from "lucide-react";
 
@@ -16,10 +17,11 @@ interface CopyableIdProps {
  * sheet title. The full id lives in the tooltip so it never competes with the name.
  */
 export function CopyableId({ id, entityLabel, className, testId }: CopyableIdProps) {
+	const { t } = useI18n();
 	const value = String(id ?? "");
-	const noun = entityLabel ? `${entityLabel.toLowerCase()} ID` : "ID";
+	const noun = entityLabel ? `${entityLabel.toLowerCase()} ${t("copy.id")}` : t("copy.id");
 	const { copy, copied } = useCopyToClipboard({
-		successMessage: `${entityLabel ? `${entityLabel} ID` : "ID"} copied`,
+		successMessage: t("copy.success", { entity: entityLabel?.toLowerCase() ?? "" }),
 	});
 
 	if (!value) return null;
@@ -33,7 +35,7 @@ export function CopyableId({ id, entityLabel, className, testId }: CopyableIdPro
 						e.stopPropagation();
 						copy(value);
 					}}
-					aria-label={`Copy ${noun}`}
+					aria-label={`${t("copy.copy")} ${noun}`}
 					data-testid={testId}
 					className={cn(
 						"text-muted-foreground hover:text-foreground hover:bg-muted inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded transition-colors",
@@ -44,7 +46,7 @@ export function CopyableId({ id, entityLabel, className, testId }: CopyableIdPro
 				</button>
 			</TooltipTrigger>
 			<TooltipContent className="flex flex-col items-start gap-0.5 px-2 py-1">
-				<span className="text-xs">Copy {noun}</span>
+				<span className="text-xs">{t("copy.copy")} {noun}</span>
 				<span className="font-mono text-xs opacity-80">{value}</span>
 			</TooltipContent>
 		</Tooltip>

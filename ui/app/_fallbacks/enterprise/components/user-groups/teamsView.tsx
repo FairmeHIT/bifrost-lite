@@ -1,6 +1,7 @@
 import TeamsTable from "@/app/workspace/governance/views/teamsTable";
 import FullPageLoader from "@/components/fullPageLoader";
 import { useDebouncedValue } from "@/hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { parseAsSafeString } from "@/lib/queryParamsParser";
 import { getErrorMessage, useGetTeamsQuery } from "@/lib/store";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
@@ -16,6 +17,7 @@ const PAGE_SIZE = 25;
 // (`virtual_key_count`), so neither needs its own unpaginated list request; the
 // customer picker in the sheet fetches its own page on open.
 export function TeamsView() {
+	const { t } = useI18n();
 	const hasTeamsAccess = useRbac(RbacResource.Teams, RbacOperation.View);
 	const shownErrorsRef = useRef(new Set<string>());
 
@@ -63,7 +65,7 @@ export function TeamsView() {
 		const errorKey = `${!!teamsError}`;
 		if (shownErrorsRef.current.has(errorKey)) return;
 		shownErrorsRef.current.add(errorKey);
-		toast.error(`Failed to load teams: ${getErrorMessage(teamsError)}`);
+		toast.error(t("enterprise.failedLoadTeams", { error: getErrorMessage(teamsError) }));
 	}, [teamsError]);
 
 	if (teamsLoading) {

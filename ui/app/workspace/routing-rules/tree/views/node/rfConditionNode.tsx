@@ -1,12 +1,21 @@
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 import { Position } from "@xyflow/react";
 import { COND_H, COND_W, SCOPE_CONFIG, type ScopeKey } from "../constants";
 import { RFEdgeHandle } from "./rfEdgeHandle";
 
-/** Width of the left scope-color strip (matches common “start node” accent bars). */
+/** Width of the left scope-color strip (matches common "start node" accent bars). */
 const ACCENT_STRIP_CLASS = "w-2.5";
 
+const SCOPE_LABEL_KEYS: Record<string, string> = {
+	virtual_key: "routingRules.tree.scopeVirtualKey",
+	team: "routingRules.tree.scopeTeam",
+	customer: "routingRules.tree.scopeCustomer",
+	global: "routingRules.tree.scopeGlobal",
+};
+
 export function RFConditionNode({ data }: { data: any }) {
+	const { t } = useI18n();
 	const condition = data.condition as string;
 	const color = data.color as string | null;
 	const scopes = (data.scopes as string[] | undefined) ?? [];
@@ -37,7 +46,7 @@ export function RFConditionNode({ data }: { data: any }) {
 										className="rounded px-1 py-0 text-[9px] font-semibold"
 										style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}
 									>
-										{cfg.label}
+										{t(SCOPE_LABEL_KEYS[sc] ?? sc)}
 									</span>
 								) : null;
 							})}
