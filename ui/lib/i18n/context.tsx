@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { LANG_STORAGE_KEY, detectInitialLang, translate } from "./index";
+import { LANG_STORAGE_KEY, detectInitialLang, setCurrentLang, translate } from "./index";
 import type { I18nState, Lang } from "./types";
 
 const I18nContext = createContext<I18nState | null>(null);
@@ -13,6 +13,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 		} catch {
 			// localStorage unavailable — language just won't persist across reloads
 		}
+		// Sync module-level lang so non-component code (zod, toasts) translates correctly
+		setCurrentLang(lang);
 	}, [lang]);
 
 	const setLang = useCallback((next: Lang) => setLangState(next), []);

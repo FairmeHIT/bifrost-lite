@@ -14,6 +14,7 @@ import { zh } from "./zh";
 
 export type { Lang } from "./types";
 export { I18nProvider, useI18n } from "./context";
+export type { I18nState } from "./types";
 
 export const LANG_STORAGE_KEY = "bifrost_lang";
 
@@ -36,6 +37,23 @@ export function detectInitialLang(): Lang {
 	}
 	return "zh";
 }
+
+// Module-level current language, kept in sync with I18nProvider so that
+// non-component code (zod error messages, toasts triggered outside React)
+// can translate without a hook. Defaults to the detected initial language.
+let currentLang: Lang = detectInitialLang();
+
+/** Update the module-level language (called by I18nProvider). */
+export function setCurrentLang(lang: Lang): void {
+	currentLang = lang;
+}
+
+/** Translate using the module-level current language — for non-component code. */
+export function t(path: string, params?: Record<string, string | number>): string {
+	return translate(currentLang, path, params);
+}
+
+/** Translate a dot-path key in a specific language. Falls back to en, then the raw key. */
 
 function resolvePath(dict: Dict, path: string): string | undefined {
 	let node: unknown = dict;
