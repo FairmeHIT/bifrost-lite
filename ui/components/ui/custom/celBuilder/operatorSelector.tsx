@@ -4,13 +4,15 @@
  */
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useI18n } from "@/lib/i18n/context";
 import { OperatorSelectorProps } from "react-querybuilder";
 
 export function OperatorSelector({ value, handleOnChange, options }: OperatorSelectorProps) {
+	const { t } = useI18n();
 	return (
 		<Select value={value || ""} onValueChange={handleOnChange}>
 			<SelectTrigger className="w-[160px]">
-				<SelectValue placeholder="Select operator..." />
+				<SelectValue placeholder={t("ui.celBuilder.selectOperator")} />
 			</SelectTrigger>
 			<SelectContent>
 				{options.map((option) => {

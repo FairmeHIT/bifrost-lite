@@ -62,6 +62,7 @@ function CustomTooltip({ active, payload }: any) {
 }
 
 function LatencyChartImpl({ data, chartType, startTime, endTime }: LatencyChartProps) {
+	const { t } = useI18n();
 	const chartData = useMemo(() => {
 		if (!data?.buckets || !data.bucket_size_seconds) {
 			return [];
@@ -75,7 +76,7 @@ function LatencyChartImpl({ data, chartType, startTime, endTime }: LatencyChartP
 	}, [data]);
 
 	if (!data?.buckets || chartData.length === 0) {
-		return <div className="text-muted-foreground flex h-full items-center justify-center text-sm">No data available</div>;
+		return <div className="text-muted-foreground flex h-full items-center justify-center text-sm">{t("dashboardCharts.noData")}</div>;
 	}
 
 	const commonProps = {

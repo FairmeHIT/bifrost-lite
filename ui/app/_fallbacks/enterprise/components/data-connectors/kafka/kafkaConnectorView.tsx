@@ -16,7 +16,7 @@ export default function KafkaConnectorView(_props: KafkaConnectorViewProps) {
 						align="middle"
 						className="mx-auto w-full max-w-lg"
 						testIdPrefix="kafka-connector"
-						icon={<img src="/images/kafka-logo.svg" alt="Kafka" width={88} height={88} />}
+						icon={<img src="/images/kafka-logo.svg" alt={t("icons.kafka")} width={88} height={88} />}
 						title={t("enterprise.kafkaTitle")}
 						description={t("enterprise.kafkaDesc")}
 						readmeLink="https://docs.getbifrost.ai/enterprise/kafka-connector"

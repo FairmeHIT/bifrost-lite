@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { CodeEditor } from "@/components/ui/codeEditor";
+import { useI18n } from "@/lib/i18n/context";
 import { ChatMessage, ContentBlock } from "@/lib/types/logs";
 import { cn } from "@/lib/utils";
 import { cleanJson, isJson } from "@/lib/utils/validation";
@@ -52,10 +53,11 @@ function downloadFileData(fileData: string, filename: string, fileType?: string)
 }
 
 export function LogChatFileBlockView({ block, className }: { block: ContentBlock; className?: string }) {
+	const { t } = useI18n();
 	const file = block.file;
 	if (!file) return null;
 
-	const title = file.filename || file.file_id || "Attached file";
+	const title = file.filename || file.file_id || t("ui.attachedFile");
 	const size = formatFileDataSize(file.file_data);
 	const details = [file.file_type, size, file.file_id ? `ID: ${file.file_id}` : undefined].filter(Boolean);
 	const canDownload = !!file.file_data;
@@ -74,7 +76,7 @@ export function LogChatFileBlockView({ block, className }: { block: ContentBlock
 						data-testid="file-block-download-btn"
 					>
 						<Download className="h-3.5 w-3.5" />
-						Download
+						{t("logs.download")}
 					</Button>
 				)}
 			</div>
@@ -87,7 +89,7 @@ export function LogChatFileBlockView({ block, className }: { block: ContentBlock
 					className="text-primary mt-2 inline-block hover:underline"
 					data-testid="file-block-open-link"
 				>
-					Open file
+					{t("ui.openFile")}
 				</a>
 			)}
 		</div>
@@ -95,6 +97,7 @@ export function LogChatFileBlockView({ block, className }: { block: ContentBlock
 }
 
 function ContentBlockView({ block }: { block: ContentBlock; index: number }) {
+	const { t } = useI18n();
 	const blockType = block.type.replaceAll("_", " ");
 
 	// Handle text content
@@ -129,7 +132,7 @@ function ContentBlockView({ block }: { block: ContentBlock; index: number }) {
 	if (block.image_url) {
 		const src = block.image_url.url;
 		if (src) {
-			return <img src={src} alt="Attached image" className="max-w-full rounded border" />;
+			return <img src={src} alt={t("ui.attachedImage")} className="max-w-full rounded border" />;
 		}
 	}
 
@@ -165,19 +168,20 @@ function ContentBlockView({ block }: { block: ContentBlock; index: number }) {
 }
 
 export default function LogChatMessageView({ message, audioFormat }: LogChatMessageViewProps) {
+	const { t } = useI18n();
 	return (
 		<div className="flex w-full flex-col gap-2">
 			{/* Role header */}
 			<div className="flex items-center gap-2">
 				<span className="text-sm font-medium capitalize">{message.role}</span>
-				{message.tool_call_id && <span className="text-muted-foreground text-xs">Tool Call ID: {message.tool_call_id}</span>}
+				{message.tool_call_id && <span className="text-muted-foreground text-xs">{t("logs.toolCallId", { id: message.tool_call_id })}</span>}
 			</div>
 
 			{/* Handle reasoning content */}
 			{message.reasoning && (
 				<>
 					{isJson(message.reasoning) ? (
-						<CollapsibleBox title="Reasoning" onCopy={() => JSON.stringify(cleanJson(message.reasoning), null, 2)} collapsedHeight={100}>
+						<CollapsibleBox title={t("logs.reasoning")} onCopy={() => JSON.stringify(cleanJson(message.reasoning), null, 2)} collapsedHeight={100}>
 							<CodeEditor
 								className="z-0 w-full"
 								shouldAdjustInitialHeight={true}
@@ -190,7 +194,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 							/>
 						</CollapsibleBox>
 					) : (
-						<CollapsibleBox title="Reasoning" onCopy={() => message.reasoning || ""} collapsedHeight={100}>
+						<CollapsibleBox title={t("logs.reasoning")} onCopy={() => message.reasoning || ""} collapsedHeight={100}>
 							<div className="custom-scrollbar text-muted-foreground max-h-[400px] overflow-y-auto px-6 py-2 font-mono text-xs break-words whitespace-pre-wrap italic">
 								{message.reasoning}
 							</div>
@@ -203,7 +207,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 			{message.refusal && (
 				<>
 					{isJson(message.refusal) ? (
-						<CollapsibleBox title="Refusal" onCopy={() => JSON.stringify(cleanJson(message.refusal), null, 2)} collapsedHeight={100}>
+						<CollapsibleBox title={t("logs.refusal")} onCopy={() => JSON.stringify(cleanJson(message.refusal), null, 2)} collapsedHeight={100}>
 							<CodeEditor
 								className="z-0 w-full"
 								shouldAdjustInitialHeight={true}
@@ -216,7 +220,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 							/>
 						</CollapsibleBox>
 					) : (
-						<CollapsibleBox title="Refusal" onCopy={() => message.refusal || ""} collapsedHeight={100}>
+						<CollapsibleBox title={t("logs.refusal")} onCopy={() => message.refusal || ""} collapsedHeight={100}>
 							<div className="custom-scrollbar max-h-[400px] overflow-y-auto px-6 py-2 font-mono text-xs break-words whitespace-pre-wrap text-red-800">
 								{message.refusal}
 							</div>
@@ -232,7 +236,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 						<>
 							{isJson(message.content) ? (
 								<CollapsibleBox
-									title="Content"
+									title={t("logs.content")}
 									onCopy={() => JSON.stringify(cleanJson(message.content as string), null, 2)}
 									collapsedHeight={100}
 								>
@@ -248,7 +252,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 									/>
 								</CollapsibleBox>
 							) : (
-								<CollapsibleBox title="Content" onCopy={() => (message.content as string) || ""} collapsedHeight={100}>
+								<CollapsibleBox title={t("logs.content")} onCopy={() => (message.content as string) || ""} collapsedHeight={100}>
 									<div className="custom-scrollbar max-h-[400px] overflow-y-auto px-6 py-2 font-mono text-xs break-words whitespace-pre-wrap">
 										{message.content}
 									</div>
@@ -270,7 +274,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 						return (
 							<CollapsibleBox
 								key={index}
-								title={`Tool Call: ${toolCall.function?.name || `#${index + 1}`}`}
+								title={t("logs.toolCallWithName", { name: toolCall.function?.name || `#${index + 1}` })}
 								onCopy={() => jsonContent}
 								collapsedHeight={100}
 							>
@@ -292,7 +296,7 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 
 			{/* Handle annotations */}
 			{message.annotations && message.annotations.length > 0 && (
-				<CollapsibleBox title="Annotations" onCopy={() => JSON.stringify(message.annotations, null, 2)} collapsedHeight={100}>
+				<CollapsibleBox title={t("logs.annotations")} onCopy={() => JSON.stringify(message.annotations, null, 2)} collapsedHeight={100}>
 					<CodeEditor
 						className="z-0 w-full"
 						shouldAdjustInitialHeight={true}
@@ -308,26 +312,28 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 
 			{/* Handle audio output */}
 			{message.audio && (
-				<CollapsibleBox title="Audio Output" collapsedHeight={150}>
+				<CollapsibleBox title={t("logs.audioOutput")} collapsedHeight={150}>
 					<div className="space-y-4 px-6 py-4">
 						{message.audio.transcript && (
 							<div className="space-y-2">
-								<div className="text-muted-foreground text-xs font-medium">Transcript:</div>
+								<div className="text-muted-foreground text-xs font-medium">{t("logs.transcript")}</div>
 								<div className="font-mono text-xs break-words whitespace-pre-wrap">{message.audio.transcript}</div>
 							</div>
 						)}
 						{message.audio.data && (
 							<div className="space-y-2">
-								<div className="text-muted-foreground text-xs font-medium">Audio:</div>
+								<div className="text-muted-foreground text-xs font-medium">{t("logs.audio")}</div>
 								<AudioPlayer src={message.audio.data} format={audioFormat} />
 							</div>
 						)}
 						{message.audio.id && (
 							<div className="text-muted-foreground text-xs">
-								ID: {message.audio.id} | Expires:{" "}
-								{message.audio.expires_at && Number.isFinite(message.audio.expires_at)
-									? new Date(message.audio.expires_at * 1000).toLocaleString()
-									: "N/A"}
+								{t("logs.idAndExpires", {
+									id: message.audio.id,
+									expires: message.audio.expires_at && Number.isFinite(message.audio.expires_at)
+										? new Date(message.audio.expires_at * 1000).toLocaleString()
+										: t("logs.na"),
+								})}
 							</div>
 						)}
 					</div>

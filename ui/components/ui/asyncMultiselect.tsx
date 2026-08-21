@@ -25,6 +25,7 @@ import {
 } from "react-select";
 import AsyncCreatableSelect from "react-select/async-creatable";
 import { useDebouncedFunction } from "../../hooks/useDebounce";
+import { useI18n } from "@/lib/i18n/context";
 import { Icons } from "./icons";
 import { Label } from "./label";
 import {
@@ -228,6 +229,7 @@ interface AsyncMultiSelectProps<T> {
 }
 
 export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
+	const { t } = useI18n();
 	const menuOpenRef = useRef(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 
@@ -357,10 +359,11 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 				onCreateOption={props.isCreatable ? props.onCreateOption : undefined}
 				isValidNewOption={props.isCreatable ? (option) => option.length > 0 : () => false}
 				isLoading={props.isLoading}
+				loadingMessage={() => t("common.loading")}
 				defaultOptions={props.defaultOptions}
 				loadOptions={props.isNonAsync ? loadOptionsForNonAsyncComponents : loadOptions}
 				isMulti={!props.isSingleSelect}
-				placeholder={props.placeholder}
+				placeholder={props.placeholder ?? t("asyncMultiselect.selectPlaceholder")}
 				closeMenuOnSelect={props.closeMenuOnSelect === true || props.isSingleSelect === true}
 				onChange={(selection, actionMeta) => {
 					switch (actionMeta.action) {
@@ -388,7 +391,7 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 
 					props.onChange && props.onChange(normalizedSelection);
 				}}
-				formatCreateLabel={props.formatCreateLabel}
+				formatCreateLabel={props.formatCreateLabel ?? ((inputValue: string) => t("asyncMultiselect.createOption", { value: inputValue }))}
 				controlShouldRenderValue={props.controlShouldRenderValue ?? true}
 				menuPlacement={props.menuPlacement}
 				blurInputOnSelect={false}
@@ -417,7 +420,12 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 				noOptionsMessage={
 					props.noOptionsMessage
 						? props.noOptionsMessage
-						: ({ inputValue }) => (inputValue.length > 0 ? <div>{props.noResultsFoundPlaceholder}</div> : props.emptyResultPlaceholder)
+						: ({ inputValue }) =>
+								inputValue.length > 0 ? (
+									<div>{props.noResultsFoundPlaceholder ?? t("ui.combobox.noResults")}</div>
+								) : (
+									props.emptyResultPlaceholder
+								)
 				}
 				inputValue={props.inputValue}
 				styles={{

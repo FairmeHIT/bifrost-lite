@@ -27,6 +27,8 @@ export function ValueEditor({
 	type,
 	context,
 }: ValueEditorProps & { context?: CELValueEditorContext }) {
+	const { t } = useI18n();
+
 	// Compute all conditions upfront before any early returns
 	const isArrayOperator = operator === "in" || operator === "notIn";
 	const isRegexOperator = operator === "matches";
@@ -122,7 +124,7 @@ export function ValueEditor({
 				<ModelMultiselect
 					value={selectedModels}
 					onChange={handleMultiModelChange}
-					placeholder="Select models..."
+					placeholder={t("ui.celBuilder.selectModels")}
 					loadModelsOnEmptyProvider
 					className="!min-h-9 w-[360px]"
 					menuPosition={menuPosition}
@@ -149,7 +151,7 @@ export function ValueEditor({
 			<ModelMultiselect
 				value={valueToUse || ""}
 				onChange={handleOnChange}
-				placeholder="Search for a model..."
+				placeholder={t("ui.celBuilder.searchForModel")}
 				isSingleSelect
 				clearable={true}
 				loadModelsOnEmptyProvider
@@ -207,7 +209,7 @@ export function ValueEditor({
 					value={selectedValues}
 					onValueChange={handleMultiselectChange}
 					options={options}
-					placeholder="Select providers..."
+					placeholder={t("ui.celBuilder.selectProviders")}
 					className="h-10 w-[360px]"
 					noPortal
 				/>
@@ -234,7 +236,7 @@ export function ValueEditor({
 				type="text"
 				value={keyValuePair.value}
 				onChange={(e) => handleKeyValueValueChange(e.target.value)}
-				placeholder="Value"
+				placeholder={t("ui.celBuilder.value")}
 				className="w-[180px]"
 				data-testid="cel-builder-keyvalue-value-input"
 			/>

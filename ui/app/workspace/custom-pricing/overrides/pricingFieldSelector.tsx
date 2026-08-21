@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -42,7 +43,18 @@ interface PricingFieldSelectorProps {
 	onFieldInteraction?: () => void;
 }
 
+const GROUP_LABEL_KEY: Record<GroupKey, string> = {
+	chat: "pricingOverrides.groupChat",
+	embedding: "pricingOverrides.groupEmbedding",
+	rerank: "pricingOverrides.groupRerank",
+	audio: "pricingOverrides.groupAudio",
+	image: "pricingOverrides.groupImage",
+	video: "pricingOverrides.groupVideo",
+	ocr: "pricingOverrides.groupOcr",
+};
+
 export function PricingFieldSelector({ values, errors, selectedRequestTypes, onChange, onFieldInteraction }: PricingFieldSelectorProps) {
+	const { t } = useI18n();
 	const [search, setSearch] = useState("");
 	const [openGroups, setOpenGroups] = useState<Set<GroupKey>>(new Set(["chat"]));
 
@@ -146,7 +158,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 						className="text-muted-foreground hover:text-foreground rounded-sm p-0.5 transition-colors"
 						onClick={() => deactivateField(field.key)}
 						data-testid={`pricing-field-deactivate-${field.key}`}
-						title="Remove field"
+						title={t("pricingOverrides.removeField")}
 					>
 						<X className="h-3.5 w-3.5" />
 					</button>
@@ -158,7 +170,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 					className={cn("h-8", hasValue && "ring-primary/40 ring-1")}
 					value={values[field.key] ?? ""}
 					onChange={(e) => handleInputChange(field.key, e.target.value)}
-					placeholder="0.0"
+					placeholder={t("pricingOverrides.fieldPlaceholder")}
 				/>
 				{error && <p className="text-destructive mt-1 text-xs">{error}</p>}
 			</div>
@@ -168,7 +180,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 	return (
 		<div className="space-y-2">
 			<Input
-				placeholder="Search all pricing fields..."
+				placeholder={t("pricingOverrides.searchFields")}
 				value={search}
 				onChange={(e) => setSearch(e.target.value)}
 				className="h-9"
@@ -179,7 +191,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 				{isSearching ? (
 					<div className="space-y-0.5 p-2">
 						{filteredFields!.length === 0 ? (
-							<div className="text-muted-foreground py-4 text-center text-sm">No fields match &ldquo;{search}&rdquo;</div>
+							<div className="text-muted-foreground py-4 text-center text-sm">{t("pricingOverrides.noFieldsMatch", { query: search })}</div>
 						) : (
 							filteredFields!.map((field) => renderFieldRow(field))
 						)}
@@ -187,7 +199,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 				) : (
 					<div className="divide-y">
 						{visibleGroupedFields.length === 0 ? (
-							<div className="text-muted-foreground py-4 text-center text-sm">No pricing fields for the selected request types</div>
+							<div className="text-muted-foreground py-4 text-center text-sm">{t("pricingOverrides.noFieldsForRequestTypes")}</div>
 						) : (
 							visibleGroupedFields.map((group) => {
 								const isOpen = openGroups.has(group.key);
@@ -202,7 +214,7 @@ export function PricingFieldSelector({ values, errors, selectedRequestTypes, onC
 											data-testid={`pricing-group-toggle-${group.key}`}
 										>
 											<span className="flex items-center gap-2">
-												{group.label}
+												{t(GROUP_LABEL_KEY[group.key])}
 												{valueCount > 0 && (
 													<Badge variant="secondary" className="px-1.5 py-0 text-[10px]">
 														{valueCount}

@@ -350,7 +350,7 @@ function MessageView({ message, index }: { message: ResponsesMessage; index: num
 			{/* Handle function call output */}
 			{message.output !== undefined && (
 				<CollapsibleBox
-					title="Output"
+					title={t("logs.output")}
 					onCopy={() => (typeof message.output === "string" ? message.output : JSON.stringify(message.output, null, 2))}
 					collapsedHeight={100}
 				>
@@ -394,7 +394,7 @@ function MessageView({ message, index }: { message: ResponsesMessage; index: num
 					),
 			) && (
 				<CollapsibleBox
-					title="Additional Fields"
+					title={t("logs.additionalFields")}
 					onCopy={() =>
 						JSON.stringify(
 							Object.fromEntries(
@@ -459,10 +459,11 @@ function MessageView({ message, index }: { message: ResponsesMessage; index: num
 }
 
 export default function LogResponsesMessageView({ messages }: LogResponsesMessageViewProps) {
+	const { t } = useI18n();
 	if (!messages || messages.length === 0) {
 		return (
 			<div className="w-full rounded-sm border">
-				<div className="text-muted-foreground px-6 py-4 text-center text-sm">No responses messages available</div>
+				<div className="text-muted-foreground px-6 py-4 text-center text-sm">{t("logs.noResponses")}</div>
 			</div>
 		);
 	}

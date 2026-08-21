@@ -4,6 +4,7 @@ import * as React from "react";
 import { createContext, useContext, useState } from "react";
 
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 
 // Context to share expanded state between SheetContent and SheetHeader
 type SheetContextValue = {
@@ -138,6 +139,7 @@ function SheetHeader({
 	...props
 }: React.ComponentProps<"div"> & { showCloseButton?: boolean; headerClassName?: string }) {
 	const sheetContext = useSheetContext();
+	const { t } = useI18n();
 
 	return (
 		<div
@@ -162,7 +164,7 @@ function SheetHeader({
 			{showCloseButton && (
 				<SheetPrimitive.Close className="hover:bg-accent shrink-0 cursor-pointer rounded-md p-2 opacity-70 transition-opacity hover:opacity-100">
 					<XIcon className="size-4" />
-					<span className="sr-only">Close</span>
+					<span className="sr-only">{t("common.close")}</span>
 				</SheetPrimitive.Close>
 			)}
 		</div>

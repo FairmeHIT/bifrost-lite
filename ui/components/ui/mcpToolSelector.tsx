@@ -1,4 +1,5 @@
 import { CodeEditor } from "@/components/ui/codeEditor";
+import { useI18n } from "@/lib/i18n/context";
 import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { components, OptionProps } from "react-select";
@@ -51,14 +52,16 @@ interface MCPToolSelectorProps {
 	className?: string;
 }
 
-export function MCPToolSelector({
-	value,
-	onChange,
-	mcpClients,
-	placeholder = "Search and select tools...",
-	disabled = false,
-	className,
-}: MCPToolSelectorProps) {
+export function MCPToolSelector(props: MCPToolSelectorProps) {
+	const { t } = useI18n();
+	const {
+		value,
+		onChange,
+		mcpClients,
+		placeholder = t("mcpToolSelector.searchToolsPlaceholder"),
+		disabled = false,
+		className,
+	} = props;
 	const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
 	// Flatten all tools from all MCP clients into searchable options
@@ -176,7 +179,7 @@ export function MCPToolSelector({
 				closeMenuOnSelect={true}
 				hideSelectedOptions={true}
 				controlShouldRenderValue={false}
-				noOptionsMessage={() => "No results found"}
+				noOptionsMessage={() => t("ui.combobox.noResults")}
 				views={{
 					option: (optionProps: OptionProps<ToolOptionMeta>) => {
 						const { Option } = components;
@@ -212,8 +215,8 @@ export function MCPToolSelector({
 						<TableHeader>
 							<TableRow>
 								<TableHead className="w-10"></TableHead>
-								<TableHead className="w-auto">Tool</TableHead>
-								<TableHead className="hidden w-32 md:table-cell">Server</TableHead>
+								<TableHead className="w-auto">{t("mcpToolSelector.toolColumn")}</TableHead>
+								<TableHead className="hidden w-32 md:table-cell">{t("mcpToolSelector.serverColumn")}</TableHead>
 								<TableHead className="w-10"></TableHead>
 							</TableRow>
 						</TableHeader>
@@ -271,7 +274,7 @@ export function MCPToolSelector({
 												<tr>
 													<td colSpan={4} className="p-0">
 														<div className="bg-muted/30 border-t px-4 py-3">
-															<div className="text-muted-foreground mb-2 text-xs font-medium">Parameters Schema</div>
+															<div className="text-muted-foreground mb-2 text-xs font-medium">{t("mcpToolSelector.parametersSchema")}</div>
 															{tool.parameters ? (
 																<CodeEditor
 																	className="z-0 w-full rounded-md border"
@@ -289,7 +292,7 @@ export function MCPToolSelector({
 																	}}
 																/>
 															) : (
-																<div className="text-muted-foreground text-sm">No parameters defined</div>
+																<div className="text-muted-foreground text-sm">{t("mcpToolSelector.noParameters")}</div>
 															)}
 														</div>
 													</td>
@@ -307,7 +310,7 @@ export function MCPToolSelector({
 			{/* Empty state */}
 			{selectedToolsWithInfo.length === 0 && (
 				<div className="text-muted-foreground rounded-md border border-dashed p-4 text-center text-sm">
-					No tools selected. Use the search above to add tools.
+					{t("mcpToolSelector.emptyState")}
 				</div>
 			)}
 		</div>

@@ -2,6 +2,7 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
@@ -56,6 +57,7 @@ function BreadcrumbSeparator({ children, className, ...props }: React.ComponentP
 }
 
 function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span">) {
+	const { t } = useI18n();
 	return (
 		<span
 			data-slot="breadcrumb-ellipsis"
@@ -65,7 +67,7 @@ function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<"span"
 			{...props}
 		>
 			<MoreHorizontal className="size-4" />
-			<span className="sr-only">More</span>
+			<span className="sr-only">{t("ui.breadcrumb.more")}</span>
 		</span>
 	);
 }

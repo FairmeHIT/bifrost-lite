@@ -581,13 +581,13 @@ export default function ModelLimitsTable({
 								onClick={() => onOffsetChange(Math.max(0, offset - limit))}
 								disabled={offset === 0}
 								data-testid="model-limits-pagination-prev-btn"
-								aria-label="Previous page"
+								aria-label={t("logs.previousPage")}
 							>
 								<ChevronLeft className="size-3" />
 							</Button>
 
 							<div className="flex items-center gap-1">
-								<span>Page</span>
+								<span>{t("logs.page")}</span>
 								<span>{Math.floor(offset / limit) + 1}</span>
 								<span>of {Math.ceil(totalCount / limit)}</span>
 							</div>
@@ -598,7 +598,7 @@ export default function ModelLimitsTable({
 								onClick={() => onOffsetChange(offset + limit)}
 								disabled={offset + limit >= totalCount}
 								data-testid="model-limits-pagination-next-btn"
-								aria-label="Next page"
+								aria-label={t("logs.nextPage")}
 							>
 								<ChevronRight className="size-3" />
 							</Button>

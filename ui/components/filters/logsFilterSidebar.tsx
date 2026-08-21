@@ -95,7 +95,7 @@ export function LogsFilterSidebar({ filters, onFiltersChange }: LogsSidebarProps
 					{activeFilterCount > 0 && (
 						<Button variant="outline" size="sm" className="text-muted-foreground h-7 px-2 text-xs" onClick={handleReset}>
 							<RotateCcw className="size-3" />
-							Reset
+							{t("logs.reset")}
 						</Button>
 					)}
 					<Button variant="ghost" size="icon" className="size-7" onClick={toggleCollapsed} title={t("filter.hideFilters")} aria-label={t("filter.hideFilters")}>
@@ -261,7 +261,7 @@ function SearchableCheckboxList({
 	items,
 	isSelected,
 	onToggle,
-	placeholder = "Search...",
+	placeholder,
 	inputRef,
 	testIdPrefix,
 	normalizeTestIdKey = false,
@@ -283,6 +283,8 @@ function SearchableCheckboxList({
 	onSearch?: (query: string) => void;
 	fetching?: boolean;
 }) {
+	const { t } = useI18n();
+	const resolvedPlaceholder = placeholder ?? t("filter.search");
 	const [query, setQuery] = useState("");
 	const normalized = query.trim().toLowerCase();
 	const filtered = normalized ? items.filter((item) => item.label.toLowerCase().includes(normalized)) : items;
@@ -322,7 +324,7 @@ function SearchableCheckboxList({
 							commitCustom();
 						}
 					}}
-					placeholder={placeholder}
+					placeholder={resolvedPlaceholder}
 					className="h-8 border-0 pl-8 text-xs"
 					data-testid={testIdPrefix ? `${testIdPrefix}-search` : undefined}
 				/>
@@ -341,7 +343,7 @@ function SearchableCheckboxList({
 				/>
 			))}
 			{filtered.length === 0 && !showAddCustom && (
-				<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">No results</div>
+				<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">{t("ui.noResults")}</div>
 			)}
 			{showAddCustom && (
 				<button
@@ -352,7 +354,7 @@ function SearchableCheckboxList({
 				>
 					<Plus className="text-muted-foreground size-3.5 shrink-0" />
 					<span className="truncate">
-						Use <span className="font-medium">&quot;{trimmed}&quot;</span>
+						{t("filter.use")} <span className="font-medium">&quot;{trimmed}&quot;</span>
 					</span>
 				</button>
 			)}
@@ -1161,27 +1163,24 @@ function CostFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentPr
 // LocalCachingFilter – filter by semantic-cache hit type (direct / semantic)
 // ---------------------------------------------------------------------------
 
-const LocalCachingOptions: { key: string; label: string }[] = [
-	{ key: "direct", label: "Direct cache" },
-	{ key: "semantic", label: "Semantic cache" },
-];
+const LocalCachingOptions = ["direct", "semantic"] as const;
 
 function LocalCachingFilter({ filters, onFiltersChange, defaultOpen }: FilterComponentProps) {
 	const { t } = useI18n();
 	const hasActive = (filters.cache_hit_types || []).length > 0;
 	return (
 		<FilterSection title={t("filter.localCaching")} defaultOpen={defaultOpen || hasActive} testId="local-caching-filter-toggle">
-			{LocalCachingOptions.map((option) => (
+			{LocalCachingOptions.map((key) => (
 				<CheckboxFilterItem
-					key={option.key}
-					label={option.label}
-					checked={(filters.cache_hit_types || []).includes(option.key)}
+					key={key}
+					label={key === "direct" ? t("filter.directCache") : t("filter.semanticCache")}
+					checked={(filters.cache_hit_types || []).includes(key)}
 					onCheckedChange={() => {
 						const current = filters.cache_hit_types || [];
-						const next = current.includes(option.key) ? current.filter((t) => t !== option.key) : [...current, option.key];
+						const next = current.includes(key) ? current.filter((t) => t !== key) : [...current, key];
 						onFiltersChange({ ...filters, cache_hit_types: next });
 					}}
-					testId={`local-caching-filter-checkbox-${option.key}`}
+					testId={`local-caching-filter-checkbox-${key}`}
 				/>
 			))}
 		</FilterSection>
@@ -1241,7 +1240,7 @@ function MetadataFilters({ filters, onFiltersChange, defaultOpen }: FilterCompon
 			testId="metadata-filter-toggle"
 		>
 			{isEmpty ? (
-				<div className="text-muted-foreground px-3 py-2 text-xs">No metadata keys</div>
+				<div className="text-muted-foreground px-3 py-2 text-xs">{t("ui.noMetadataKeys")}</div>
 			) : (
 				<>
 					<div className="relative border-b">
@@ -1259,7 +1258,7 @@ function MetadataFilters({ filters, onFiltersChange, defaultOpen }: FilterCompon
 						/>
 					</div>
 					{entries.length === 0 && !isFetching && (
-						<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">No results</div>
+						<div className="text-muted-foreground flex h-9 items-center px-3 text-xs">{t("ui.noResults")}</div>
 					)}
 					{entries.map(([metadataKey, values]) => (
 						<div key={metadataKey} data-testid={`metadata-${metadataKey}-filter-group`}>

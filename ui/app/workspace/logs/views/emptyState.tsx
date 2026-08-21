@@ -41,6 +41,7 @@ interface CodeBlockProps {
 }
 
 function CodeBlock({ code, language, onLanguageChange, showLanguageSelect = false, readonly = true }: CodeBlockProps) {
+	const { t } = useI18n();
 	const { copy: copyToClipboard } = useCopyToClipboard();
 
 	return (
@@ -53,10 +54,10 @@ function CodeBlock({ code, language, onLanguageChange, showLanguageSelect = fals
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem className="text-xs" value="python">
-								Python
+								{t("logs.languagePython")}
 							</SelectItem>
 							<SelectItem className="text-xs" value="typescript">
-								TypeScript
+								{t("logs.languageTypeScript")}
 							</SelectItem>
 						</SelectContent>
 					</Select>
@@ -262,12 +263,12 @@ const result = await chain.invoke({ input: "What is LangChain?" });`,
 
 				<Tabs defaultValue="curl" className="w-full rounded-lg border">
 					<TabsList className="grid h-10 w-full grid-cols-6 rounded-t-lg rounded-b-none">
-						<TabsTrigger value="curl">cURL</TabsTrigger>
-						<TabsTrigger value="openai">OpenAI SDK</TabsTrigger>
-						<TabsTrigger value="anthropic">Anthropic SDK</TabsTrigger>
-						<TabsTrigger value="genai">Google GenAI SDK</TabsTrigger>
-						<TabsTrigger value="litellm">LiteLLM SDK</TabsTrigger>
-						<TabsTrigger value="langchain">LangChain SDK</TabsTrigger>
+						<TabsTrigger value="curl">{t("logs.emptyTabCurl")}</TabsTrigger>
+						<TabsTrigger value="openai">{t("logs.emptyTabOpenai")}</TabsTrigger>
+						<TabsTrigger value="anthropic">{t("logs.emptyTabAnthropic")}</TabsTrigger>
+						<TabsTrigger value="genai">{t("logs.emptyTabGenai")}</TabsTrigger>
+						<TabsTrigger value="litellm">{t("logs.emptyTabLitellm")}</TabsTrigger>
+						<TabsTrigger value="langchain">{t("logs.emptyTabLangchain")}</TabsTrigger>
 					</TabsList>
 
 					<TabsContent value="curl" className="px-4">

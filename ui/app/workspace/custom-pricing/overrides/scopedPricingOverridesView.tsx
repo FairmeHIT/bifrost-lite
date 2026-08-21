@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { VirtualKeySelector } from "@/components/entitySelectors/virtualKeySelector";
 import FullPageLoader from "@/components/fullPageLoader";
 import {
@@ -38,6 +39,7 @@ function PricingOverrideActionsMenu({
 	onEdit: (row: PricingOverride) => void;
 	onDelete: (row: PricingOverride) => void;
 }) {
+	const { t } = useI18n();
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
@@ -47,7 +49,7 @@ function PricingOverrideActionsMenu({
 					variant="ghost"
 					size="icon"
 					className="h-8 w-8"
-					aria-label={`Actions for pricing override ${row.name || row.id}`}
+					aria-label={t("pricingOverrides.actionsFor", { name: row.name || row.id })}
 					data-testid={`pricing-override-actions-btn-${row.id}`}
 				>
 					<MoreHorizontal className="h-4 w-4" />
@@ -64,7 +66,7 @@ function PricingOverrideActionsMenu({
 					}}
 				>
 					<Edit className="h-4 w-4" />
-					Edit
+					{t("common.edit")}
 				</DropdownMenuItem>
 				<DropdownMenuItem
 					data-testid={`pricing-override-delete-btn-${row.id}`}
@@ -77,7 +79,7 @@ function PricingOverrideActionsMenu({
 					}}
 				>
 					<Trash2 className="h-4 w-4" />
-					Delete
+					{t("common.delete")}
 				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
@@ -104,22 +106,22 @@ function parseScopeKind(value: string | null): ScopeFilter {
 }
 
 // Returns the top-level scope label: "Global", "Virtual Key", or "User".
-function scopeLabel(override: PricingOverride): string {
+function scopeLabel(override: PricingOverride, t: (path: string, params?: Record<string, string | number>) => string): string {
 	const scopeKind = resolveScopeKind(override);
 	if (override.virtual_key_id && scopeKind.startsWith("virtual_key")) {
-		return "Virtual Key";
+		return t("pricingOverrides.virtualKey");
 	}
 	if (override.user_id && scopeKind.startsWith("user")) {
-		return "User";
+		return t("pricingOverrides.user");
 	}
-	return "Global";
+	return t("pricingOverrides.global");
 }
 
 // Returns the key label for the override, or "-" when no specific key is scoped.
-function keyLabel(override: PricingOverride, keyLabelMap: Map<string, string>): string {
+function keyLabel(override: PricingOverride, keyLabelMap: Map<string, string>, t: (path: string, params?: Record<string, string | number>) => string): string {
 	if (!override.provider_key_id) {
 		if (!override.provider_id) return "-";
-		return "All Keys";
+		return t("pricingOverrides.allKeys");
 	}
 	return keyLabelMap.get(override.provider_key_id) || override.provider_key_id;
 }
@@ -175,6 +177,7 @@ function resolveScopeKind(override: PricingOverride): PricingOverrideScopeKind {
 const PAGE_SIZE = 25;
 
 export default function ScopedPricingOverridesView() {
+	const { t } = useI18n();
 	const location = useLocation();
 	const searchParams = useMemo(() => new URLSearchParams(location.searchStr), [location.searchStr]);
 
@@ -231,9 +234,9 @@ export default function ScopedPricingOverridesView() {
 
 	useEffect(() => {
 		if (error) {
-			toast.error("Failed to load pricing overrides", { description: getErrorMessage(error) });
+			toast.error(t("pricingOverrides.loadFailedToast"), { description: getErrorMessage(error) });
 		}
-	}, [error]);
+	}, [error, t]);
 
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 	const [editingOverride, setEditingOverride] = useState<PricingOverride | null>(null);
@@ -269,9 +272,9 @@ export default function ScopedPricingOverridesView() {
 			virtualKeyID: virtualKeyID || undefined,
 			providerID: providerID || undefined,
 			providerKeyID: providerKeyID || undefined,
-			label: `${scopeKind}${userID || virtualKeyID || providerID || providerKeyID ? " (filtered)" : ""}`,
+			label: `${scopeKind}${userID || virtualKeyID || providerID || providerKeyID ? t("pricingOverrides.filteredSuffix") : ""}`,
 		};
-	}, [scopeKind, userID, virtualKeyID, providerID, providerKeyID]);
+	}, [scopeKind, userID, virtualKeyID, providerID, providerKeyID, t]);
 
 	const openCreateDrawer = () => {
 		setEditingOverride(null);
@@ -287,10 +290,10 @@ export default function ScopedPricingOverridesView() {
 		if (!deleteTarget) return;
 		try {
 			await deleteOverride(deleteTarget.id).unwrap();
-			toast.success("Pricing override deleted");
+			toast.success(t("pricingOverrides.deletedToast"));
 			setDeleteTarget(null);
 		} catch (deleteError) {
-			toast.error("Failed to delete pricing override", { description: getErrorMessage(deleteError) });
+			toast.error(t("pricingOverrides.deleteFailedToast"), { description: getErrorMessage(deleteError) });
 		}
 	};
 
@@ -321,14 +324,12 @@ export default function ScopedPricingOverridesView() {
 		<div className="flex flex-col overflow-y-auto">
 			<div className="mb-4 flex items-center justify-between gap-4">
 				<div>
-					<h2 className="text-lg font-semibold tracking-tight">Pricing Overrides</h2>
-					<p className="text-muted-foreground text-sm">
-						Set custom rates for any model across global, virtual key, or user scopes, optionally narrowed to a specific provider or key
-					</p>
+					<h2 className="text-lg font-semibold tracking-tight">{t("sidebar.pricingOverrides")}</h2>
+					<p className="text-muted-foreground text-sm">{t("pricingOverrides.pageDescription")}</p>
 				</div>
 				<Button data-testid="pricing-override-create-btn" onClick={openCreateDrawer} className="gap-2">
 					<Plus className="h-4 w-4" />
-					<span className="hidden sm:inline">New Override</span>
+					<span className="hidden sm:inline">{t("pricingOverrides.newOverride")}</span>
 				</Button>
 			</div>
 
@@ -337,8 +338,8 @@ export default function ScopedPricingOverridesView() {
 				<div className="relative w-full max-w-sm">
 					<Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
 					<Input
-						aria-label="Search pricing overrides by name"
-						placeholder="Search by name..."
+						aria-label={t("pricingOverrides.searchAria")}
+						placeholder={t("pricingOverrides.searchPlaceholder")}
 						value={search}
 						onChange={(e) => setSearch(e.target.value)}
 						className="pl-9"
@@ -350,7 +351,7 @@ export default function ScopedPricingOverridesView() {
 					<VirtualKeySelector
 						value={virtualKeyID}
 						onChange={setVirtualKeyID}
-						placeholder="All virtual keys"
+						placeholder={t("pricingOverrides.allVirtualKeys")}
 						triggerClassName="h-9"
 						// A page, not a sheet — portalling keeps the popover out of the
 						// scrolling table container.
@@ -365,27 +366,27 @@ export default function ScopedPricingOverridesView() {
 						onClick={() => setVirtualKeyID("")}
 						data-testid="pricing-overrides-virtual-key-filter-clear-btn"
 					>
-						Clear
+						{t("filter.clear")}
 					</Button>
 				)}
 			</div>
 
 			<div className="mb-2 overflow-hidden rounded-sm border">
 				{isLoading ? (
-					<div className="p-4 text-sm">Loading overrides...</div>
+					<div className="p-4 text-sm">{t("pricingOverrides.loadingOverrides")}</div>
 				) : error ? (
-					<div className="p-4 text-sm text-red-500">Failed to load pricing overrides. Please try refreshing the page.</div>
+					<div className="p-4 text-sm text-red-500">{t("pricingOverrides.loadFailedPage")}</div>
 				) : (
 					<Table containerClassName="h-full overflow-auto">
 						<TableHeader className="bg-muted sticky top-0 z-10">
 							<TableRow className="bg-muted/50">
-								<TableHead className="font-semibold">Name</TableHead>
-								<TableHead className="font-semibold">Scope</TableHead>
-								<TableHead className="font-semibold">Provider</TableHead>
-								<TableHead className="font-semibold">Key</TableHead>
-								<TableHead className="font-semibold">Model</TableHead>
+								<TableHead className="font-semibold">{t("common.name")}</TableHead>
+								<TableHead className="font-semibold">{t("pricingOverrides.scope")}</TableHead>
+								<TableHead className="font-semibold">{t("pricingOverrides.provider")}</TableHead>
+								<TableHead className="font-semibold">{t("pricingOverrides.key")}</TableHead>
+								<TableHead className="font-semibold">{t("pricingOverrides.model")}</TableHead>
 								<TableHead className={`bg-muted sticky right-0 z-30 w-[50px] text-right font-semibold ${PIN_SHADOW_RIGHT}`}>
-									Actions
+									{t("common.actions")}
 								</TableHead>
 							</TableRow>
 						</TableHeader>
@@ -393,7 +394,7 @@ export default function ScopedPricingOverridesView() {
 							{rows.length === 0 ? (
 								<TableRow>
 									<TableCell colSpan={6} className="h-24 text-center">
-										<span className="text-muted-foreground text-sm">No matching pricing overrides found.</span>
+										<span className="text-muted-foreground text-sm">{t("pricingOverrides.noMatches")}</span>
 									</TableCell>
 								</TableRow>
 							) : (
@@ -401,7 +402,7 @@ export default function ScopedPricingOverridesView() {
 									<TableRow key={row.id} className="group hover:bg-muted/50 cursor-pointer transition-colors">
 										<TableCell>{row.name || "-"}</TableCell>
 										<TableCell>
-											<Badge variant="secondary">{scopeLabel(row)}</Badge>
+											<Badge variant="secondary">{scopeLabel(row, t)}</Badge>
 										</TableCell>
 										<TableCell>
 											{(() => {
@@ -415,7 +416,7 @@ export default function ScopedPricingOverridesView() {
 												);
 											})()}
 										</TableCell>
-										<TableCell>{keyLabel(row, providerKeyLabelMap)}</TableCell>
+										<TableCell>{keyLabel(row, providerKeyLabelMap, t)}</TableCell>
 										<TableCell>{row.pattern}</TableCell>
 										<TableCell
 											className={`group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
@@ -437,8 +438,11 @@ export default function ScopedPricingOverridesView() {
 			{totalCount > 0 && (
 				<div className="flex shrink-0 items-center justify-between text-xs" data-testid="pagination">
 					<div className="text-muted-foreground flex items-center gap-2">
-						{(offset + 1).toLocaleString()}-{Math.min(offset + PAGE_SIZE, totalCount).toLocaleString()} of {totalCount.toLocaleString()}{" "}
-						entries
+						{t("governance.entriesOf", {
+							start: (offset + 1).toLocaleString(),
+							end: Math.min(offset + PAGE_SIZE, totalCount).toLocaleString(),
+							total: totalCount.toLocaleString(),
+						})}
 					</div>
 
 					<div className="flex items-center gap-2">
@@ -448,15 +452,15 @@ export default function ScopedPricingOverridesView() {
 							onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}
 							disabled={offset === 0}
 							data-testid="pricing-overrides-pagination-prev-btn"
-							aria-label="Previous page"
+							aria-label={t("logs.previousPage")}
 						>
 							<ChevronLeft className="size-3" />
 						</Button>
 
 						<div className="flex items-center gap-1">
-							<span>Page</span>
+							<span>{t("logs.page")}</span>
 							<span>{Math.floor(offset / PAGE_SIZE) + 1}</span>
-							<span>of {Math.ceil(totalCount / PAGE_SIZE)}</span>
+							<span>{t("logs.ofPages")} {Math.ceil(totalCount / PAGE_SIZE)}</span>
 						</div>
 
 						<Button
@@ -465,7 +469,7 @@ export default function ScopedPricingOverridesView() {
 							onClick={() => setOffset(offset + PAGE_SIZE)}
 							disabled={offset + PAGE_SIZE >= totalCount}
 							data-testid="pricing-overrides-pagination-next-btn"
-							aria-label="Next page"
+							aria-label={t("logs.nextPage")}
 						>
 							<ChevronRight className="size-3" />
 						</Button>
@@ -483,14 +487,12 @@ export default function ScopedPricingOverridesView() {
 			<AlertDialog open={!!deleteTarget} onOpenChange={(open) => (!open ? setDeleteTarget(null) : undefined)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Pricing Override</AlertDialogTitle>
-						<AlertDialogDescription>
-							Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? This action cannot be undone.
-						</AlertDialogDescription>
+						<AlertDialogTitle>{t("pricingOverrides.deleteTitle")}</AlertDialogTitle>
+						<AlertDialogDescription>{t("pricingOverrides.deleteConfirm", { name: deleteTarget?.name ?? "" })}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel data-testid="pricing-override-delete-cancel-btn" disabled={isDeleting}>
-							Cancel
+							{t("common.cancel")}
 						</AlertDialogCancel>
 						<AlertDialogAction
 							data-testid="pricing-override-delete-confirm-btn"
@@ -501,7 +503,7 @@ export default function ScopedPricingOverridesView() {
 							disabled={isDeleting}
 							className="bg-destructive hover:bg-destructive/90"
 						>
-							{isDeleting ? "Deleting..." : "Delete"}
+							{isDeleting ? t("governance.deleting") : t("common.delete")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

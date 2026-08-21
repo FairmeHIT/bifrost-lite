@@ -356,7 +356,7 @@ function ProviderUsageTabImpl({
 
 			{/* Provider Latency Chart */}
 			<ChartCard
-				title="Provider Latency"
+				title={t("dashboardCharts.providerLatency")}
 				loading={loadingProviderLatency}
 				testId="chart-provider-latency"
 				totalLabel="Avg"
@@ -456,7 +456,7 @@ function ProviderUsageTabImpl({
 
 			{/* Provider Throughput (tokens/sec) Chart */}
 			<ChartCard
-				title="Provider Throughput"
+				title={t("dashboardCharts.providerThroughput")}
 				loading={loadingProviderThroughput}
 				testId="chart-provider-throughput"
 				totalLabel="Avg"

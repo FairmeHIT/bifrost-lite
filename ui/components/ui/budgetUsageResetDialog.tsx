@@ -8,6 +8,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alertDialog";
+import { useI18n } from "@/lib/i18n/context";
 
 interface BudgetUsageResetDialogProps {
 	"data-testid"?: string;
@@ -37,22 +38,22 @@ export default function BudgetUsageResetDialog({
 	onChoice,
 	ownerLabel,
 }: BudgetUsageResetDialogProps) {
+	const { t } = useI18n();
 	return (
 		<AlertDialog open={open} onOpenChange={onOpenChange}>
 			<AlertDialogContent data-testid={testId}>
 				<AlertDialogHeader>
-					<AlertDialogTitle>Reset budget usage?</AlertDialogTitle>
+					<AlertDialogTitle>{t("budgetReset.title")}</AlertDialogTitle>
 					<AlertDialogDescription>
-						You changed a budget amount or reset frequency on this {ownerLabel}. Reset current usage to 0, or preserve the existing
-						counters. The reset window keeps its current start and end either way.
+						{t("budgetReset.description", { ownerLabel })}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel onClick={() => onChoice(false)} data-testid={testId ? `${testId}-preserve-btn` : undefined}>
-						Preserve Usage
+						{t("budgetReset.preserveUsage")}
 					</AlertDialogCancel>
 					<AlertDialogAction onClick={() => onChoice(true)} data-testid={testId ? `${testId}-confirm-btn` : undefined}>
-						Reset Usage
+						{t("budgetReset.resetUsage")}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

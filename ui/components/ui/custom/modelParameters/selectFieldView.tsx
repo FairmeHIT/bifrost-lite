@@ -1,6 +1,7 @@
 import ParameterFieldView from "./paramFieldView";
 import { Parameter } from "./types";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n/context";
 import { ComboboxSelect } from "@/components/ui/combobox";
 import FieldLabel from "./fieldLabel";
 
@@ -18,6 +19,7 @@ interface Props {
 }
 
 export default function SelectFieldView(props: Props) {
+	const { t } = useI18n();
 	const { field, config } = props;
 	const value = field.accesorKey ? (config[field.id] as any)?.[field.accesorKey] || "" : config[field.id];
 
@@ -56,7 +58,7 @@ export default function SelectFieldView(props: Props) {
 					value={Array.isArray(value) ? value : []}
 					onValueChange={(vals) => props.onChange(field.accesorKey ? { [field.accesorKey]: vals } : vals)}
 					disabled={props.disabled}
-					placeholder={`Add ${field.label}`}
+					placeholder={t("ui.modelParameters.addLabel", { label: field.label })}
 					className="h-8"
 				/>
 			) : (
@@ -65,7 +67,7 @@ export default function SelectFieldView(props: Props) {
 					value={(value as string) || null}
 					onValueChange={onFieldChange}
 					disabled={props.disabled}
-					placeholder="Select"
+					placeholder={t("ui.modelParameters.select")}
 					disableSearch
 					className="h-8"
 				/>

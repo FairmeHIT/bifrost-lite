@@ -95,7 +95,7 @@ export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, 
 
 				<div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-muted-foreground">
 					<Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500" />
-					<span>Affects the logs dashboard only. Governance budgets and usage tracking remain unchanged.</span>
+					<span>{t("recalculateCost.affectsDashboardOnly")}</span>
 				</div>
 
 				<DialogFooter className="pt-0">

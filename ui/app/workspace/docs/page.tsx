@@ -2,81 +2,121 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import GradientHeader from "@/components/ui/gradientHeader";
+import { useI18n } from "@/lib/i18n/context";
 import { BookOpen, Code, ExternalLink, FileText, GitBranch, Play, Shield, Users, Zap } from "lucide-react";
 
-const docSections = [
-	{
-		title: "Quick Start",
-		description: "Get Bifrost running in under 30 seconds",
-		icon: Play,
-		url: "https://github.com/maximhq/bifrost/tree/main/docs/quickstart",
-		badge: "Popular",
-		items: ["HTTP Transport Setup", "Go Package Usage", "Docker Guide"],
-	},
-	{
-		title: "Architecture",
-		description: "Deep dive into Bifrost's design and performance",
-		icon: GitBranch,
-		url: "https://github.com/maximhq/bifrost/tree/main/docs/architecture",
-		items: ["System Overview", "Request Flow", "Concurrency Model", "Design Decisions"],
-	},
-	{
-		title: "Usage Guides",
-		description: "Complete API reference and configuration guides",
-		icon: BookOpen,
-		url: "https://github.com/maximhq/bifrost/tree/main/docs/usage",
-		badge: "Comprehensive",
-		items: ["Providers Setup", "Key Management", "Error Handling", "Memory & Networking"],
-	},
-	{
-		title: "Contributing",
-		description: "Help improve Bifrost for everyone",
-		icon: Users,
-		url: "https://github.com/maximhq/bifrost/tree/main/docs/contributing",
-		items: ["Contributing Guide", "Adding Providers", "Plugin Development", "Code Conventions"],
-	},
-	{
-		title: "Integration Examples",
-		description: "Practical examples and testing code",
-		icon: Code,
-		url: "https://github.com/maximhq/bifrost/tree/main/docs/usage/http-transport/integrations",
-		items: ["OpenAI Integration", "Anthropic Integration", "GenAI Integration", "Migration Guides"],
-	},
-	{
-		title: "Benchmarks",
-		description: "Performance metrics and guides",
-		icon: Zap,
-		url: "https://github.com/maximhq/bifrost/blob/main/docs/benchmarks.md",
-		items: ["5K RPS Test Results", "Performance Metrics", "Configuration Tuning", "Hardware Comparisons"],
-	},
-];
-
-const featuredDocs = [
-	{
-		title: "MCP Documentation",
-		description: "Comprehensive guide to Model Context Protocol integration",
-		content: "Learn how to build sophisticated AI agents with MCP support, tool calling, and external integrations.",
-		href: "https://github.com/maximhq/bifrost/blob/main/docs/mcp.md",
-		icon: FileText,
-		buttonText: "View MCP Guide",
-		borderColor: "border-primary/20",
-		backgroundColor: "bg-primary/5",
-		iconColor: "text-primary",
-	},
-	{
-		title: "Governance Plugin",
-		description: "Complete access control, budgets, and rate limiting guide",
-		content: "Master Virtual Keys, hierarchical budgets, rate limiting, and usage tracking for secure AI infrastructure.",
-		href: "https://github.com/maximhq/bifrost/blob/main/docs/governance.md",
-		icon: Shield,
-		buttonText: "View Governance Guide",
-		borderColor: "border-green-200 dark:border-green-800",
-		backgroundColor: "bg-green-50 dark:bg-green-950/20",
-		iconColor: "text-green-600",
-	},
-];
-
 export default function DocsPage() {
+	const { t } = useI18n();
+
+	const docSections = [
+		{
+			slug: "quick-start",
+			title: t("docs.quickStart.title"),
+			description: t("docs.quickStart.description"),
+			icon: Play,
+			url: "https://github.com/maximhq/bifrost/tree/main/docs/quickstart",
+			badge: t("docs.quickStart.badge"),
+			items: [
+				t("docs.quickStart.item1"),
+				t("docs.quickStart.item2"),
+				t("docs.quickStart.item3"),
+			],
+		},
+		{
+			slug: "architecture",
+			title: t("docs.architecture.title"),
+			description: t("docs.architecture.description"),
+			icon: GitBranch,
+			url: "https://github.com/maximhq/bifrost/tree/main/docs/architecture",
+			items: [
+				t("docs.architecture.item1"),
+				t("docs.architecture.item2"),
+				t("docs.architecture.item3"),
+				t("docs.architecture.item4"),
+			],
+		},
+		{
+			slug: "usage-guides",
+			title: t("docs.usage.title"),
+			description: t("docs.usage.description"),
+			icon: BookOpen,
+			url: "https://github.com/maximhq/bifrost/tree/main/docs/usage",
+			badge: t("docs.usage.badge"),
+			items: [
+				t("docs.usage.item1"),
+				t("docs.usage.item2"),
+				t("docs.usage.item3"),
+				t("docs.usage.item4"),
+			],
+		},
+		{
+			slug: "contributing",
+			title: t("docs.contributing.title"),
+			description: t("docs.contributing.description"),
+			icon: Users,
+			url: "https://github.com/maximhq/bifrost/tree/main/docs/contributing",
+			items: [
+				t("docs.contributing.item1"),
+				t("docs.contributing.item2"),
+				t("docs.contributing.item3"),
+				t("docs.contributing.item4"),
+			],
+		},
+		{
+			slug: "integration-examples",
+			title: t("docs.integration.title"),
+			description: t("docs.integration.description"),
+			icon: Code,
+			url: "https://github.com/maximhq/bifrost/tree/main/docs/usage/http-transport/integrations",
+			items: [
+				t("docs.integration.item1"),
+				t("docs.integration.item2"),
+				t("docs.integration.item3"),
+				t("docs.integration.item4"),
+			],
+		},
+		{
+			slug: "benchmarks",
+			title: t("docs.benchmarks.title"),
+			description: t("docs.benchmarks.description"),
+			icon: Zap,
+			url: "https://github.com/maximhq/bifrost/blob/main/docs/benchmarks.md",
+			items: [
+				t("docs.benchmarks.item1"),
+				t("docs.benchmarks.item2"),
+				t("docs.benchmarks.item3"),
+				t("docs.benchmarks.item4"),
+			],
+		},
+	];
+
+	const featuredDocs = [
+		{
+			slug: "mcp-documentation",
+			title: t("docs.featuredMcp.title"),
+			description: t("docs.featuredMcp.description"),
+			content: t("docs.featuredMcp.content"),
+			href: "https://github.com/maximhq/bifrost/blob/main/docs/mcp.md",
+			icon: FileText,
+			buttonText: t("docs.featuredMcp.buttonText"),
+			borderColor: "border-primary/20",
+			backgroundColor: "bg-primary/5",
+			iconColor: "text-primary",
+		},
+		{
+			slug: "governance-plugin",
+			title: t("docs.featuredGovernance.title"),
+			description: t("docs.featuredGovernance.description"),
+			content: t("docs.featuredGovernance.content"),
+			href: "https://github.com/maximhq/bifrost/blob/main/docs/governance.md",
+			icon: Shield,
+			buttonText: t("docs.featuredGovernance.buttonText"),
+			borderColor: "border-green-200 dark:border-green-800",
+			backgroundColor: "bg-green-50 dark:bg-green-950/20",
+			iconColor: "text-green-600",
+		},
+	];
+
 	return (
 		<div className="dark:bg-card bg-white">
 			<div className="mx-auto max-w-7xl">
@@ -85,12 +125,10 @@ export default function DocsPage() {
 					<div className="space-y-4 text-center">
 						<div className="bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm">
 							<BookOpen className="h-4 w-4" />
-							<span className="font-semibold">Documentation</span>
+							<span className="font-semibold">{t("docs.title")}</span>
 						</div>
-						<GradientHeader title="Power Up Your Bifrost Stack" />
-						<p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-							Everything you need to know about building production AI applications with Bifrost
-						</p>
+						<GradientHeader title={t("docs.header")} />
+						<p className="text-muted-foreground mx-auto max-w-2xl text-lg">{t("docs.subtitle")}</p>
 						<div className="flex justify-center gap-4">
 							<Button asChild>
 								<a
@@ -100,7 +138,7 @@ export default function DocsPage() {
 									data-testid="docs-view-full-documentation-link"
 								>
 									<ExternalLink className="mr-2 h-4 w-4" />
-									View Full Documentation
+									{t("docs.viewFullDocumentation")}
 								</a>
 							</Button>
 							<Button variant="outline" asChild>
@@ -111,7 +149,7 @@ export default function DocsPage() {
 									data-testid="docs-quick-start-guide-link"
 								>
 									<Play className="mr-2 h-4 w-4" />
-									Quick Start Guide
+									{t("docs.quickStartGuide")}
 								</a>
 							</Button>
 						</div>
@@ -122,7 +160,7 @@ export default function DocsPage() {
 						{docSections.map((section) => {
 							const Icon = section.icon;
 							return (
-								<Card key={section.title} className="group transition-all duration-200 hover:shadow-lg">
+								<Card key={section.slug} className="group transition-all duration-200 hover:shadow-lg">
 									<CardHeader>
 										<div className="flex items-center justify-between">
 											<div className="bg-primary/10 group-hover:bg-primary/20 mb-4 flex h-12 w-12 items-center justify-center rounded-lg transition-colors">
@@ -154,9 +192,9 @@ export default function DocsPage() {
 												target="_blank"
 												rel="noopener noreferrer"
 												className="flex items-center justify-center gap-2"
-												data-testid={`docs-read-more-${section.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
+												data-testid={`docs-read-more-${section.slug}`}
 											>
-												Read More
+												{t("docs.readMore")}
 												<ExternalLink className="h-4 w-4" />
 											</a>
 										</Button>
@@ -169,7 +207,7 @@ export default function DocsPage() {
 					{/* Featured Documentation */}
 					<div className="grid gap-6 pt-8 md:grid-cols-2">
 						{featuredDocs.map((doc, index) => (
-							<Card className={`${doc.borderColor} ${doc.backgroundColor}`} key={index}>
+							<Card className={`${doc.borderColor} ${doc.backgroundColor}`} key={doc.slug}>
 								<CardHeader>
 									<CardTitle className="flex items-center gap-2">
 										<doc.icon className={`h-5 w-5 ${doc.iconColor}`} />
@@ -184,7 +222,7 @@ export default function DocsPage() {
 											href={doc.href}
 											target="_blank"
 											rel="noopener noreferrer"
-											data-testid={`docs-featured-${doc.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`}
+											data-testid={`docs-featured-${doc.slug}`}
 										>
 											<doc.icon className="mr-2 h-4 w-4" />
 											{doc.buttonText}

@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n/context";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatQuarterPreview, quarterStartMonthOptions } from "@/lib/constants/governance";
@@ -22,10 +23,11 @@ interface QuarterStartSelectProps {
  * took effect - what differs is which quarter is labelled Q1.
  */
 export default function QuarterStartSelect({ "data-testid": testId, value, onChange }: QuarterStartSelectProps) {
+	const { t } = useI18n();
 	return (
 		<div className="bg-muted/20 mt-1 space-y-1.5 rounded-sm border p-2.5" data-testid={testId}>
 			<div className="flex w-full flex-row items-center gap-2">
-				<Label className="text-muted-foreground font-medium">Fiscal year starts</Label>
+				<Label className="text-muted-foreground font-medium">{t("quarterStart.fiscalYearStarts")}</Label>
 				<div className="ml-auto flex flex-col items-end">
 					<Select value={String(value ?? 1)} onValueChange={(month) => onChange(Number(month))}>
 						<SelectTrigger className="h-8 w-44" data-testid={testId ? `${testId}-trigger` : undefined}>

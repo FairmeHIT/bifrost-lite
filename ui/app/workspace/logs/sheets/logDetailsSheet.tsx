@@ -1,6 +1,7 @@
 import { SheetNavigationButtons } from "@/components/sheetNavigationButtons";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { useI18n } from "@/lib/i18n/context";
 import { useGetLogByIdQuery } from "@/lib/store/apis/logsApi";
 import type { LogEntry } from "@/lib/types/logs";
 import { useSheetNavigation } from "@/hooks/useSheetNavigation";
@@ -33,6 +34,7 @@ export function LogDetailSheet({
 	onViewSession,
 	onFilterByParentRequestId,
 }: LogDetailSheetProps) {
+	const { t } = useI18n();
 	const [pollingInterval, setPollingInterval] = useState(0);
 	const {
 		data: fullLog,
@@ -69,7 +71,7 @@ export function LogDetailSheet({
 			<SheetContent className="border-secondary flex w-full flex-col gap-4 overflow-x-hidden border p-8 sm:max-w-[60%]">
 				{!isFullDataReady ? (
 					<div className="flex h-full items-center justify-center">
-						<SheetTitle className="sr-only">Loading log details</SheetTitle>
+						<SheetTitle className="sr-only">{t("logs.loadingLogDetails")}</SheetTitle>
 						<Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
 					</div>
 				) : (
@@ -89,7 +91,7 @@ export function LogDetailSheet({
 										data-testid="session-button-view"
 										onClick={() => onViewSession(displayLog.parent_request_id as string, displayLog.id)}
 									>
-										View Session
+										{t("logs.viewSession")}
 									</Button>
 								) : null}
 								<SheetNavigationButtons

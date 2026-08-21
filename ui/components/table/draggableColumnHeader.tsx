@@ -6,6 +6,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdownMenu";
+import { useI18n } from "@/lib/i18n/context";
 import { cn } from "@/lib/utils";
 import { Header, flexRender } from "@tanstack/react-table";
 import { ArrowLeftToLine, ArrowRightToLine, Ellipsis, EyeOff, PinOff } from "lucide-react";
@@ -36,6 +37,7 @@ export function DraggableColumnHeader<TData>({
 }) {
 	const [isDragging, setIsDragging] = useState(false);
 	const [isDropTarget, setIsDropTarget] = useState(false);
+	const { t } = useI18n();
 	const pinned = header.column.getIsPinned();
 
 	const size = header.getSize();
@@ -87,7 +89,7 @@ export function DraggableColumnHeader<TData>({
 									className="ml-1 shrink-0 opacity-0 transition-opacity group-hover/col:opacity-100 focus-visible:opacity-100"
 									onClick={(e) => e.stopPropagation()}
 									onMouseDown={(e) => e.stopPropagation()}
-									aria-label="Column actions"
+									aria-label={t("columnConfig.columnActions")}
 								>
 									<Ellipsis className="h-3.5 w-3.5" />
 								</Button>
