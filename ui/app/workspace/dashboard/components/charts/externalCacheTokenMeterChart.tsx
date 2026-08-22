@@ -78,14 +78,14 @@ function ExternalCacheTokenMeterChartImpl({ data }: ExternalCacheTokenMeterChart
 					<div>
 						<div className="flex shrink-0 flex-col items-center pt-1 leading-none">
 							<div className="text-muted-foreground text-3xl font-semibold tracking-tight">{percentage.toFixed(1)}%</div>
-							<div className="mt-1 flex items-center gap-1 text-[11px] text-zinc-400">
+							<div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
 								<span>{t("dashboardCharts.ofInputTokensCachedByProvider")}</span>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<button
 											type="button"
 											data-testid="external-cache-meter-info-btn"
-											className="text-zinc-500 transition-colors hover:text-zinc-300"
+											className="text-muted-foreground transition-colors hover:text-foreground"
 											aria-label={t("dashboardCharts.externalCacheInfoAria")}
 										>
 											<Info className="h-3 w-3" />

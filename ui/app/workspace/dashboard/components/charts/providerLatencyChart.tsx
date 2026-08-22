@@ -3,6 +3,9 @@ import type { ProviderLatencyHistogramResponse } from "@/lib/types/logs";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
 	formatFullTimestamp,
 	formatLatency,
 	formatTimestamp,
@@ -28,8 +31,8 @@ function AllProvidersTooltip({ active, payload, displayProviders: providers }: a
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{providers.map((provider: string, idx: number) => {
 					const stats = data.by_provider?.[provider];
@@ -38,7 +41,7 @@ function AllProvidersTooltip({ active, payload, displayProviders: providers }: a
 						<div key={provider} className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: getModelColor(idx) }} />
-								<span className="max-w-[120px] truncate text-zinc-600 dark:text-zinc-400">{provider}</span>
+								<span className="max-w-[120px] truncate text-muted-foreground">{provider}</span>
 							</span>
 							<span className="font-medium">{formatLatency(stats.avg_latency)}</span>
 						</div>
@@ -57,39 +60,39 @@ function SingleProviderTooltip({ active, payload }: any) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full" style={{ backgroundColor: LATENCY_COLORS.avg }} />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.avg")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.avg")}</span>
 					</span>
 					<span className="font-medium">{formatLatency(data.avg_latency)}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full" style={{ backgroundColor: LATENCY_COLORS.p90 }} />
-						<span className="text-zinc-600 dark:text-zinc-400">P90</span>
+						<span className="text-muted-foreground">P90</span>
 					</span>
 					<span className="font-medium">{formatLatency(data.p90_latency)}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full" style={{ backgroundColor: LATENCY_COLORS.p95 }} />
-						<span className="text-zinc-600 dark:text-zinc-400">P95</span>
+						<span className="text-muted-foreground">P95</span>
 					</span>
 					<span className="font-medium">{formatLatency(data.p95_latency)}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full" style={{ backgroundColor: LATENCY_COLORS.p99 }} />
-						<span className="text-zinc-600 dark:text-zinc-400">P99</span>
+						<span className="text-muted-foreground">P99</span>
 					</span>
 					<span className="font-medium">{formatLatency(data.p99_latency)}</span>
 				</div>
-				<div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-1 dark:border-zinc-700">
-					<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.requests")}</span>
+				<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+					<span className="text-muted-foreground">{t("dashboardCharts.requests")}</span>
 					<span className="font-medium">{data.total_requests?.toLocaleString() || 0}</span>
 				</div>
 			</div>
@@ -151,19 +154,19 @@ function ProviderLatencyChartImpl({ data, chartType, startTime, endTime, selecte
 			<ResponsiveContainer width="100%" height="100%">
 				{chartType === "bar" ? (
 					<BarChart {...commonProps} barCategoryGap={1}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={55}
@@ -173,7 +176,7 @@ function ProviderLatencyChartImpl({ data, chartType, startTime, endTime, selecte
 						/>
 						{mode === "single" ? (
 							<>
-								<Tooltip content={<SingleProviderTooltip provider={selectedProvider} />} cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }} />
+								<Tooltip content={<SingleProviderTooltip provider={selectedProvider} />} cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }} />
 								<Bar
 									isAnimationActive={false}
 									dataKey="avg_latency"
@@ -211,7 +214,7 @@ function ProviderLatencyChartImpl({ data, chartType, startTime, endTime, selecte
 							<>
 								<Tooltip
 									content={<AllProvidersTooltip displayProviders={displayProviders} />}
-									cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+									cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 								/>
 								{displayProviders.map((provider, idx) => (
 									<Bar
@@ -229,19 +232,19 @@ function ProviderLatencyChartImpl({ data, chartType, startTime, endTime, selecte
 					</BarChart>
 				) : (
 					<AreaChart {...commonProps}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={55}

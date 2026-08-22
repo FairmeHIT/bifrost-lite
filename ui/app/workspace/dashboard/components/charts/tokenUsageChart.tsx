@@ -3,7 +3,7 @@ import type { TokenHistogramResponse } from "@/lib/types/logs";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCompactNumber } from "@/lib/utils/numbers";
-import { CHART_COLORS, formatFullTimestamp, formatTimestamp } from "../../utils/chartUtils";
+import { CHART_COLORS, CHART_GRID_CLASS, CHART_TICK_CLASS, CHART_TOOLTIP_CLASS, formatFullTimestamp, formatTimestamp } from "../../utils/chartUtils";
 import { ChartErrorBoundary } from "./chartErrorBoundary";
 import type { ChartType } from "./chartTypeToggle";
 
@@ -22,20 +22,20 @@ function CustomTooltip({ active, payload }: any) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-blue-500" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.input")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.input")}</span>
 					</span>
 					<span className="font-medium">{data.prompt_tokens.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-emerald-500" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.output")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.output")}</span>
 					</span>
 					<span className="font-medium">{data.completion_tokens.toLocaleString()}</span>
 				</div>
@@ -43,13 +43,13 @@ function CustomTooltip({ active, payload }: any) {
 					<div className="flex items-center justify-between gap-4">
 						<span className="flex items-center gap-1.5">
 							<span className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS.cachedReadTokens }} />
-							<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.cached")}</span>
+							<span className="text-muted-foreground">{t("dashboardCharts.cached")}</span>
 						</span>
 						<span className="font-medium">{data.cached_read_tokens.toLocaleString()}</span>
 					</div>
 				)}
-				<div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-1 dark:border-zinc-700">
-					<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.total")}</span>
+				<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+					<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
 					<span className="font-medium">{data.total_tokens.toLocaleString()}</span>
 				</div>
 			</div>
@@ -86,19 +86,19 @@ function TokenUsageChartImpl({ data, chartType, startTime, endTime }: TokenUsage
 			<ResponsiveContainer width="100%" height="100%">
 				{chartType === "bar" ? (
 					<BarChart {...commonProps} barCategoryGap={1}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}
@@ -106,7 +106,7 @@ function TokenUsageChartImpl({ data, chartType, startTime, endTime }: TokenUsage
 							domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
 							allowDataOverflow={false}
 						/>
-						<Tooltip content={<CustomTooltip />} cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }} />
+						<Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }} />
 						<Bar
 							isAnimationActive={false}
 							dataKey="uncached_prompt_tokens"
@@ -137,19 +137,19 @@ function TokenUsageChartImpl({ data, chartType, startTime, endTime }: TokenUsage
 					</BarChart>
 				) : (
 					<AreaChart {...commonProps}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}

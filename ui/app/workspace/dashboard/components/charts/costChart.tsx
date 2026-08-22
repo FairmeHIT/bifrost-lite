@@ -4,6 +4,9 @@ import { formatCurrencyNumber } from "@/lib/utils/numbers";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
 	computeDisplaySeries,
 	formatCost,
 	formatFullTimestamp,
@@ -32,8 +35,8 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedModel === "all" ? (
 					<>
@@ -45,7 +48,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								<div key={model} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-zinc-600 dark:text-zinc-400">{isOther ? OTHER_SERIES_LABEL : model}</span>
+										<span className="max-w-[120px] truncate text-muted-foreground">{isOther ? OTHER_SERIES_LABEL : model}</span>
 									</span>
 									<span className="font-medium" style={{ color: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }}>
 										{formatCost(cost)}
@@ -53,18 +56,18 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								</div>
 							);
 						})}
-						<div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-1 dark:border-zinc-700">
-							<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.total")}</span>
-							<span className="font-medium text-zinc-900 dark:text-zinc-100">{formatCost(data.total_cost)}</span>
+						<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+							<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
+							<span className="font-medium text-popover-foreground">{formatCost(data.total_cost)}</span>
 						</div>
 					</>
 				) : (
 					<div className="flex items-center justify-between gap-4">
 						<span className="flex items-center gap-1.5">
 							<span className="h-2 w-2 rounded-full" style={{ backgroundColor: getModelColor(0) }} />
-							<span className="text-zinc-600 dark:text-zinc-400">{selectedModel}</span>
+							<span className="text-muted-foreground">{selectedModel}</span>
 						</span>
-						<span className="font-medium text-zinc-900 dark:text-zinc-100">{formatCost(data.by_model?.[selectedModel] || 0)}</span>
+						<span className="font-medium text-popover-foreground">{formatCost(data.by_model?.[selectedModel] || 0)}</span>
 					</div>
 				)}
 			</div>
@@ -125,19 +128,19 @@ function CostChartImpl({ data, chartType, startTime, endTime, selectedModel }: C
 			<ResponsiveContainer width="100%" height="100%">
 				{chartType === "bar" ? (
 					<BarChart {...commonProps} barCategoryGap={1}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}
@@ -147,7 +150,7 @@ function CostChartImpl({ data, chartType, startTime, endTime, selectedModel }: C
 						/>
 						<Tooltip
 							content={<CustomTooltip selectedModel={selectedModel} displayModels={displayModels} />}
-							cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+							cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 						/>
 						{displayModels.map((model, idx) => (
 							<Bar
@@ -164,19 +167,19 @@ function CostChartImpl({ data, chartType, startTime, endTime, selectedModel }: C
 					</BarChart>
 				) : (
 					<AreaChart {...commonProps}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}
@@ -186,7 +189,7 @@ function CostChartImpl({ data, chartType, startTime, endTime, selectedModel }: C
 						/>
 						<Tooltip
 							content={<CustomTooltip selectedModel={selectedModel} displayModels={displayModels} />}
-							cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+							cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 						/>
 						{displayModels.map((model, idx) => {
 							const color = model === OTHER_SERIES_KEY ? OTHER_SERIES_COLOR : getModelColor(idx);

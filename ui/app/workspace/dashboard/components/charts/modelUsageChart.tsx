@@ -5,6 +5,9 @@ import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
 	CHART_COLORS,
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
 	computeDisplaySeries,
 	formatFullTimestamp,
 	formatTimestamp,
@@ -37,8 +40,8 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedModel === "all" ? (
 					<>
@@ -50,7 +53,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								<div key={model} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-zinc-600 dark:text-zinc-400">{isOther ? OTHER_SERIES_LABEL : model}</span>
+										<span className="max-w-[120px] truncate text-muted-foreground">{isOther ? OTHER_SERIES_LABEL : model}</span>
 									</span>
 									<span className="font-medium" style={{ color: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }}>
 										{total.toLocaleString()}
@@ -64,7 +67,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 						<div className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full bg-emerald-500" />
-								<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.success")}</span>
+								<span className="text-muted-foreground">{t("dashboardCharts.success")}</span>
 							</span>
 							<span className="font-medium text-emerald-600 dark:text-emerald-400">
 								{(data.by_model?.[selectedModel]?.success || 0).toLocaleString()}
@@ -73,7 +76,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 						<div className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full bg-red-500" />
-								<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.error")}</span>
+								<span className="text-muted-foreground">{t("dashboardCharts.error")}</span>
 							</span>
 							<span className="font-medium text-red-600 dark:text-red-400">
 								{(data.by_model?.[selectedModel]?.error || 0).toLocaleString()}
@@ -82,9 +85,9 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 						<div className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS.cancelled }} />
-								<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.cancelled")}</span>
+								<span className="text-muted-foreground">{t("dashboardCharts.cancelled")}</span>
 							</span>
-							<span className="font-medium text-zinc-600 dark:text-zinc-400">
+							<span className="font-medium text-muted-foreground">
 								{(data.by_model?.[selectedModel]?.cancelled || 0).toLocaleString()}
 							</span>
 						</div>
@@ -161,19 +164,19 @@ function ModelUsageChartImpl({ data, chartType, startTime, endTime, selectedMode
 			<ResponsiveContainer width="100%" height="100%">
 				{chartType === "bar" ? (
 					<BarChart {...commonProps} barCategoryGap={1}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={44}
@@ -183,7 +186,7 @@ function ModelUsageChartImpl({ data, chartType, startTime, endTime, selectedMode
 						/>
 						<Tooltip
 							content={<CustomTooltip selectedModel={selectedModel} displayModels={displayModels} />}
-							cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+							cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 						/>
 						{selectedModel === "all" ? (
 							displayModels.map((model, idx) => (
@@ -232,19 +235,19 @@ function ModelUsageChartImpl({ data, chartType, startTime, endTime, selectedMode
 					</BarChart>
 				) : (
 					<AreaChart {...commonProps}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={44}
@@ -254,7 +257,7 @@ function ModelUsageChartImpl({ data, chartType, startTime, endTime, selectedMode
 						/>
 						<Tooltip
 							content={<CustomTooltip selectedModel={selectedModel} displayModels={displayModels} />}
-							cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+							cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 						/>
 						{selectedModel === "all" ? (
 							displayModels.map((model, idx) => {

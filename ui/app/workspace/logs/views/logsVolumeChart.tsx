@@ -27,9 +27,9 @@ function EmptyChart() {
 					{ name: " ", value: 0 },
 				]}
 			>
-				<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
-				<XAxis dataKey="name" tick={{ fontSize: 13, className: "fill-zinc-500", dy: 5 }} tickLine={false} axisLine={false} />
-				<YAxis tick={{ fontSize: 13, className: "fill-zinc-500" }} tickLine={false} axisLine={false} width={40} domain={[0, 1]} />
+				<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/30" />
+				<XAxis dataKey="name" tick={{ fontSize: 13, className: "fill-muted-foreground", dy: 5 }} tickLine={false} axisLine={false} />
+				<YAxis tick={{ fontSize: 13, className: "fill-muted-foreground" }} tickLine={false} axisLine={false} width={40} domain={[0, 1]} />
 			</BarChart>
 		</ResponsiveContainer>
 	);
@@ -136,36 +136,36 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className="rounded-sm border border-popover bg-popover px-3 py-2 shadow-lg text-popover-foreground">
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="mt-2 flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-blue-500" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.total")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
 					</span>
 					<span className="font-medium">{data.count.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-emerald-500" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.success")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.success")}</span>
 					</span>
 					<span className="font-medium text-emerald-600 dark:text-emerald-400">{data.success.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-red-500" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.error")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.error")}</span>
 					</span>
 					<span className="font-medium text-red-600 dark:text-red-400">{data.error.toLocaleString()}</span>
 				</div>
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
 						<span className="h-2 w-2 rounded-full bg-zinc-400" />
-						<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.cancelled")}</span>
+						<span className="text-muted-foreground">{t("dashboardCharts.cancelled")}</span>
 					</span>
-					<span className="font-medium text-zinc-600 dark:text-zinc-400">{(data.cancelled ?? 0).toLocaleString()}</span>
+					<span className="font-medium text-muted-foreground">{(data.cancelled ?? 0).toLocaleString()}</span>
 				</div>
 			</div>
 		</div>
@@ -423,19 +423,19 @@ export function LogsVolumeChart({
 										onMouseLeave={handleMouseUp}
 										barCategoryGap={1}
 									>
-										<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+										<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/30" />
 										<XAxis
 											dataKey="index"
 											type="number"
 											domain={[-0.5, chartData.length - 0.5]}
-											tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+											tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 											tickLine={true}
 											axisLine={false}
 											tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 											interval="preserveStartEnd"
 										/>
 										<YAxis
-											tick={{ fontSize: 11, className: "fill-zinc-500" }}
+											tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 											tickLine={false}
 											axisLine={false}
 											width={40}

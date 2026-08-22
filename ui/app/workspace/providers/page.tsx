@@ -196,7 +196,7 @@ export default function Providers() {
 			<div className="flex flex-col" style={{ maxHeight: "calc(100vh - 70px)", width: "300px" }}>
 				<TooltipProvider>
 					<div className="custom-scrollbar flex-1 overflow-y-auto">
-						<div className="rounded-md bg-zinc-50/50 p-4 dark:bg-zinc-800/20">
+						<div className="rounded-md bg-muted p-4">
 							{/* Configured Providers (standard with keys + custom) */}
 							{configuredProviders.length > 0 && (
 								<div className="mb-4">

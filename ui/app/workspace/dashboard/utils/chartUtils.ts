@@ -156,3 +156,10 @@ export const CHART_COLORS = {
 	cost: "#f59e0b", // amber-500
 	cachedReadTokens: "#06b6d4", // cyan-500
 };
+
+// CSS class for chart tooltip — follows the cockpit theme (popover bg, cyan border)
+export const CHART_TOOLTIP_CLASS = "rounded-sm border border-popover bg-popover px-3 py-2 shadow-lg text-popover-foreground";
+// CSS class for tick labels
+export const CHART_TICK_CLASS = "fill-muted-foreground text-[11px]";
+// Cartesian grid stroke — uses the theme border color via Tailwind's stroke-*; falls back to muted-foreground with low opacity
+export const CHART_GRID_CLASS = "stroke-border/30";

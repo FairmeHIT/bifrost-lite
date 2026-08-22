@@ -19,7 +19,7 @@ function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
 		<thead
 			data-slot="table-header"
 			className={cn(
-				"bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),color-mix(in_srgb,var(--primary)_4%,transparent))] [&_tr]:border-b [&_tr]:border-b-primary/35 [&_th]:text-title [&_th]:tracking-wider",
+				"bg-[linear-gradient(180deg,color-mix(in_srgb,var(--primary)_14%,transparent),color-mix(in_srgb,var(--primary)_4%,transparent))] [&_tr]:border-b [&_tr]:border-b-primary/35 [&_th]:text-title [&_th]:text-xs [&_th]:font-semibold [&_th]:uppercase [&_th]:tracking-wider",
 				className,
 			)}
 			{...props}

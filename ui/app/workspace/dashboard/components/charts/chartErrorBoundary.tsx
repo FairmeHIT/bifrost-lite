@@ -11,9 +11,9 @@ function EmptyChart() {
 					{ name: " ", value: 0 },
 				]}
 			>
-				<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
-				<XAxis dataKey="name" tick={{ fontSize: 13, className: "fill-zinc-500", dy: 5 }} tickLine={false} axisLine={false} />
-				<YAxis tick={{ fontSize: 13, className: "fill-zinc-500" }} tickLine={false} axisLine={false} width={40} domain={[0, 1]} />
+				<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border/30" />
+				<XAxis dataKey="name" tick={{ fontSize: 13, className: "fill-muted-foreground", dy: 5 }} tickLine={false} axisLine={false} />
+				<YAxis tick={{ fontSize: 13, className: "fill-muted-foreground" }} tickLine={false} axisLine={false} width={40} domain={[0, 1]} />
 			</BarChart>
 		</ResponsiveContainer>
 	);

@@ -4,6 +4,9 @@ import { formatCurrencyNumber } from "@/lib/utils/numbers";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
 	computeDisplaySeries,
 	formatCost,
 	formatFullTimestamp,
@@ -32,8 +35,8 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedProvider === "all" ? (
 					<>
@@ -45,7 +48,7 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 								<div key={provider} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-zinc-600 dark:text-zinc-400">
+										<span className="max-w-[120px] truncate text-muted-foreground">
 											{isOther ? OTHER_SERIES_LABEL : provider}
 										</span>
 									</span>
@@ -53,8 +56,8 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 								</div>
 							);
 						})}
-						<div className="flex items-center justify-between gap-4 border-t border-zinc-200 pt-1 dark:border-zinc-700">
-							<span className="text-zinc-600 dark:text-zinc-400">{t("dashboardCharts.total")}</span>
+						<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+							<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
 							<span className="font-medium">{formatCost(data.total_cost)}</span>
 						</div>
 					</>
@@ -62,7 +65,7 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 					<div className="flex items-center justify-between gap-4">
 						<span className="flex items-center gap-1.5">
 							<span className="h-2 w-2 rounded-full" style={{ backgroundColor: getModelColor(0) }} />
-							<span className="text-zinc-600 dark:text-zinc-400">{selectedProvider}</span>
+							<span className="text-muted-foreground">{selectedProvider}</span>
 						</span>
 						<span className="font-medium">{formatCost(data.by_provider?.[selectedProvider] || 0)}</span>
 					</div>
@@ -125,19 +128,19 @@ function ProviderCostChartImpl({ data, chartType, startTime, endTime, selectedPr
 			<ResponsiveContainer width="100%" height="100%">
 				{chartType === "bar" ? (
 					<BarChart {...commonProps} barCategoryGap={1}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}
@@ -147,7 +150,7 @@ function ProviderCostChartImpl({ data, chartType, startTime, endTime, selectedPr
 						/>
 						<Tooltip
 							content={<CustomTooltip selectedProvider={selectedProvider} displayProviders={displayProviders} />}
-							cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+							cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 						/>
 						{displayProviders.map((provider, idx) => (
 							<Bar
@@ -164,19 +167,19 @@ function ProviderCostChartImpl({ data, chartType, startTime, endTime, selectedPr
 					</BarChart>
 				) : (
 					<AreaChart {...commonProps}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+						<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 						<XAxis
 							dataKey="index"
 							type="number"
 							domain={[-0.5, chartData.length - 0.5]}
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 							interval="preserveStartEnd"
 						/>
 						<YAxis
-							tick={{ fontSize: 11, className: "fill-zinc-500" }}
+							tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 							tickLine={false}
 							axisLine={false}
 							width={50}

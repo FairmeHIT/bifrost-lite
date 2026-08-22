@@ -9,6 +9,9 @@ import NumberFlow from "@number-flow/react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import {
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
 	displayModelLabel,
 	formatFullTimestamp,
 	formatTimestamp,
@@ -46,8 +49,8 @@ function UsageShareTooltip({ active, payload, models, modelLabels }: any) {
 	if (!data) return null;
 
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{formatFullTimestamp(data.timestamp)}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{models.map((model: string, idx: number) => {
 					const val = data[`model_${idx}`];
@@ -58,7 +61,7 @@ function UsageShareTooltip({ active, payload, models, modelLabels }: any) {
 						<div key={model || `__unnamed_${idx}`} className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-								<span className={`max-w-[140px] truncate text-zinc-600 dark:text-zinc-400${isUnnamed ? " italic" : ""}`}>
+								<span className={`max-w-[140px] truncate text-muted-foreground${isUnnamed ? " italic" : ""}`}>
 									{displayModelLabel(model, modelLabels)}
 								</span>
 							</span>
@@ -168,19 +171,19 @@ function TopModelsChart({
 					<ChartErrorBoundary resetKey={`${startTime}-${endTime}-${chartData.length}`}>
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={chartData} margin={{ top: 6, right: 4, left: 4, bottom: 0 }} barCategoryGap={1}>
-								<CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+								<CartesianGrid strokeDasharray="3 3" vertical={false} className={CHART_GRID_CLASS} />
 								<XAxis
 									dataKey="index"
 									type="number"
 									domain={[-0.5, chartData.length - 0.5]}
-									tick={{ fontSize: 11, className: "fill-zinc-500", dy: 5 }}
+									tick={{ fontSize: 11, className: "fill-muted-foreground", dy: 5 }}
 									tickLine={false}
 									axisLine={false}
 									tickFormatter={(idx) => chartData[Math.round(idx)]?.formattedTime || ""}
 									interval="preserveStartEnd"
 								/>
 								<YAxis
-									tick={{ fontSize: 11, className: "fill-zinc-500" }}
+									tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 									tickLine={false}
 									axisLine={false}
 									width={48}
@@ -190,7 +193,7 @@ function TopModelsChart({
 								/>
 								<Tooltip
 									content={<UsageShareTooltip models={displayModels} modelLabels={modelLabels} />}
-									cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }}
+									cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
 								/>
 								{displayModels.map((model, idx) => (
 									<Bar

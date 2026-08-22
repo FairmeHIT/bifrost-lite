@@ -7,7 +7,7 @@ import { COMPACT_NUMBER_FORMAT, formatCompactNumber as formatNumber } from "@/li
 import NumberFlow from "@number-flow/react";
 import { memo, useCallback, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { getModelColor } from "../utils/chartUtils";
+import { CHART_GRID_CLASS, CHART_TICK_CLASS, CHART_TOOLTIP_CLASS, getModelColor } from "../utils/chartUtils";
 import { ChartCard } from "./charts/chartCard";
 import { ChartErrorBoundary } from "./charts/chartErrorBoundary";
 import { formatCost, SortableHeader, TrendBadge } from "./rankingsShared";
@@ -29,8 +29,8 @@ function TopDimensionTooltip({ active, payload }: any) {
 	const data = payload[0]?.payload;
 	if (!data) return null;
 	return (
-		<div className="rounded-sm border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<div className="mb-1 text-xs text-zinc-500">{data.displayName}</div>
+		<div className={CHART_TOOLTIP_CLASS}>
+			<div className="mb-1 text-xs text-muted-foreground">{data.displayName}</div>
 			<div className="text-sm font-medium">
 				{data.total_requests.toLocaleString()} {t("dashboardCharts.requests")}
 			</div>
@@ -124,10 +124,10 @@ function TopDimensionChart({
 					<ChartErrorBoundary resetKey={`${chartData.length}`}>
 						<ResponsiveContainer width="100%" height="100%">
 							<BarChart data={chartData} layout="vertical" margin={{ top: 6, right: 20, left: 0, bottom: 0 }} barCategoryGap={4}>
-								<CartesianGrid strokeDasharray="3 3" horizontal={false} className="stroke-zinc-200 dark:stroke-zinc-700" />
+								<CartesianGrid strokeDasharray="3 3" horizontal={false} className={CHART_GRID_CLASS} />
 								<XAxis
 									type="number"
-									tick={{ fontSize: 11, className: "fill-zinc-500" }}
+									tick={{ fontSize: 11, className: "fill-muted-foreground" }}
 									tickLine={false}
 									axisLine={false}
 									tickFormatter={(v) => formatNumber(v)}
@@ -142,7 +142,7 @@ function TopDimensionChart({
 											<foreignObject x={x - labelWidth} y={y - 9} width={labelWidth} height={18} style={{ overflow: "visible" }}>
 												<div
 													title={payload.value}
-													className="truncate text-right text-[11px] leading-[18px] text-zinc-500 dark:text-zinc-400"
+													className="truncate text-right text-[11px] leading-[18px] text-muted-foreground"
 													style={{ width: labelWidth }}
 												>
 													{payload.value}
@@ -154,7 +154,7 @@ function TopDimensionChart({
 									axisLine={false}
 									width={100}
 								/>
-								<Tooltip content={<TopDimensionTooltip />} cursor={{ fill: "#8c8c8f", fillOpacity: 0.15 }} />
+								<Tooltip content={<TopDimensionTooltip />} cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }} />
 								<Bar dataKey="total_requests" isAnimationActive={false} barSize={24} radius={[0, 4, 4, 0]}>
 									{chartData.map((entry, idx) => (
 										<Cell key={entry.id} fill={getModelColor(idx)} />
