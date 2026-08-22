@@ -390,7 +390,7 @@ const statusPillStyles: Record<string, string> = {
 	success: "bg-green-50 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-900",
 	error: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/40 dark:text-red-400 dark:border-red-900",
 	processing: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900",
-	cancelled: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/40 dark:text-gray-400 dark:border-gray-800",
+	cancelled: "bg-muted text-muted-foreground border-border",
 };
 const statusDotStyles: Record<string, string> = {
 	success: "bg-green-500",
@@ -460,16 +460,16 @@ function CopyInlineButton({ text, testId }: { text: string; testId?: string }) {
 
 type MessageRole = "system" | "user" | "assistant" | "reasoning" | "tool";
 const messageToneClass: Record<MessageRole, string> = {
-	system: "bg-zinc-50 border-zinc-200 dark:bg-zinc-900/40 dark:border-zinc-800",
+	system: "bg-muted border-border",
 	user: "bg-blue-50/60 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900",
-	assistant: "bg-white border-zinc-200 dark:bg-zinc-900 dark:border-zinc-800",
+	assistant: "bg-card border-border",
 	reasoning: "bg-violet-50/70 border-violet-200 dark:bg-violet-950/30 dark:border-violet-900",
 	tool: "bg-amber-50/70 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900",
 };
 const messageDotClass: Record<MessageRole, string> = {
 	system: "bg-zinc-400",
 	user: "bg-blue-500",
-	assistant: "bg-zinc-900 dark:bg-zinc-100",
+	assistant: "bg-muted-foreground dark:bg-muted-foreground",
 	reasoning: "bg-violet-500",
 	tool: "bg-amber-500",
 };
@@ -902,7 +902,7 @@ export function LogDetailView({
 							</div>
 						)}
 					</div>
-					<div className="flex shrink-0 items-center gap-1.5 rounded-sm border bg-white px-2 py-1 text-[12px] font-medium dark:bg-zinc-900">
+					<div className="flex shrink-0 items-center gap-1.5 rounded-sm border bg-card px-2 py-1 text-[12px] font-medium dark:bg-muted">
 						<RenderProviderIcon provider={log.provider as ProviderIconType} size="xs" />
 						<span className="uppercase">{log.provider}</span>
 					</div>

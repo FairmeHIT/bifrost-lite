@@ -432,7 +432,7 @@ export const createColumns = (
 				return (
 					<div className="flex items-center gap-2 pl-4">
 						<span className="font-mono text-[12px] tabular-nums">{formatLatency(latency)}</span>
-						<div className="relative h-1.5 w-[56px] overflow-hidden rounded-sm bg-zinc-200 dark:bg-zinc-700">
+						<div className="relative h-1.5 w-[56px] overflow-hidden rounded-sm bg-muted-foreground/20 dark:bg-muted-foreground/20">
 							<div className={cn("absolute inset-y-0 left-0 rounded-sm opacity-85", tone)} style={{ width: `${pct}%` }} />
 						</div>
 					</div>

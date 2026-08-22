@@ -313,7 +313,7 @@ export function LogsHeaderView({
 				<Search className="mr-0.5 ml-2 size-4" />
 				<Input
 					type="text"
-					className="!h-7 rounded-tl-none rounded-tr-sm rounded-br-sm rounded-bl-none border-none bg-slate-50 shadow-none outline-none focus-visible:ring-0"
+					className="!h-7 rounded-tl-none rounded-tr-sm rounded-br-sm rounded-bl-none border-none bg-transparent shadow-none outline-none focus-visible:ring-0"
 					placeholder={t("logs.search")}
 					value={localSearch}
 					onChange={(e) => handleSearchChange(e.target.value)}

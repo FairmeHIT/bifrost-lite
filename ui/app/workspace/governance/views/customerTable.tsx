@@ -482,7 +482,7 @@ export default function CustomersTable({
 												<TableCell
 													className={cn(
 														"dark:bg-card dark:group-hover:bg-muted",
-														isExhausted ? "bg-red-500/5 group-hover:bg-red-500/10" : "bg-white group-hover:bg-muted",
+														isExhausted ? "bg-red-500/5 group-hover:bg-red-500/10" : "bg-transparent group-hover:bg-muted",
 														ACTIONS_COLUMN_CLASS,
 													)}
 												>

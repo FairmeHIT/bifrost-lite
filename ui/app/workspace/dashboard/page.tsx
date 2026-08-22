@@ -425,7 +425,7 @@ export default function DashboardPage() {
 				{/* Header */}
 				<div className="flex items-center justify-between p-4">
 					<div className="flex items-center gap-2">
-						<h1 className="text-lg font-semibold">{t("dashboard.title")}</h1>
+						<h1 className="text-title text-sm font-semibold tracking-widest uppercase">{t("dashboard.title")}</h1>
 					</div>
 					<div className="flex items-center gap-2">
 						<ExportPopover

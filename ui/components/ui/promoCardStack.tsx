@@ -107,7 +107,7 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 					>
 						<Card
 							className={cn(
-								"flex h-full w-full flex-col gap-0 rounded-lg px-2.5 py-2",
+								"flex h-full w-full flex-col gap-0 rounded-[2px] px-2.5 py-2 corner-brackets",
 								visibleCards.length < 2 ? "shadow-none" : "shadow-md",
 								card.variant === "warning" && "border-amber-500/50 bg-amber-50 dark:border-amber-500/70 dark:bg-amber-950/20",
 							)}
@@ -136,6 +136,7 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 							<CardContent className="text-muted-foreground mt-0 flex-1 overflow-y-auto px-1 pt-0 pb-1 text-xs">
 								{typeof card.description === "string" ? card.description : card.description}
 							</CardContent>
+							<span className="corner-brackets-bottom" aria-hidden="true" />
 						</Card>
 					</div>
 				);

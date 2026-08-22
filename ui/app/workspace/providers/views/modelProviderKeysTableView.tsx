@@ -270,7 +270,7 @@ export default function ModelProviderKeysTableView({ provider, className, header
 									<TableRow
 										key={key.id}
 										data-testid={`key-row-${key.name}`}
-										className="text-sm transition-colors hover:bg-white"
+										className="text-sm transition-colors hover:bg-muted"
 										onClick={() => {}}
 									>
 										<TableCell className="overflow-hidden">

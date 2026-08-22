@@ -662,7 +662,7 @@ const SuggestionDropdown = ({
 			<CustomDropdown
 				options={filteredSuggestions}
 				onChange={(opt) => handleSuggestionSelect(opt as DropdownOption)}
-				className={cn("custom-scrollbar max-h-full min-w-[200px] bg-white p-1 shadow-lg", suggestionDropdownClassName)}
+				className={cn("custom-scrollbar max-h-full min-w-[200px] bg-white p-1 shadow-lg dark:bg-popover dark:border-popover", suggestionDropdownClassName)}
 				selectFirstOptionByDefault
 				style={{
 					maxHeight:
