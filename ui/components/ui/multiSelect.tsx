@@ -628,7 +628,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 				if (isPopoverOpen) {
 					announce(`Dropdown opened. ${totalOptions} options available. Use arrow keys to navigate.`);
 				} else {
-					announce("Dropdown closed.");
+					announce(t("ui.multiSelect.dropdownClosed"));
 				}
 				prevIsOpen.current = isPopoverOpen;
 			}

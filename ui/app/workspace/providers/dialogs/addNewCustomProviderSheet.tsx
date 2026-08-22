@@ -12,6 +12,7 @@ import { cleanPathOverrides } from "@/lib/utils/validation";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useI18n } from "@/lib/i18n/context";
+import { t } from "@/lib/i18n";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -21,7 +22,10 @@ import { AllowedRequestsFields } from "../fragments/allowedRequestsFields";
 const formSchema = z.object({
 	name: z.string().min(1),
 	baseFormat: z.string().min(1),
-	base_url: z.string().min(1, "Base URL is required").url("Must be a valid URL"),
+	base_url: z
+		.string()
+		.min(1, { error: () => t("providerForm.baseUrlRequired") })
+		.url({ error: () => t("providerForm.validUrl") }),
 	allowed_requests: allowedRequestsSchema,
 	request_path_overrides: z.record(z.string(), z.string().optional()).optional(),
 	is_key_less: z.boolean().optional(),

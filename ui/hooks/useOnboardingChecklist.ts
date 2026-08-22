@@ -4,6 +4,7 @@ import { useGetModelConfigsQuery, useGetVirtualKeysQuery } from "@/lib/store/api
 import { useGetSCIMProvidersQuery } from "@enterprise/lib/store/apis/scimApi";
 import { useGetAllKeysQuery } from "@/lib/store/apis/providersApi";
 import { useMemo } from "react";
+import { t } from "@/lib/i18n";
 
 export const METADATA_DISMISSED_KEY = "onboarding_dismissed";
 export const METADATA_SKIPPED_KEY = "onboarding_skipped";
@@ -16,7 +17,7 @@ export const REMIND_LATER_COOKIE = "bifrost_onboarding_remind_at";
 // card can read the same hidden/snoozed state the floating widget uses.
 export const HIDDEN_UNTIL_NAV_COOKIE = "bifrost_onboarding_hidden_until_nav";
 
-export type OnboardingSection = "Security" | "Provider Setup" | "Everything Else";
+export type OnboardingSection = string;
 
 export interface OnboardingStep {
 	id: string;
@@ -72,7 +73,7 @@ export function useOnboardingChecklist({ skip = false }: { skip?: boolean } = {}
 		const common: OnboardingStep[] = [
 			{
 				id: "cors",
-				title: "Restrict CORS origins",
+				title: t("onboarding.restrictCors"),
 				route: "/workspace/config/security",
 				section: "Security",
 				complete:
@@ -80,23 +81,23 @@ export function useOnboardingChecklist({ skip = false }: { skip?: boolean } = {}
 			},
 			{
 				id: "dashboard-auth",
-				title: "Set up dashboard auth",
+				title: t("onboarding.setupDashboardAuth"),
 				route: "/workspace/config/security",
 				section: "Security",
 				complete: !!authConfig?.is_enabled && authValueSet(authConfig?.admin_username) && authValueSet(authConfig?.admin_password),
 			},
 			{
 				id: "enforce-inference-auth",
-				title: "Enforce auth on inference",
+				title: t("onboarding.enforceAuthInference"),
 				route: "/workspace/config/security",
 				section: "Security",
 				complete: !!clientConfig?.enforce_auth_on_inference,
 			},
 			{
 				id: "provider-key",
-				title: "Add a provider key",
+				title: t("onboarding.addProviderKey"),
 				route: "/workspace/providers",
-				section: "Provider Setup",
+				section: t("onboarding.providerSetup"),
 				complete: (allKeys?.length ?? 0) > 0,
 			},
 		];
@@ -104,23 +105,23 @@ export function useOnboardingChecklist({ skip = false }: { skip?: boolean } = {}
 			? [
 					{
 						id: "scim",
-						title: "Configure SCIM provisioning",
+						title: t("onboarding.configureScim"),
 						route: "/workspace/scim",
-						section: "Everything Else",
+						section: t("onboarding.everythingElse"),
 						complete: (scimProviders?.length ?? 0) > 0,
 					},
 					{
 						id: "models",
-						title: "Configure governance model catalog",
+						title: t("onboarding.configureGovernanceCatalog"),
 						route: "/workspace/model-catalog",
-						section: "Everything Else",
+						section: t("onboarding.everythingElse"),
 						complete: (modelConfigsResponse?.total_count ?? 0) > 0,
 					},
 					{
 						id: "virtual-keys",
 						title: "Set up virtual keys / access profiles",
 						route: "/workspace/virtual-keys",
-						section: "Everything Else",
+						section: t("onboarding.everythingElse"),
 						complete: (vksResponse?.total_count ?? 0) > 0,
 					},
 				]

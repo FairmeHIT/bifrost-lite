@@ -3,6 +3,8 @@
 // compact mono budget labels, allocation-bar math, and the neutral swatch ramp
 // consistent across every screen that renders a provider config.
 
+
+import { t } from "@/lib/i18n";
 export interface BudgetLineLike {
 	max_limit?: number | null;
 	reset_duration?: string;
@@ -47,7 +49,7 @@ export function money(value: number | null | undefined): string {
 
 // "$50/wk · $150/mo" — every budget line joined, in ascending period order.
 // Returns `fallback` when empty.
-export function budgetLinesLabel(budgets: BudgetLineLike[] | undefined, fallback = "No budget"): string {
+export function budgetLinesLabel(budgets: BudgetLineLike[] | undefined, fallback = t("budget.noBudget")): string {
 	if (!budgets || budgets.length === 0) return fallback;
 	return [...budgets]
 		.sort((a, b) => periodRank(a.reset_duration) - periodRank(b.reset_duration))

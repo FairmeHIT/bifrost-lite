@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useBranding } from "@/lib/hooks/useBranding";
 import { LanguageToggle } from "@/components/languageToggle";
 import { useI18n } from "@/lib/i18n/context";
+import { t } from "@/lib/i18n";
 import { getErrorMessage, useLoginMutation } from "@/lib/store/apis";
 import { BooksIcon, DiscordLogoIcon, GithubLogoIcon } from "@phosphor-icons/react";
 import { useNavigate } from "@tanstack/react-router";
@@ -13,7 +14,7 @@ import { useEffect, useState } from "react";
 
 const externalLinks = [
 	{
-		title: "Discord Server",
+		title: t("login.discordServer"),
 		url: "https://discord.gg/exN5KAydbU",
 		icon: DiscordLogoIcon,
 	},
@@ -23,7 +24,7 @@ const externalLinks = [
 		icon: GithubLogoIcon,
 	},
 	{
-		title: "Full Documentation",
+		title: t("login.fullDocumentation"),
 		url: "https://docs.getbifrost.ai",
 		icon: BooksIcon,
 		strokeWidth: 1,

@@ -1,4 +1,5 @@
 import { useI18n } from "@/lib/i18n/context";
+import { t } from "@/lib/i18n";
 import { formatCost, formatLatency } from "@/app/workspace/dashboard/utils/chartUtils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -168,13 +169,13 @@ export function getMessage(log?: LogEntry) {
 	} else if (log?.speech_input) {
 		return log.speech_input.input;
 	} else if (log?.transcription_input) {
-		return "Audio file";
+		return t("logs.audioFile");
 	} else if (log?.image_generation_input?.prompt) {
 		return log.image_generation_input.prompt;
 	}
 	const obj = log?.object as string | undefined;
 	if (obj === "image_edit" || obj === "image_edit_stream" || obj === "image_variation") {
-		return "Image file";
+		return t("logs.imageFile");
 	}
 	if (log?.content_summary) {
 		return log.content_summary;
@@ -398,7 +399,7 @@ export const createColumns = (
 		{
 			id: "app",
 			accessorKey: "app",
-			header: "App",
+			header: t("logs.columnApp"),
 			size: 140,
 			cell: ({ row }) => {
 				const app = row.original.app ? mapAppToClientApp(row.original.app) : mapUserAgentToApp(row.original.user_agent);
@@ -491,7 +492,7 @@ export const createColumns = (
 			size: 120,
 			cell: ({ row }) => {
 				if (row.original.cost == null) {
-					return <div className="pl-4 font-mono text-[12px]">N/A</div>;
+					return <div className="pl-4 font-mono text-[12px]">{t("common.na")}</div>;
 				}
 				return <div className="pl-4 font-mono text-sm tabular-nums">{formatCost(row.original.cost)}</div>;
 			},
@@ -501,19 +502,19 @@ export const createColumns = (
 	const attributionColumns: ColumnDef<LogEntry>[] = [
 		{
 			id: "virtual_key",
-			header: "Virtual Key",
+			header: t("logs.columnVirtualKey"),
 			size: 170,
 			cell: ({ row }) => <AttributionCell name={row.original.virtual_key_name} id={row.original.virtual_key_id} />,
 		},
 		{
 			id: "routing_rule",
-			header: "Routing Rule",
+			header: t("logs.columnRoutingRule"),
 			size: 170,
 			cell: ({ row }) => <AttributionCell name={row.original.routing_rule_name} id={row.original.routing_rule_id} />,
 		},
 		{
 			id: "team",
-			header: "Team",
+			header: t("logs.columnTeam"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell
@@ -526,7 +527,7 @@ export const createColumns = (
 		},
 		{
 			id: "customer",
-			header: "Customer",
+			header: t("logs.columnCustomer"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell
@@ -539,13 +540,13 @@ export const createColumns = (
 		},
 		{
 			id: "user",
-			header: "User",
+			header: t("logs.columnUser"),
 			size: 150,
 			cell: ({ row }) => <AttributionCell name={row.original.user_name} id={row.original.user_id} />,
 		},
 		{
 			id: "business_unit",
-			header: "Business Unit",
+			header: t("logs.columnBusinessUnit"),
 			size: 150,
 			cell: ({ row }) => (
 				<AttributionCell

@@ -4,6 +4,7 @@ import * as React from "react";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
 	return (
@@ -16,8 +17,8 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
 }
 
 function CommandDialog({
-	title = "Command Palette",
-	description = "Search for a command to run...",
+	title = t("ui.command.palette"),
+	description = t("ui.command.description"),
 	children,
 	className,
 	showCloseButton = true,

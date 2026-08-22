@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { OtelFormFragment } from "../../fragments/otelFormFragment";
 import PluginTracingSheet from "../../sheets/pluginTracingSheet";
+import { t } from "@/lib/i18n";
 
 interface OtelViewProps {
 	onDelete?: () => void;
@@ -43,7 +44,7 @@ export default function OtelView({ onDelete, isDeleting }: OtelViewProps) {
 					toast.success("OTEL configuration updated successfully");
 				})
 				.catch((err) => {
-					toast.error("Failed to update OTEL configuration", {
+					toast.error(t("observability.otelConfigFailed"), {
 						description: getErrorMessage(err),
 					});
 					reject(err);

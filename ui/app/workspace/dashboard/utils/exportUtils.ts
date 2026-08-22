@@ -17,32 +17,60 @@ import type {
 	ProviderTokenHistogramResponse,
 	TokenHistogramResponse,
 } from "@/lib/types/logs";
+import { t } from "@/lib/i18n";
 
 type CSVData = { headers: string[]; rows: unknown[][] };
 
+const csvTimestamp = () => t("dashboard.export.timestamp");
+const csvTotalRequests = () => t("dashboard.export.totalRequests");
+const csvSuccess = () => t("dashboard.export.success");
+const csvError = () => t("dashboard.export.error");
+const csvCancelled = () => t("dashboard.export.cancelled");
+const csvPromptTokens = () => t("dashboard.export.promptTokens");
+const csvCompletionTokens = () => t("dashboard.export.completionTokens");
+const csvTotalTokens = () => t("dashboard.export.totalTokens");
+const csvCachedReadTokens = () => t("dashboard.export.cachedReadTokens");
+const csvTotalCost = () => t("dashboard.export.totalCost");
+const csvAvgLatency = () => t("dashboard.export.avgLatency");
+const csvP90 = () => t("dashboard.export.p90");
+const csvP95 = () => t("dashboard.export.p95");
+const csvP99 = () => t("dashboard.export.p99");
+const csvModel = () => t("dashboard.export.model");
+const csvCanonicalModel = () => t("dashboard.export.canonicalModel");
+const csvProvider = () => t("dashboard.export.provider");
+const csvSuccessCount = () => t("dashboard.export.successCount");
+const csvSuccessRate = () => t("dashboard.export.successRate");
+const csvThroughput = () => t("dashboard.export.throughput");
+const csvRequestsTrend = () => t("dashboard.export.requestsTrend");
+const csvTokensTrend = () => t("dashboard.export.tokensTrend");
+const csvCostTrend = () => t("dashboard.export.costTrend");
+const csvLatencyTrend = () => t("dashboard.export.latencyTrend");
+const csvThroughputTrend = () => t("dashboard.export.throughputTrend");
+const csvNA = () => t("common.na");
+
 export function overviewVolumeToCSV(data: LogsHistogramResponse | null): CSVData {
-	const headers = ["Timestamp", "Total Requests", "Success", "Error", "Cancelled"];
+	const headers = [csvTimestamp(), csvTotalRequests(), csvSuccess(), csvError(), csvCancelled()];
 	const rows = (data?.buckets ?? []).map((b) => [b.timestamp, b.count, b.success, b.error, b.cancelled ?? 0]);
 	return { headers, rows };
 }
 
 export function overviewTokensToCSV(data: TokenHistogramResponse | null): CSVData {
-	const headers = ["Timestamp", "Prompt Tokens", "Completion Tokens", "Total Tokens", "Cached Read Tokens"];
+	const headers = [csvTimestamp(), csvPromptTokens(), csvCompletionTokens(), csvTotalTokens(), csvCachedReadTokens()];
 	const rows = (data?.buckets ?? []).map((b) => [b.timestamp, b.prompt_tokens, b.completion_tokens, b.total_tokens, b.cached_read_tokens]);
 	return { headers, rows };
 }
 
 export function overviewCostToCSV(data: CostHistogramResponse | null): CSVData {
 	const models = data?.models ?? [];
-	const headers = ["Timestamp", "Total Cost", ...models];
+	const headers = [csvTimestamp(), csvTotalCost(), ...models];
 	const rows = (data?.buckets ?? []).map((b) => [b.timestamp, b.total_cost, ...models.map((m) => b.by_model?.[m] ?? 0)]);
 	return { headers, rows };
 }
 
 export function overviewModelUsageToCSV(data: ModelHistogramResponse | null): CSVData {
 	const models = data?.models ?? [];
-	const modelHeaders = models.flatMap((m) => [`${m} Total`, `${m} Success`, `${m} Error`, `${m} Cancelled`]);
-	const headers = ["Timestamp", ...modelHeaders];
+	const modelHeaders = models.flatMap((m) => [`${m} ${t("dashboard.export.total")}`, `${m} ${csvSuccess()}`, `${m} ${csvError()}`, `${m} ${csvCancelled()}`]);
+	const headers = [csvTimestamp(), ...modelHeaders];
 	const rows = (data?.buckets ?? []).map((b) => [
 		b.timestamp,
 		...models.flatMap((m) => {
@@ -54,7 +82,7 @@ export function overviewModelUsageToCSV(data: ModelHistogramResponse | null): CS
 }
 
 export function overviewLatencyToCSV(data: LatencyHistogramResponse | null): CSVData {
-	const headers = ["Timestamp", "Avg Latency (ms)", "P90 (ms)", "P95 (ms)", "P99 (ms)", "Total Requests"];
+	const headers = [csvTimestamp(), csvAvgLatency(), csvP90(), csvP95(), csvP99(), csvTotalRequests()];
 	const rows = (data?.buckets ?? []).map((b) => [
 		b.timestamp,
 		b.avg_latency,
@@ -68,15 +96,15 @@ export function overviewLatencyToCSV(data: LatencyHistogramResponse | null): CSV
 
 export function providerCostToCSV(data: ProviderCostHistogramResponse | null): CSVData {
 	const providers = data?.providers ?? [];
-	const headers = ["Timestamp", "Total Cost", ...providers];
+	const headers = [csvTimestamp(), csvTotalCost(), ...providers];
 	const rows = (data?.buckets ?? []).map((b) => [b.timestamp, b.total_cost, ...providers.map((p) => b.by_provider?.[p] ?? 0)]);
 	return { headers, rows };
 }
 
 export function providerTokensToCSV(data: ProviderTokenHistogramResponse | null): CSVData {
 	const providers = data?.providers ?? [];
-	const provHeaders = providers.flatMap((p) => [`${p} Prompt`, `${p} Completion`, `${p} Total`]);
-	const headers = ["Timestamp", ...provHeaders];
+	const provHeaders = providers.flatMap((p) => [`${p} ${csvPromptTokens()}`, `${p} ${csvCompletionTokens()}`, `${p} ${csvTotalTokens()}`]);
+	const headers = [csvTimestamp(), ...provHeaders];
 	const rows = (data?.buckets ?? []).map((b) => [
 		b.timestamp,
 		...providers.flatMap((p) => {
@@ -89,8 +117,8 @@ export function providerTokensToCSV(data: ProviderTokenHistogramResponse | null)
 
 export function providerLatencyToCSV(data: ProviderLatencyHistogramResponse | null): CSVData {
 	const providers = data?.providers ?? [];
-	const provHeaders = providers.flatMap((p) => [`${p} Avg (ms)`, `${p} P90 (ms)`, `${p} P95 (ms)`, `${p} P99 (ms)`]);
-	const headers = ["Timestamp", ...provHeaders];
+	const provHeaders = providers.flatMap((p) => [`${p} ${csvAvgLatency()}`, `${p} ${csvP90()}`, `${p} ${csvP95()}`, `${p} ${csvP99()}`]);
+	const headers = [csvTimestamp(), ...provHeaders];
 	const rows = (data?.buckets ?? []).map((b) => [
 		b.timestamp,
 		...providers.flatMap((p) => {
@@ -103,21 +131,21 @@ export function providerLatencyToCSV(data: ProviderLatencyHistogramResponse | nu
 
 export function modelRankingsToCSV(data: ModelRankingsResponse | null): CSVData {
 	const headers = [
-		"Model",
-		"Canonical Model",
-		"Provider",
-		"Total Requests",
-		"Success Count",
-		"Success Rate (%)",
-		"Total Tokens",
-		"Total Cost ($)",
-		"Avg Latency (ms)",
-		"Throughput (tok/s)",
-		"Requests Trend (%)",
-		"Tokens Trend (%)",
-		"Cost Trend (%)",
-		"Latency Trend (%)",
-		"Throughput Trend (%)",
+		csvModel(),
+		csvCanonicalModel(),
+		csvProvider(),
+		csvTotalRequests(),
+		csvSuccessCount(),
+		csvSuccessRate(),
+		csvTotalTokens(),
+		t("dashboard.export.totalCostDollar"),
+		csvAvgLatency(),
+		csvThroughput(),
+		csvRequestsTrend(),
+		csvTokensTrend(),
+		csvCostTrend(),
+		csvLatencyTrend(),
+		csvThroughputTrend(),
 	];
 	const rows = (data?.rankings ?? []).map((r) => [
 		r.model,
@@ -130,11 +158,11 @@ export function modelRankingsToCSV(data: ModelRankingsResponse | null): CSVData 
 		r.total_cost,
 		r.avg_latency,
 		r.throughput,
-		r.trend.has_previous_period ? r.trend.requests_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.tokens_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.cost_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.latency_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.throughput_trend : "N/A",
+		r.trend.has_previous_period ? r.trend.requests_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.tokens_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.cost_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.latency_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.throughput_trend : csvNA(),
 	]);
 	return { headers, rows };
 }
@@ -143,12 +171,12 @@ export function dimensionRankingsToCSV(data: DimensionRankingsResponse | null, d
 	const headers = [
 		`${dimensionLabel} ID`,
 		`${dimensionLabel} Name`,
-		"Total Requests",
-		"Total Tokens",
-		"Total Cost ($)",
-		"Requests Trend (%)",
-		"Tokens Trend (%)",
-		"Cost Trend (%)",
+		csvTotalRequests(),
+		csvTotalTokens(),
+		t("dashboard.export.totalCostDollar"),
+		csvRequestsTrend(),
+		csvTokensTrend(),
+		csvCostTrend(),
 	];
 	const rows = (data?.rankings ?? []).map((r) => [
 		r.id,
@@ -156,9 +184,9 @@ export function dimensionRankingsToCSV(data: DimensionRankingsResponse | null, d
 		r.total_requests,
 		r.total_tokens,
 		r.total_cost,
-		r.trend.has_previous_period ? r.trend.requests_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.tokens_trend : "N/A",
-		r.trend.has_previous_period ? r.trend.cost_trend : "N/A",
+		r.trend.has_previous_period ? r.trend.requests_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.tokens_trend : csvNA(),
+		r.trend.has_previous_period ? r.trend.cost_trend : csvNA(),
 	]);
 	return { headers, rows };
 }
@@ -206,18 +234,18 @@ export type ExportTab = DashboardTab | "all";
  * PDF section headings, and for the DOM ids the PDF capture reads.
  */
 export const DASHBOARD_EXPORT_TABS: { value: DashboardTab; label: string; sectionId: string }[] = [
-	{ value: "overview", label: "Overview", sectionId: "dashboard-section-overview" },
-	{ value: "provider-usage", label: "Provider Usage", sectionId: "dashboard-section-provider-usage" },
-	{ value: "rankings", label: "Model Rankings", sectionId: "dashboard-section-rankings" },
-	{ value: "team-rankings", label: "Team Rankings", sectionId: "dashboard-section-team-rankings" },
-	{ value: "customer-rankings", label: "Customer Rankings", sectionId: "dashboard-section-customer-rankings" },
-	{ value: "bu-rankings", label: "BU Rankings", sectionId: "dashboard-section-bu-rankings" },
-	{ value: "user-rankings", label: "User Rankings", sectionId: "dashboard-section-user-rankings" },
-	{ value: "virtual-key-rankings", label: "Virtual Key Rankings", sectionId: "dashboard-section-virtual-key-rankings" },
-	{ value: "app-rankings", label: "App Rankings", sectionId: "dashboard-section-app-rankings" },
+	{ value: "overview", label: t("dashboard.overview"), sectionId: "dashboard-section-overview" },
+	{ value: "provider-usage", label: t("dashboard.providerUsage"), sectionId: "dashboard-section-provider-usage" },
+	{ value: "rankings", label: t("dashboard.modelRankings"), sectionId: "dashboard-section-rankings" },
+	{ value: "team-rankings", label: t("dashboard.teamRankings"), sectionId: "dashboard-section-team-rankings" },
+	{ value: "customer-rankings", label: t("dashboard.customerRankings"), sectionId: "dashboard-section-customer-rankings" },
+	{ value: "bu-rankings", label: t("dashboard.buRankings"), sectionId: "dashboard-section-bu-rankings" },
+	{ value: "user-rankings", label: t("dashboard.userRankings"), sectionId: "dashboard-section-user-rankings" },
+	{ value: "virtual-key-rankings", label: t("dashboard.virtualKeyRankings"), sectionId: "dashboard-section-virtual-key-rankings" },
+	{ value: "app-rankings", label: t("dashboard.appRankings"), sectionId: "dashboard-section-app-rankings" },
 ];
 
-export const getExportTabLabel = (tab: DashboardTab): string => DASHBOARD_EXPORT_TABS.find((t) => t.value === tab)?.label ?? "Current Tab";
+export const getExportTabLabel = (tab: DashboardTab): string => DASHBOARD_EXPORT_TABS.find((t2) => t2.value === tab)?.label ?? t("export.currentTab");
 
 /** Return all CSV sections for the selected scope. Each entry becomes its own sheet / file section. */
 export function getCSVSections(data: DashboardData, tab: ExportTab): { name: string; csv: CSVData }[] {

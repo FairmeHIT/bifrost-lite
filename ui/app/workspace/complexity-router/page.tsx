@@ -28,6 +28,7 @@ import {
 } from "@/lib/types/complexityRouter";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/lib/i18n/context";
+import { t } from "@/lib/i18n";
 import { RbacOperation, RbacResource, useRbac } from "@enterprise/lib";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExternalLink, LoaderCircle, RotateCcw, Save } from "lucide-react";
@@ -95,7 +96,10 @@ function getBoundaryFields(t: (path: string, params?: Record<string, string | nu
 	];
 }
 
-const boundaryField = z.number({ error: "Enter a number between 0 and 1" }).gt(0, "Must be greater than 0").lt(1, "Must be less than 1");
+const boundaryField = z
+	.number({ error: () => t("complexityRouter.boundaryNumber") })
+	.gt(0, { error: () => t("complexityRouter.boundaryGt0") })
+	.lt(1, { error: () => t("complexityRouter.boundaryLt1") });
 
 const analyzerConfigSchema = z.object({
 	tier_boundaries: z
@@ -106,21 +110,29 @@ const analyzerConfigSchema = z.object({
 		})
 		.superRefine((data, ctx) => {
 			if (Number.isFinite(data.medium_complex) && Number.isFinite(data.simple_medium) && data.medium_complex <= data.simple_medium) {
-				ctx.addIssue({ code: "custom", message: "Must be greater than Simple → Medium", path: ["medium_complex"] });
+				ctx.addIssue({
+					code: "custom",
+					message: t("complexityRouter.boundaryGtSimpleMedium"),
+					path: ["medium_complex"],
+				});
 			}
 			if (
 				Number.isFinite(data.complex_reasoning) &&
 				Number.isFinite(data.medium_complex) &&
 				data.complex_reasoning <= data.medium_complex
 			) {
-				ctx.addIssue({ code: "custom", message: "Must be greater than Medium → Complex", path: ["complex_reasoning"] });
+				ctx.addIssue({
+					code: "custom",
+					message: t("complexityRouter.boundaryGtMediumComplex"),
+					path: ["complex_reasoning"],
+				});
 			}
 		}),
 	keywords: z.object({
-		simple_keywords: z.array(z.string()).min(1, "Simple keywords cannot be empty"),
-		code_keywords: z.array(z.string()).min(1, "Code keywords cannot be empty"),
-		technical_keywords: z.array(z.string()).min(1, "Technical keywords cannot be empty"),
-		reasoning_keywords: z.array(z.string()).min(1, "Reasoning keywords cannot be empty"),
+		simple_keywords: z.array(z.string()).min(1, { error: () => t("complexityRouter.simpleKeywordsRequired") }),
+		code_keywords: z.array(z.string()).min(1, { error: () => t("complexityRouter.codeKeywordsRequired") }),
+		technical_keywords: z.array(z.string()).min(1, { error: () => t("complexityRouter.technicalKeywordsRequired") }),
+		reasoning_keywords: z.array(z.string()).min(1, { error: () => t("complexityRouter.reasoningKeywordsRequired") }),
 	}),
 });
 
@@ -385,18 +397,18 @@ export default function ComplexityRouterPage() {
 							const inputId = `boundary-${key}`;
 							const errorId = `${inputId}-error`;
 							const { onChange, ...boundaryInputProps } = register(`tier_boundaries.${key}`, {
-								required: "Enter a number between 0 and 1",
+								required: t("complexityRouter.boundaryNumber"),
 								setValueAs: boundaryValueAsNumber,
 								validate: (value) => {
-									if (!Number.isFinite(value)) return "Enter a number between 0 and 1";
-									if (value <= 0) return "Must be greater than 0";
-									if (value >= 1) return "Must be less than 1";
+									if (!Number.isFinite(value)) return t("complexityRouter.boundaryNumber");
+									if (value <= 0) return t("complexityRouter.boundaryGt0");
+									if (value >= 1) return t("complexityRouter.boundaryLt1");
 									const { simple_medium, medium_complex } = liveBoundaries;
 									if (key === "medium_complex" && Number.isFinite(simple_medium) && value <= simple_medium) {
-										return "Must be greater than Simple → Medium";
+										return t("complexityRouter.boundaryGtSimpleMedium");
 									}
 									if (key === "complex_reasoning" && Number.isFinite(medium_complex) && value <= medium_complex) {
-										return "Must be greater than Medium → Complex";
+										return t("complexityRouter.boundaryGtMediumComplex");
 									}
 									return true;
 								},

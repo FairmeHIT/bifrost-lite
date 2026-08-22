@@ -244,10 +244,10 @@ export function ValueEditor({
 	}
 
 	const placeholder = isArrayOperator
-		? "Enter comma-separated values or JSON array"
+		? t("ui.valueEditor.commaSeparated")
 		: isRegexOperator
 			? "e.g., .* (any), openai|anthropic (multiple), ^gpt.* (prefix)"
-			: fieldData?.placeholder || "Enter value...";
+			: fieldData?.placeholder || t("ui.valueEditor.enterValue");
 
 	// Use textarea for array inputs
 	if (isArrayOperator) {

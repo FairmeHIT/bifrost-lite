@@ -8,6 +8,7 @@ import NumberAndSelect from "@/components/ui/numberAndSelect";
 import { DottedSeparator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/lib/i18n/context";
+import { t } from "@/lib/i18n";
 import { supportsCalendarAlignment } from "@/lib/constants/governance";
 import {
 	getErrorMessage,
@@ -30,8 +31,11 @@ interface GovernanceFormFragmentProps {
 
 const budgetLineSchema = z.object({
 	id: z.string().optional(),
-	max_limit: z.number({ error: "Budget limit must be a number" }).nonnegative("Budget limit cannot be negative").optional(),
-	reset_duration: z.string().min(1, "Reset duration is required"),
+	max_limit: z
+		.number({ error: () => t("governanceForm.budgetLimitNumber") })
+		.nonnegative({ error: () => t("governanceForm.budgetLimitNegative") })
+		.optional(),
+	reset_duration: z.string().min(1, { error: () => t("governanceForm.resetDurationRequired") }),
 });
 
 const formSchema = z.object({

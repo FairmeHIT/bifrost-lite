@@ -3,6 +3,7 @@ import { CustomDropdown } from "./dropdown";
 import { DropdownOption } from "./types";
 import { cn } from "@/lib/utils";
 import { Icons } from "../../icons";
+import { t } from "@/lib/i18n";
 
 const EMPTY_SELECTED_VALUES: ReadonlyArray<DropdownOption<unknown>> = [];
 interface SearchableDropdownProps<T = {}> {
@@ -37,7 +38,7 @@ export function SearchableDropdown<T = {}>({
 	groupHeadingClassName,
 	searchPlaceholder = "Search",
 	searchClassName,
-	noResultsText = "No results found",
+	noResultsText = t("ui.searchableDropdown.noResults"),
 	maxHeight = "300px",
 	dropdownClassName,
 	removeEmptyGroups,

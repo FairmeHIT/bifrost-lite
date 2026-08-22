@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 
 interface UseCopyToClipboardOptions {
 	successMessage?: string;
@@ -8,7 +9,7 @@ interface UseCopyToClipboardOptions {
 }
 
 export function useCopyToClipboard(options: UseCopyToClipboardOptions = {}) {
-	const { successMessage = "Copied to clipboard", errorMessage = "Failed to copy", resetDelay = 2000 } = options;
+	const { successMessage = t("ui.copyToClipboard.success"), errorMessage = t("ui.copyToClipboard.failed"), resetDelay = 2000 } = options;
 	const [copied, setCopied] = useState(false);
 	const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 

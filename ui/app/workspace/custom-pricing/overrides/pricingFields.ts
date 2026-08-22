@@ -4,6 +4,8 @@
 // model-catalog detail sheet) can reuse the labels without pulling that
 // component's form/mutation dependencies into their bundle.
 
+
+import { t } from "@/lib/i18n";
 export const REQUEST_TYPE_GROUPS = [
 	{
 		label: "Chat / Text / Responses",
@@ -303,7 +305,7 @@ export const PRICING_FIELDS = [
 	},
 	{
 		key: "inference_geo_us_multiplier",
-		label: "Inference geo US multiplier",
+		label: t("pricing.geoMultiplier"),
 		group: "chat",
 		requestTypeGroups: ["chat"],
 	},

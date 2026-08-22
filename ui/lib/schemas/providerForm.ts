@@ -2,6 +2,7 @@ import { KnownProvidersNames } from "@/lib/constants/logs";
 import { aliasConfigSchema, secretVarSchema } from "@/lib/types/schemas";
 import { isValidAliases, isValidVertexAuthCredentials } from "@/lib/utils/validation";
 import { z } from "zod";
+import { t } from "@/lib/i18n";
 
 // Base schemas for reusable types
 const ProxyTypeSchema = z.enum(["none", "http", "socks5", "environment"]);
@@ -16,7 +17,7 @@ const ProxyConfigSchema = z
 	.superRefine((v, ctx) => {
 		const needsUrl = v.type === "http" || v.type === "socks5";
 		if (needsUrl && !(v.url && v.url.trim())) {
-			ctx.addIssue({ code: "custom", path: ["url"], message: "Proxy URL is required for http/socks5" });
+			ctx.addIssue({ code: "custom", path: ["url"], message: t("providerForm.proxyUrlRequired") });
 		}
 		const user = v.username?.trim();
 		const pass = v.password?.trim();
@@ -24,7 +25,7 @@ const ProxyConfigSchema = z
 			ctx.addIssue({
 				code: "custom",
 				path: ["password"],
-				message: "Username and password must both be provided",
+				message: t("providerForm.usernamePasswordRequired"),
 			});
 		}
 	});
@@ -33,8 +34,8 @@ const NetworkConfigSchema = z
 	.object({
 		base_url: z.string().optional(),
 		extra_headers: z.record(z.string(), z.string()).optional(),
-		default_request_timeout_in_seconds: z.number().min(1, "Timeout must be greater than 0 seconds"),
-		max_retries: z.number().min(0, "Max retries cannot be negative"),
+		default_request_timeout_in_seconds: z.number().min(1, { error: () => t("providerForm.timeoutMustBeGreaterThan0Seconds") }),
+		max_retries: z.number().min(0, { error: () => t("providerForm.maxRetriesCannotBeNegative") }),
 		retry_backoff_initial: z.number(),
 		retry_backoff_max: z.number(),
 		insecure_skip_verify: z.boolean().optional(),
@@ -46,17 +47,17 @@ const NetworkConfigSchema = z
 		http2_ping_interval_in_seconds: z.number().int().min(0).max(3600).optional(),
 	})
 	.refine((v) => v.retry_backoff_initial <= v.retry_backoff_max, {
-		message: "Initial backoff must be <= max backoff",
+		error: () => t("providerForm.initialBackoffMaxBackoff"),
 		path: ["retry_backoff_initial"],
 	});
 
 const ConcurrencyAndBufferSizeSchema = z
 	.object({
-		concurrency: z.number().min(1, "Concurrency must be greater than 0"),
-		buffer_size: z.number().min(1, "Buffer size must be greater than 0"),
+		concurrency: z.number().min(1, { error: () => t("providerForm.concurrencyMustBeGreaterThan0") }),
+		buffer_size: z.number().min(1, { error: () => t("providerForm.bufferSizeMustBeGreaterThan0") }),
 	})
 	.refine((data) => data.concurrency <= data.buffer_size, {
-		message: "Concurrency must be less than or equal to buffer size",
+		error: () => t("providerForm.concurrencyBufferSize"),
 		path: ["concurrency"],
 	});
 
@@ -75,28 +76,28 @@ const AllowedRequestsSchema = z.object({
 
 // Key configuration schemas
 const AzureKeyConfigSchema = z.object({
-	endpoint: z.string().min(1, "Endpoint is required for Azure keys"),
+	endpoint: z.string().min(1, { error: () => t("providerForm.endpointIsRequiredForAzureKeys") }),
 	client_id: z.string().optional(),
 	client_secret: z.string().optional(),
 	tenant_id: z.string().optional(),
 });
 
 const VertexKeyConfigSchema = z.object({
-	project_id: z.string().min(1, "Project ID is required for Vertex AI keys"),
+	project_id: z.string().min(1, { error: () => t("providerForm.projectIdIsRequiredForVertexAiKeys") }),
 	project_number: z.string().optional(),
-	region: z.string().min(1, "Region is required for Vertex AI keys"),
+	region: z.string().min(1, { error: () => t("providerForm.regionIsRequiredForVertexAiKeys") }),
 	auth_credentials: z
 		.string()
 		.optional()
 		.refine((value) => !value || isValidVertexAuthCredentials(value), {
-			message: "Auth Credentials must be a valid JSON object or env.VAR format when provided",
+			error: () => t("providerForm.authCredentialsFormat"),
 		}),
 	force_single_region: z.boolean().optional(),
 });
 
 // S3 bucket configuration for Bedrock batch operations
 const S3BucketConfigSchema = z.object({
-	bucket_name: z.string().min(1, "Bucket name is required"),
+	bucket_name: z.string().min(1, { error: () => t("providerForm.bucketNameIsRequired") }),
 	prefix: z.string().optional(),
 	is_default: z.boolean().optional(),
 });
@@ -126,7 +127,7 @@ const BedrockKeyConfigSchema = z
 		access_key: z.string(),
 		secret_key: z.string(),
 		session_token: z.string().optional(),
-		region: z.string().min(1, "Region is required for Bedrock keys"),
+		region: z.string().min(1, { error: () => t("providerForm.regionIsRequiredForBedrockKeys") }),
 		role_arn: z.string().optional(),
 		external_id: z.string().optional(),
 		session_name: z.string().optional(),
@@ -157,7 +158,7 @@ const BedrockKeyConfigSchema = z
 			return true;
 		},
 		{
-			message: "For Bedrock: either provide both Access Key and Secret Key, or leave both empty for IAM role authentication",
+			message: t("providerForm.bedrockKeysRequired"),
 			path: ["access_key"],
 		},
 	);
@@ -167,7 +168,7 @@ const BedrockMantleKeyConfigSchema = z
 		access_key: z.string(),
 		secret_key: z.string(),
 		session_token: z.string().optional(),
-		region: z.string().min(1, "Region is required for Bedrock Mantle keys"),
+		region: z.string().min(1, { error: () => t("providerForm.regionIsRequiredForBedrockMantleKeys") }),
 		role_arn: z.string().optional(),
 		external_id: z.string().optional(),
 		session_name: z.string().optional(),
@@ -189,7 +190,7 @@ const BedrockMantleKeyConfigSchema = z
 			return bothEmpty || bothProvided;
 		},
 		{
-			message: "For Bedrock Mantle: either provide both Access Key and Secret Key, or leave both empty for IAM role authentication",
+			message: t("providerForm.bedrockMantleKeysRequired"),
 			path: ["access_key"],
 		},
 	);
@@ -200,14 +201,14 @@ const ReplicateKeyConfigSchema = z.object({
 
 const KeySchema = z.object({
 	id: z.string(),
-	name: z.string().min(1, "Name is required for the key"),
+	name: z.string().min(1, { error: () => t("providerForm.nameIsRequiredForTheKey") }),
 	value: z.string(),
 	models: z.array(z.string()),
-	weight: z.number().min(0.1, "Key weights must be between 0.1 and 1").max(1, "Key weights must be between 0.1 and 1"),
+	weight: z.number().min(0.1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") }).max(1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") }),
 	aliases: z
 		.record(z.string(), aliasConfigSchema)
 		.optional()
-		.refine((value) => !value || isValidAliases(value), { message: "Deployments must have a Model ID set on every row" }),
+		.refine((value) => !value || isValidAliases(value), { error: () => t("providerForm.deploymentsModelId") }),
 	azure_key_config: AzureKeyConfigSchema.optional(),
 	vertex_key_config: VertexKeyConfigSchema.optional(),
 	bedrock_key_config: BedrockKeyConfigSchema.optional(),
@@ -219,7 +220,7 @@ const KeySchema = z.object({
 // Main provider form schema
 export const ProviderFormSchema = z
 	.object({
-		selectedProvider: z.string().min(1, "Please select a provider"),
+		selectedProvider: z.string().min(1, { error: () => t("providerForm.pleaseSelectAProvider") }),
 		customProviderName: z.string().optional(),
 		baseProviderType: z.enum([...KnownProvidersNames, ""]).optional(),
 		keys: z.array(KeySchema),
@@ -242,7 +243,7 @@ export const ProviderFormSchema = z
 			if (!data.customProviderName?.trim()) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Custom provider name is required",
+					message: t("providerForm.customProviderNameRequired"),
 					path: ["customProviderName"],
 				});
 			}
@@ -250,7 +251,7 @@ export const ProviderFormSchema = z
 			if (!/^[a-z0-9_-]+$/.test(data.customProviderName?.trim() || "")) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Custom provider name must be lowercase alphanumeric and may include '-' or '_' (no spaces)",
+					message: t("providerForm.customProviderNameFormat"),
 					path: ["customProviderName"],
 				});
 			}
@@ -258,7 +259,7 @@ export const ProviderFormSchema = z
 			if (!data.baseProviderType) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Base provider type is required for custom providers",
+					message: t("providerForm.baseProviderTypeRequired"),
 					path: ["baseProviderType"],
 				});
 			}
@@ -266,7 +267,7 @@ export const ProviderFormSchema = z
 			if (KnownProvidersNames.includes(data.customProviderName?.trim() as (typeof KnownProvidersNames)[number])) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Custom provider name cannot be the same as a standard provider name",
+					message: t("providerForm.customProviderNameNotStandard"),
 					path: ["customProviderName"],
 				});
 			}
@@ -278,7 +279,7 @@ export const ProviderFormSchema = z
 			if (!data.networkConfig?.base_url) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Base URL is required for this provider",
+					message: t("providerForm.baseUrlRequired"),
 					path: ["networkConfig", "base_url"],
 				});
 			}
@@ -286,7 +287,7 @@ export const ProviderFormSchema = z
 			if (data.networkConfig?.base_url && !/^https?:\/\/.+/.test(data.networkConfig.base_url)) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "Base URL must start with http:// or https://",
+					message: t("providerForm.baseUrlHttp"),
 					path: ["networkConfig", "base_url"],
 				});
 			}
@@ -298,7 +299,7 @@ export const ProviderFormSchema = z
 			if (data.keys.length < 1) {
 				ctx.addIssue({
 					code: z.ZodIssueCode.custom,
-					message: "At least one API key is required",
+					message: t("providerForm.atLeastOneApiKey"),
 					path: ["keys"],
 				});
 			}
@@ -309,7 +310,7 @@ export const ProviderFormSchema = z
 				if (effectiveProviderType !== "vertex" && effectiveProviderType !== "bedrock" && !key.value.trim()) {
 					ctx.addIssue({
 						code: z.ZodIssueCode.custom,
-						message: "API key value cannot be empty",
+						message: t("providerForm.apiKeyValueNotEmpty"),
 						path: ["keys", index, "value"],
 					});
 				}
