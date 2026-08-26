@@ -323,6 +323,36 @@ When a full URL (with scheme and host) is provided in `request_path_overrides`, 
 
 In this example, instead of using OpenAI's default `/v1/chat/completions` path, requests will be sent to `https://custom-endpoint.example.com/api/v2/chat`.
 
+### Reasoning Effort Levels
+
+The `reasoning_effort_levels` field lists the reasoning effort values your upstream accepts. Custom OpenAI-compatible providers pass `reasoning_effort` through verbatim (they skip the built-in providers' per-model effort normalization), so a value like `"max"` that your upstream does not accept would previously be forwarded and rejected with a `400`. Declaring the accepted levels makes Bifrost clamp out-of-range values to the nearest declared level on both the chat completions and responses paths:
+
+- Values in the list pass through unchanged (`"low"`, `"medium"`, `"high"`, `"none"` …).
+- Values above the highest declared level (`"max"` / `"xhigh"` when the upstream tops out at `"high"`) are clamped down to it.
+- Values below the lowest declared level (e.g. `"minimal"` on an upstream whose levels start at `"low"`) clamp to the lowest declared level.
+- Omitted or empty means **no clamping** — today's passthrough behavior, so existing configurations are unaffected.
+
+**Example: SenseNova-style deepseek-v4 deployment that only accepts `low` / `medium` / `high` / `none`**
+
+```json
+{
+    "providers": {
+        "sensenova": {
+            "keys": [{ "name": "sensenova-key-1", "value": "env.SENSENOVA_API_KEY", "models": ["*"], "weight": 1.0 }],
+            "network_config": {
+                "base_url": "https://token.sensenova.cn/v1"
+            },
+            "custom_provider_config": {
+                "base_provider_type": "openai",
+                "reasoning_effort_levels": ["none", "low", "medium", "high"]
+            }
+        }
+    }
+}
+```
+
+With this configuration, a client sending `"reasoning_effort": "max"` is served with `"high"` instead of receiving a `400` from the upstream, while `"none"`, `"low"`, `"medium"` and `"high"` pass through unchanged.
+
 ### TLS for Self-Signed or Internal Certificates
 
 When connecting to providers with HTTPS endpoints that use self-signed certificates or internal CAs (e.g., air-gapped environments, internal services), you can configure TLS in `network_config`:

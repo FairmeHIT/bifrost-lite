@@ -126,6 +126,17 @@ func ToOpenAIChatRequest(ctx *schemas.BifrostContext, bifrostReq *schemas.Bifros
 	default:
 		// Check if provider is a custom provider
 		if isCustomProvider, ok := ctx.Value(schemas.BifrostContextKeyIsCustomProvider).(bool); ok && isCustomProvider {
+			// Custom providers skip filterOpenAISpecificParameters (and with it
+			// normalizeReasoningEffort), so reasoning_effort would be forwarded
+			// verbatim — including values like "max" that an OpenAI-compatible
+			// upstream may reject. Clamp it to the levels the upstream declares
+			// via custom_provider_config.reasoning_effort_levels (no-op when the
+			// provider declares none).
+			if openaiReq.ChatParameters.Reasoning != nil {
+				reasoningCopy := *openaiReq.ChatParameters.Reasoning
+				openaiReq.ChatParameters.Reasoning = &reasoningCopy
+				openaiReq.ChatParameters.Reasoning.Effort = clampCustomProviderReasoningEffort(ctx, openaiReq.ChatParameters.Reasoning.Effort)
+			}
 			return openaiReq
 		}
 		openaiReq.filterOpenAISpecificParameters(capModel)

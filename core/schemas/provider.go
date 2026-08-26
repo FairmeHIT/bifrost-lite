@@ -534,6 +534,15 @@ type CustomProviderConfig struct {
 	BaseProviderType     ModelProvider          `json:"base_provider_type"`               // Base provider type
 	AllowedRequests      *AllowedRequests       `json:"allowed_requests,omitempty"`       // Allowed requests for the custom provider
 	RequestPathOverrides map[RequestType]string `json:"request_path_overrides,omitempty"` // Mapping of request type to its custom path which will override the default path of the provider (not allowed for Bedrock)
+	// ReasoningEffortLevels lists the reasoning effort values this upstream
+	// accepts, in no particular order (e.g. ["none","low","medium","high"] for
+	// a gateway whose deepseek-v4 deployment rejects "max"). Values in the
+	// list pass through unchanged; canonical values above the highest declared
+	// level (or below the lowest, e.g. "minimal" on an upstream that starts at
+	// "low") are clamped to the nearest declared level instead of being
+	// forwarded to an upstream that would reject them. Omitted or empty means
+	// no clamping — today's passthrough behavior.
+	ReasoningEffortLevels []string `json:"reasoning_effort_levels,omitempty"`
 }
 
 // IsOperationAllowed checks if a specific operation is allowed for this custom provider

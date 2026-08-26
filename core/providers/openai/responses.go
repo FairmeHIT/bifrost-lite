@@ -356,6 +356,15 @@ func ToOpenAIResponsesRequest(ctx *schemas.BifrostContext, bifrostReq *schemas.B
 				// Clear reasoning for non-reasoning OpenAI models to avoid API errors
 				req.ResponsesParameters.Reasoning = nil
 			}
+
+			// Clamp reasoning effort to the levels the custom provider's upstream
+			// declares via custom_provider_config.reasoning_effort_levels (no-op
+			// for built-in providers and custom providers that declare none).
+			// Runs after all provider-specific normalization so it sees the final
+			// value that would otherwise cross the wire.
+			if req.ResponsesParameters.Reasoning != nil {
+				req.ResponsesParameters.Reasoning.Effort = clampCustomProviderReasoningEffort(ctx, req.ResponsesParameters.Reasoning.Effort)
+			}
 		}
 
 		// Strip top_p for OpenAI reasoning models (o1/o3 series) which reject it

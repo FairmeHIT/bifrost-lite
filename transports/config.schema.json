@@ -7576,6 +7576,14 @@
             }
           },
           "additionalProperties": false
+        },
+        "reasoning_effort_levels": {
+          "type": "array",
+          "description": "Reasoning effort values this upstream accepts (e.g. ['none','low','medium','high'] for a deepseek-v4 deployment that rejects 'max'). Values in the list pass through unchanged; canonical values above the highest declared level (or below the lowest, e.g. 'minimal' on an upstream that starts at 'low') are clamped to the nearest declared level instead of being forwarded to an upstream that would reject them. Omitted or empty means no clamping (passthrough).",
+          "items": {
+            "type": "string"
+          },
+          "optional": true
         }
       },
       "required": ["base_provider_type"],

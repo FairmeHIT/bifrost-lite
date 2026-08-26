@@ -5945,6 +5945,17 @@ func (bifrost *Bifrost) requestWorker(provider schemas.Provider, config *schemas
 		// Lets downstream converters resolve a custom provider key back to the built-in provider it wraps.
 		req.Context.SetValue(schemas.BifrostContextKeyBaseProviderType, baseProvider)
 
+		// Reasoning effort levels the custom provider's upstream accepts, used by
+		// OpenAI-dialect converters to clamp effort values the upstream would
+		// reject. Always written explicitly per attempt (nil when the provider
+		// declares none) so a previous fallback attempt's levels cannot leak
+		// into this provider's request on a reused context.
+		var reasoningEffortLevels []string
+		if cfg := config.CustomProviderConfig; cfg != nil {
+			reasoningEffortLevels = cfg.ReasoningEffortLevels
+		}
+		req.Context.SetValue(schemas.BifrostContextKeyReasoningEffortLevels, reasoningEffortLevels)
+
 		// Disable Anthropic raw-body passthrough when this attempt's provider isn't Anthropic-native (e.g. Bedrock).
 		clearAnthropicPassthroughForNonNativeProvider(req.Context, baseProvider)
 

@@ -239,6 +239,88 @@ func supportsMaxReasoningEffort(model string) bool {
 		strings.HasPrefix(modelLower, "glm-5.2")
 }
 
+// reasoningEffortRank orders the canonical reasoning effort levels so clamping
+// can find the nearest declared level. Non-canonical values (vendor spellings a
+// custom provider's passthrough may carry) are not ranked and pass through
+// unchanged.
+var reasoningEffortRank = map[string]int{
+	"none":    0,
+	"minimal": 1,
+	"low":     2,
+	"medium":  3,
+	"high":    4,
+	"xhigh":   5,
+	"max":     6,
+}
+
+// clampReasoningEffortToLevels restricts a reasoning effort value to the levels
+// a custom provider's upstream accepts. Semantics:
+//
+//   - levels empty → value returned unchanged (no clamping configured).
+//   - value declared in levels → returned unchanged.
+//   - canonical value above the highest declared level (e.g. "max"/"xhigh" on an
+//     upstream that tops out at "high") → clamped down to the nearest declared
+//     level at or below it, so the client's intent is preserved as far as the
+//     upstream can honor it instead of failing with a 400.
+//   - canonical value below the lowest declared level (e.g. "minimal" on an
+//     upstream whose levels start at "low") → clamped to the lowest declared
+//     level; there is nothing below to fall back to.
+//   - non-canonical values are left untouched: normalization only produces
+//     canonical values, and a vendor-specific spelling can only have reached
+//     this point through passthrough, where we have no way to judge it.
+func clampReasoningEffortToLevels(effort string, levels []string) string {
+	if len(levels) == 0 {
+		return effort
+	}
+	rank, known := reasoningEffortRank[effort]
+	if !known {
+		return effort
+	}
+	best := ""
+	bestRank := -1
+	lowest := ""
+	lowestRank := 1 << 30
+	for _, level := range levels {
+		levelRank, ok := reasoningEffortRank[level]
+		if !ok {
+			continue
+		}
+		if levelRank <= rank && levelRank > bestRank {
+			best = level
+			bestRank = levelRank
+		}
+		if levelRank < lowestRank {
+			lowest = level
+			lowestRank = levelRank
+		}
+	}
+	if best != "" {
+		return best
+	}
+	return lowest
+}
+
+// clampCustomProviderReasoningEffort applies the custom provider's declared
+// reasoning effort levels (BifrostContextKeyReasoningEffortLevels, set per
+// attempt by the request worker) to a resolved reasoning effort. No-op when the
+// provider declares no levels, mirroring the passthrough behavior custom
+// providers have always had. ctx may be nil (unit tests construct requests
+// without one) — clamping is skipped then.
+func clampCustomProviderReasoningEffort(ctx *schemas.BifrostContext, effort *string) *string {
+	if effort == nil || ctx == nil {
+		return effort
+	}
+	levels, _ := ctx.Value(schemas.BifrostContextKeyReasoningEffortLevels).([]string)
+	if len(levels) == 0 {
+		return effort
+	}
+	clamped := clampReasoningEffortToLevels(*effort, levels)
+	if clamped == *effort {
+		return effort
+	}
+	return schemas.Ptr(clamped)
+}
+
 // MaxUserFieldLength for OpenAI enforces a 64 character maximum on the user field
 const MaxUserFieldLength = 64
 

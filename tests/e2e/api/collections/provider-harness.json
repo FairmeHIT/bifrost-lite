@@ -8542,6 +8542,34 @@
                   }
                 },
                 {
+                  "name": "8.6.4.A native chat → sensenova/deepseek-v4-flash (custom provider clamps reasoning_effort max)",
+                  "description": "Requires a custom OpenAI-compatible provider named 'sensenova' (base_provider_type openai) with custom_provider_config.reasoning_effort_levels = [\"none\",\"low\",\"medium\",\"high\"] (an upstream like SenseNova's deepseek-v4-flash that rejects \"max\"). The gateway must clamp reasoning_effort \"max\" to \"high\" on both the chat and responses paths instead of forwarding a value the upstream would reject with 400.",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"model\": \"sensenova/deepseek-v4-flash\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is 17 * 23? Think step by step.\"\n    }\n  ],\n  \"reasoning_effort\": \"max\"\n}"
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/v1/chat/completions",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "v1",
+                        "chat",
+                        "completions"
+                      ]
+                    }
+                  }
+                },
+                {
                   "name": "8.6.4.A native chat → anthropic/claude-opus-4-7 (thinking)",
                   "request": {
                     "method": "POST",
