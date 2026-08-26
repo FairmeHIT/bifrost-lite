@@ -71,6 +71,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCookies } from "react-cookie";
 import { LanguageToggle } from "./languageToggle";
 import { ThemeToggle } from "./themeToggle";
+import { GithubLink } from "./githubLink";
 import { Badge } from "./ui/badge";
 import { PromoCardStack } from "./ui/promoCardStack";
 
@@ -1255,6 +1256,7 @@ export default function AppSidebar() {
 						<div className="mx-auto flex flex-row gap-4 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-2">
 							<LanguageToggle />
 							<ThemeToggle />
+							<GithubLink />
 							{IS_ENTERPRISE && userInfo ? (
 								<Popover open={userPopoverOpen} onOpenChange={setUserPopoverOpen}>
 									<PopoverTrigger asChild>

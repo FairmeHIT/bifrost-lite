@@ -26,6 +26,7 @@ export const zh: Dict = {
 		name: "名称",
 		description: "描述",
 		language: "语言",
+		github: "GitHub",
 		error: "错误",
 		viewLogs: "查看日志",
 		docs: "通用 - 文档",

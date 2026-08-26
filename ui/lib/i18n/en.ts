@@ -26,6 +26,7 @@ export const en: Dict = {
 		name: "Name",
 		description: "Description",
 		language: "Language",
+		github: "GitHub",
 		error: "Error",
 		viewLogs: "View logs",
 		docs: "Common - Docs",
