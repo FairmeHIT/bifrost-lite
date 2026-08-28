@@ -1,0 +1,102 @@
+---
+title: "Bifrost 使用手册"
+description: "一页式速查手册，方便快速找到 Bifrost 的常用入口、核心概念和日常操作。"
+icon: "book-open"
+---
+
+Bifrost 是一个把多个模型供应商统一到同一套 OpenAI 兼容入口里的网关，同时也能把 MCP 工具接进来。  
+这份手册只写当前仓库里可直接用的能力，方便你以后快速查。
+
+## 先记住 4 个概念
+
+| 概念 | 作用 |
+|---|---|
+| Provider | 接入 OpenAI、Anthropic、Bedrock、Gemini 等模型供应商 |
+| Virtual Key | 给调用方发放的统一访问令牌，常见格式是 `sk-bf-*` |
+| Governance | 控制谁能用哪些模型、路由、预算和限制 |
+| MCP | 把外部工具接进来，让模型能调用工具 |
+
+## 最常见的 5 件事
+
+### 1. 配置一个模型供应商
+
+在 `Providers` 里添加供应商的 API key 和模型配置。  
+如果你只是想让 Bifrost 转发推理请求，这一步通常就够了。
+
+### 2. 发起一次推理请求
+
+最常用的是 OpenAI 兼容接口：
+
+```bash
+curl http://localhost:8080/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer sk-bf-xxx' \
+  -d '{
+    "model": "openai/gpt-4o-mini",
+    "messages": [{"role":"user","content":"Hello"}]
+  }'
+```
+
+### 3. 给调用方发 Virtual Key
+
+如果你想限制某个应用只能用特定模型或路由，就发一个 Virtual Key。  
+调用方带上 `Authorization: Bearer sk-bf-...` 或 `x-bf-vk` 即可。
+
+### 4. 接 MCP 工具
+
+先把 MCP server 接到 Bifrost，再在请求里按需打开工具调用。  
+如果工具不出现，优先检查：
+
+- 工具是否已连接
+- 过滤规则是否放行
+- 当前 Virtual Key 是否允许使用
+
+### 5. 看日志和排障
+
+常看的地方：
+
+- `Logs`：查请求、错误、延迟
+- `Governance`：查 Virtual Key、Teams、Customers
+- `Config / Security`：查认证、管理员登录、推理鉴权
+
+## 常用入口
+
+| 入口 | 用途 |
+|---|---|
+| `/workspace/providers` | 管理模型供应商 |
+| `/workspace/virtual-keys` | 管理 Virtual Keys |
+| `/workspace/governance` | 管理 Teams、Customers、治理配置 |
+| `/workspace/logs` | 查看请求和错误日志 |
+| `/workspace/config/security` | 配置管理员登录和推理鉴权 |
+| `/workspace/config/api-keys` | 查看基础认证说明 |
+| `/workspace/mcp` | 管理 MCP 连接与工具 |
+
+## 快速排障
+
+### 返回 401
+
+先看三件事：
+
+1. 你发的是不是 Bifrost 的 `sk-bf-*` Virtual Key
+2. 是否开启了推理鉴权
+3. 请求头是否被代理或网关改掉了
+
+### 模型调用到了错误的供应商
+
+检查 Virtual Key 的路由和模型限制，以及 provider 是否配置了正确的模型映射。
+
+### 流式返回卡住
+
+通常是反向代理缓冲、超时或 WebSocket/SSE 转发配置问题。先看 `health` 和网关日志，再看代理层设置。
+
+### MCP 工具不生效
+
+检查连接状态、工具过滤和当前请求是否允许自动执行。
+
+## 记忆版结论
+
+- 先配 Provider
+- 再发 Virtual Key
+- 再调用 `/v1/*`
+- 需要工具时再接 MCP
+- 出问题先看 Logs 和 Security

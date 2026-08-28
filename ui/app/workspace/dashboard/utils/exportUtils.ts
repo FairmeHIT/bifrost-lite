@@ -69,7 +69,12 @@ export function overviewCostToCSV(data: CostHistogramResponse | null): CSVData {
 
 export function overviewModelUsageToCSV(data: ModelHistogramResponse | null): CSVData {
 	const models = data?.models ?? [];
-	const modelHeaders = models.flatMap((m) => [`${m} ${t("dashboard.export.total")}`, `${m} ${csvSuccess()}`, `${m} ${csvError()}`, `${m} ${csvCancelled()}`]);
+	const modelHeaders = models.flatMap((m) => [
+		`${m} ${t("dashboard.export.total")}`,
+		`${m} ${csvSuccess()}`,
+		`${m} ${csvError()}`,
+		`${m} ${csvCancelled()}`,
+	]);
 	const headers = [csvTimestamp(), ...modelHeaders];
 	const rows = (data?.buckets ?? []).map((b) => [
 		b.timestamp,
@@ -191,9 +196,6 @@ export function dimensionRankingsToCSV(data: DimensionRankingsResponse | null, d
 	return { headers, rows };
 }
 
-
-
-
 export interface DashboardData {
 	// Overview
 	histogramData: LogsHistogramResponse | null;
@@ -209,8 +211,6 @@ export interface DashboardData {
 	rankingsData: ModelRankingsResponse | null;
 	teamRankingsData: DimensionRankingsResponse | null;
 	customerRankingsData: DimensionRankingsResponse | null;
-	buRankingsData: DimensionRankingsResponse | null;
-	userRankingsData: DimensionRankingsResponse | null;
 	virtualKeyRankingsData: DimensionRankingsResponse | null;
 	appRankingsData: DimensionRankingsResponse | null;
 }
@@ -221,8 +221,6 @@ export type DashboardTab =
 	| "rankings"
 	| "team-rankings"
 	| "customer-rankings"
-	| "bu-rankings"
-	| "user-rankings"
 	| "virtual-key-rankings"
 	| "app-rankings";
 
@@ -239,13 +237,17 @@ export const DASHBOARD_EXPORT_TABS: { value: DashboardTab; label: string; sectio
 	{ value: "rankings", label: t("dashboard.modelRankings"), sectionId: "dashboard-section-rankings" },
 	{ value: "team-rankings", label: t("dashboard.teamRankings"), sectionId: "dashboard-section-team-rankings" },
 	{ value: "customer-rankings", label: t("dashboard.customerRankings"), sectionId: "dashboard-section-customer-rankings" },
-	{ value: "bu-rankings", label: t("dashboard.buRankings"), sectionId: "dashboard-section-bu-rankings" },
-	{ value: "user-rankings", label: t("dashboard.userRankings"), sectionId: "dashboard-section-user-rankings" },
 	{ value: "virtual-key-rankings", label: t("dashboard.virtualKeyRankings"), sectionId: "dashboard-section-virtual-key-rankings" },
 	{ value: "app-rankings", label: t("dashboard.appRankings"), sectionId: "dashboard-section-app-rankings" },
 ];
 
-export const getExportTabLabel = (tab: DashboardTab): string => DASHBOARD_EXPORT_TABS.find((t2) => t2.value === tab)?.label ?? t("export.currentTab");
+const DASHBOARD_TAB_VALUES = new Set<string>(DASHBOARD_EXPORT_TABS.map((tab) => tab.value));
+
+export const normalizeDashboardTab = (tab: string | null | undefined): DashboardTab =>
+	tab && DASHBOARD_TAB_VALUES.has(tab) ? (tab as DashboardTab) : "overview";
+
+export const getExportTabLabel = (tab: DashboardTab): string =>
+	DASHBOARD_EXPORT_TABS.find((t2) => t2.value === tab)?.label ?? t("export.currentTab");
 
 /** Return all CSV sections for the selected scope. Each entry becomes its own sheet / file section. */
 export function getCSVSections(data: DashboardData, tab: ExportTab): { name: string; csv: CSVData }[] {
@@ -281,14 +283,6 @@ export function getCSVSections(data: DashboardData, tab: ExportTab): { name: str
 		sections.push({ name: "customer-rankings", csv: dimensionRankingsToCSV(data.customerRankingsData, "Customer") });
 	}
 
-	if (tab === "all" || tab === "bu-rankings") {
-		sections.push({ name: "bu-rankings", csv: dimensionRankingsToCSV(data.buRankingsData, "Business Unit") });
-	}
-
-	if (tab === "all" || tab === "user-rankings") {
-		sections.push({ name: "user-rankings", csv: dimensionRankingsToCSV(data.userRankingsData, "User") });
-	}
-
 	if (tab === "all" || tab === "virtual-key-rankings") {
 		sections.push({ name: "virtual-key-rankings", csv: dimensionRankingsToCSV(data.virtualKeyRankingsData, "Virtual Key") });
 	}
@@ -296,7 +290,6 @@ export function getCSVSections(data: DashboardData, tab: ExportTab): { name: str
 	if (tab === "all" || tab === "app-rankings") {
 		sections.push({ name: "app-rankings", csv: dimensionRankingsToCSV(data.appRankingsData, "App") });
 	}
-
 
 	return sections;
 }

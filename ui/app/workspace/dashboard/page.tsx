@@ -12,13 +12,12 @@ import { useLocation } from "@tanstack/react-router";
 import { parseAsBoolean, parseAsInteger, parseAsString, useQueryStates } from "nuqs";
 import { type RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { type ChartType } from "./components/charts/chartTypeToggle";
-import { ModelFilterSelect } from "./components/charts/modelFilterSelect";
 import { ExportPopover } from "./components/exportPopover";
 import { type DimensionRankingsTabViewHandle, DimensionRankingsTabView } from "./components/tabViews/dimensionRankingsTabView";
 import { type ModelRankingsTabViewHandle, ModelRankingsTabView } from "./components/tabViews/modelRankingsTabView";
 import { type OverviewTabViewHandle, OverviewTabView } from "./components/tabViews/overviewTabView";
 import { type ProviderUsageTabViewHandle, ProviderUsageTabView } from "./components/tabViews/providerUsageTabView";
-import { type DashboardData, type DashboardTab, type ExportTab, DASHBOARD_EXPORT_TABS } from "./utils/exportUtils";
+import { type DashboardData, type DashboardTab, type ExportTab, DASHBOARD_EXPORT_TABS, normalizeDashboardTab } from "./utils/exportUtils";
 
 const toChartType = (value: string): ChartType => (value === "line" ? "line" : "bar");
 
@@ -159,29 +158,16 @@ export default function DashboardPage() {
 		],
 	);
 
-
 	// Tab view refs for export data aggregation
 	const overviewRef = useRef<OverviewTabViewHandle>(null);
 	const providerRef = useRef<ProviderUsageTabViewHandle>(null);
 	const modelRankingsRef = useRef<ModelRankingsTabViewHandle>(null);
 	const teamRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
 	const customerRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
-	const buRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
-	const userRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
 	const virtualKeyRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
 	const appRankingsRef = useRef<DimensionRankingsTabViewHandle>(null);
 
-	const allRefs = [
-		overviewRef,
-		providerRef,
-		modelRankingsRef,
-		teamRankingsRef,
-		customerRankingsRef,
-		buRankingsRef,
-		userRankingsRef,
-		virtualKeyRankingsRef,
-		appRankingsRef,
-	];
+	const allRefs = [overviewRef, providerRef, modelRankingsRef, teamRankingsRef, customerRankingsRef, virtualKeyRankingsRef, appRankingsRef];
 
 	const getDashboardData = useCallback((): DashboardData => {
 		const merged: Partial<DashboardData> = {};
@@ -200,8 +186,6 @@ export default function DashboardPage() {
 			rankingsData: null,
 			teamRankingsData: null,
 			customerRankingsData: null,
-			buRankingsData: null,
-			userRankingsData: null,
 			virtualKeyRankingsData: null,
 			appRankingsData: null,
 			...merged,
@@ -230,13 +214,11 @@ export default function DashboardPage() {
 			rankings: modelRankingsRef,
 			"team-rankings": teamRankingsRef,
 			"customer-rankings": customerRankingsRef,
-			"bu-rankings": buRankingsRef,
-			"user-rankings": userRankingsRef,
 			"virtual-key-rankings": virtualKeyRankingsRef,
 			"app-rankings": appRankingsRef,
 		};
 
-		const refs = scope === "all" ? allRefs : [refsByTab[scope]];
+		const refs = scope === "all" ? allRefs : [refsByTab[normalizeDashboardTab(scope)]];
 		await Promise.all(refs.map((r) => r.current?.loadData()));
 
 		// Let the loaded snapshots commit before the caller reads getData() or
@@ -413,7 +395,7 @@ export default function DashboardPage() {
 		setExportScope(null);
 	}, []);
 
-	const activeTab = (urlState.tab || "overview") as DashboardTab;
+	const activeTab = normalizeDashboardTab(urlState.tab);
 
 	return (
 		<div id="dashboard-root" className="no-padding-parent no-border-parent bg-background flex h-[calc(100vh_-_16px)] w-full gap-3">
@@ -467,17 +449,11 @@ export default function DashboardPage() {
 								<TabsTrigger className="shrink-0" value="team-rankings" data-testid="dashboard-tab-team-rankings">
 									{t("dashboard.teamRankings")}
 								</TabsTrigger>
-								<TabsTrigger className="shrink-0" value="user-rankings" data-testid="dashboard-tab-user-rankings">
-									{t("dashboard.userRankings")}
-								</TabsTrigger>
 								<TabsTrigger className="shrink-0" value="virtual-key-rankings" data-testid="dashboard-tab-virtual-key-rankings">
 									{t("dashboard.virtualKeyRankings")}
 								</TabsTrigger>
 								<TabsTrigger className="shrink-0" value="customer-rankings" data-testid="dashboard-tab-customer-rankings">
 									{t("dashboard.customerRankings")}
-								</TabsTrigger>
-								<TabsTrigger className="shrink-0" value="bu-rankings" data-testid="dashboard-tab-bu-rankings">
-									{t("dashboard.buRankings")}
 								</TabsTrigger>
 								<TabsTrigger value="app-rankings" data-testid="dashboard-tab-app-rankings">
 									{t("dashboard.appRankings")}
@@ -556,7 +532,6 @@ export default function DashboardPage() {
 							</div>
 						</TabsContent>
 
-
 						{/* Team Rankings Tab */}
 						<TabsContent value="team-rankings" {...(exportingAll && { forceMount: true })}>
 							<div id="dashboard-section-team-rankings">
@@ -590,36 +565,8 @@ export default function DashboardPage() {
 						</TabsContent>
 
 						{/* Business Unit Rankings Tab */}
-						<TabsContent value="bu-rankings" {...(exportingAll && { forceMount: true })}>
-							<div id="dashboard-section-bu-rankings">
-								<DimensionRankingsTabView
-									ref={buRankingsRef}
-									filters={filters}
-									active={activeTab === "bu-rankings" || exportingAll}
-									dimension="business_unit"
-									dimensionLabel={t("dashboard.buRankings")}
-									testIdPrefix="dashboard-bu-rankings"
-									dataKey="buRankingsData"
-									pdfMode={isExportingTab("bu-rankings")}
-								/>
-							</div>
-						</TabsContent>
 
 						{/* User Rankings Tab */}
-						<TabsContent value="user-rankings" {...(exportingAll && { forceMount: true })}>
-							<div id="dashboard-section-user-rankings">
-								<DimensionRankingsTabView
-									ref={userRankingsRef}
-									filters={filters}
-									active={activeTab === "user-rankings" || exportingAll}
-									dimension="user"
-									dimensionLabel={t("dashboard.userRankings")}
-									testIdPrefix="dashboard-user-rankings"
-									dataKey="userRankingsData"
-									pdfMode={isExportingTab("user-rankings")}
-								/>
-							</div>
-						</TabsContent>
 
 						{/* Virtual Key Rankings Tab */}
 						<TabsContent value="virtual-key-rankings" {...(exportingAll && { forceMount: true })}>

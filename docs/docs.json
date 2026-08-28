@@ -65,6 +65,13 @@
             ]
           },
           {
+            "group": "使用手册",
+            "icon": "book-open",
+            "pages": [
+              "guides/bifrost-manual"
+            ]
+          },
+          {
             "group": "Quick Start",
             "icon": "rocket",
             "pages": [

@@ -4,9 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useGetCoreConfigQuery } from "@/lib/store";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { Link } from "@tanstack/react-router";
-import { Copy, InfoIcon, KeyRound } from "lucide-react";
+import { Copy, InfoIcon } from "lucide-react";
 import { useMemo } from "react";
-import ContactUsView from "../views/contactUsView";
 
 export default function APIKeysView() {
 	const { t } = useI18n();
@@ -63,15 +62,7 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 				<InfoIcon className="text-muted h-4 w-4" />
 				<AlertDescription>
 					<p className="text-md text-muted-foreground">
-						{isInferenceAuthDisabled ? (
-							<>
-								{t("enterprise.apiKeysAuthDisabled")}
-							</>
-						) : (
-							<>
-								{t("enterprise.apiKeysAuthEnabled")}
-							</>
-						)}
+						{isInferenceAuthDisabled ? <>{t("enterprise.apiKeysAuthDisabled")}</> : <>{t("enterprise.apiKeysAuthEnabled")}</>}
 					</p>
 					{!isInferenceAuthDisabled && (
 						<>
@@ -90,14 +81,6 @@ curl --location 'http://localhost:8080/v1/chat/completions'
 					)}
 				</AlertDescription>
 			</Alert>
-
-			<ContactUsView
-				className="mt-4 rounded-md border px-3 py-8"
-				icon={<KeyRound size={48} />}
-				title={t("enterprise.scopeApiKeysTitle")}
-				description={t("enterprise.scopeApiKeysDesc")}
-				readmeLink="https://docs.getbifrost.io/enterprise/api-keys"
-			/>
 		</div>
 	);
 }

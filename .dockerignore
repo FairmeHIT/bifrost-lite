@@ -42,6 +42,9 @@ coverage/
 # Cache directories
 .cache/
 .parcel-cache/
+.gocache/
+.gomodcache/
+.gopath/
 
 # Documentation that's not needed for build
 docs/

@@ -1,13 +1,8 @@
 import {
 	ArrowUpRight,
 	BadgeInfo,
-	BookUser,
 	Building,
-	Building2,
 	Landmark,
-	ScrollText,
-	UserRoundCheck,
-	Users,
 	WalletCards,
 	Boxes,
 	BoxIcon,
@@ -203,14 +198,15 @@ const SidebarItemView = ({
 
 	const isHighlighted = !hasSubItems && highlightedUrl === item.url;
 
-	const buttonClassName = `group/nav-item relative h-7.5 cursor-pointer rounded-sm border px-3 transition-all duration-200 ${isHighlighted
-		? "bg-sidebar-accent text-accent-foreground border-primary/20"
-		: isActive || isAnySubItemActive
-			? "bg-sidebar-accent text-primary border-primary/20"
-			: item.hasAccess
-				? "hover:bg-sidebar-accent hover:text-accent-foreground border-transparent text-slate-500 dark:text-zinc-400"
-				: "hover:bg-destructive/5 hover:text-muted-foreground text-muted-foreground cursor-not-allowed border-transparent"
-		} `;
+	const buttonClassName = `group/nav-item relative h-7.5 cursor-pointer rounded-sm border px-3 transition-all duration-200 ${
+		isHighlighted
+			? "bg-sidebar-accent text-accent-foreground border-primary/20"
+			: isActive || isAnySubItemActive
+				? "bg-sidebar-accent text-primary border-primary/20"
+				: item.hasAccess
+					? "hover:bg-sidebar-accent hover:text-accent-foreground border-transparent text-slate-500 dark:text-zinc-400"
+					: "hover:bg-destructive/5 hover:text-muted-foreground text-muted-foreground cursor-not-allowed border-transparent"
+	} `;
 
 	const innerContent = (
 		<div className="flex w-full items-center justify-between">
@@ -361,14 +357,15 @@ const SidebarItemView = ({
 						const isSubItemActive = subItem.queryParam ? pathname === subItem.url : isRouteMatch(subItem.url);
 						const isSubItemHighlighted = highlightedUrl ? subItemHref.startsWith(highlightedUrl) : false;
 						const SubItemIcon = subItem.icon;
-						const subItemClassName = `h-7 cursor-pointer rounded-sm px-2 transition-all duration-200 ${isSubItemHighlighted
-							? "bg-sidebar-accent text-accent-foreground"
-							: isSubItemActive
-								? "bg-sidebar-accent text-primary font-medium"
-								: subItem.hasAccess === false
-									? "hover:bg-destructive/5 hover:text-muted-foreground text-muted-foreground cursor-not-allowed border-transparent"
-									: "hover:bg-sidebar-accent hover:text-accent-foreground text-slate-500 dark:text-zinc-400"
-							}`;
+						const subItemClassName = `h-7 cursor-pointer rounded-sm px-2 transition-all duration-200 ${
+							isSubItemHighlighted
+								? "bg-sidebar-accent text-accent-foreground"
+								: isSubItemActive
+									? "bg-sidebar-accent text-primary font-medium"
+									: subItem.hasAccess === false
+										? "hover:bg-destructive/5 hover:text-muted-foreground text-muted-foreground cursor-not-allowed border-transparent"
+										: "hover:bg-sidebar-accent hover:text-accent-foreground text-slate-500 dark:text-zinc-400"
+						}`;
 						const subInner = (
 							<div className="flex w-full items-center gap-2">
 								{SubItemIcon && <SubItemIcon className={`h-3.5 w-3.5 ${isSubItemActive ? "text-primary" : "text-muted-foreground"}`} />}
@@ -444,24 +441,10 @@ export default function AppSidebar() {
 	const hasSettingsAccess = useRbac(RbacResource.Settings, RbacOperation.View);
 	const hasFeatureFlagsAccess = useRbac(RbacResource.FeatureFlags, RbacOperation.View);
 	const hasAPIKeyAccess = useRbac(RbacResource.APIKeys, RbacOperation.View);
-	const hasUsersAccess = useRbac(RbacResource.Users, RbacOperation.View);
-	const hasUserProvisioningAccess = useRbac(RbacResource.UserProvisioning, RbacOperation.View);
-	const hasAuditLogsAccess = useRbac(RbacResource.AuditLogs, RbacOperation.View);
 	const hasCustomersAccess = useRbac(RbacResource.Customers, RbacOperation.View);
 	const hasTeamsAccess = useRbac(RbacResource.Teams, RbacOperation.View);
-	const hasBusinessUnitsAccess = useRbac(RbacResource.UserProvisioning, RbacOperation.View);
-	const hasRbacAccess = useRbac(RbacResource.RBAC, RbacOperation.View);
 	const hasVirtualKeysAccess = useRbac(RbacResource.VirtualKeys, RbacOperation.View);
-	const hasAccessProfilesAccess = useRbac(RbacResource.AccessProfiles, RbacOperation.View);
-	const hasAnyGovernanceAccess =
-		hasVirtualKeysAccess ||
-		hasTeamsAccess ||
-		hasUsersAccess ||
-		hasCustomersAccess ||
-		hasBusinessUnitsAccess ||
-		hasRbacAccess ||
-		hasAccessProfilesAccess ||
-		hasGovernanceLegacyAccess;
+	const hasAnyGovernanceAccess = hasVirtualKeysAccess || hasTeamsAccess || hasCustomersAccess || hasGovernanceLegacyAccess;
 	const { t } = useI18n();
 	const { data: coreConfig } = useGetCoreConfigQuery({});
 	const isDbConnected = coreConfig?.is_db_connected ?? false;
@@ -610,25 +593,11 @@ export default function AppSidebar() {
 						hasAccess: hasVirtualKeysAccess,
 					},
 					{
-						title: t("sidebar.users"),
-						url: "/workspace/governance/users",
-						icon: Users,
-						description: t("sidebar.descUsers"),
-						hasAccess: hasUsersAccess,
-					},
-					{
 						title: t("sidebar.teams"),
 						url: "/workspace/governance/teams",
 						icon: Building,
 						description: t("sidebar.descTeams"),
 						hasAccess: hasTeamsAccess,
-					},
-					{
-						title: t("sidebar.businessUnits"),
-						url: "/workspace/governance/business-units",
-						icon: Building2,
-						description: t("sidebar.descBusinessUnits"),
-						hasAccess: hasBusinessUnitsAccess,
 					},
 					{
 						title: t("sidebar.customers"),
@@ -637,34 +606,6 @@ export default function AppSidebar() {
 						description: t("sidebar.descCustomers"),
 						hasAccess: hasCustomersAccess,
 					},
-					{
-						title: t("sidebar.userProvisioning"),
-						url: "/workspace/scim",
-						icon: BookUser,
-						description: t("sidebar.descUserProvisioning"),
-						hasAccess: hasUserProvisioningAccess,
-					},
-					{
-						title: t("sidebar.rolesAndPermissions"),
-						url: "/workspace/governance/rbac",
-						icon: UserRoundCheck,
-						description: t("sidebar.descRolesAndPermissions"),
-						hasAccess: hasRbacAccess,
-					},
-					{
-						title: t("sidebar.accessProfiles"),
-						url: "/workspace/governance/access-profiles",
-						icon: ShieldCheck,
-						description: t("sidebar.descAccessProfiles"),
-						hasAccess: hasAccessProfilesAccess,
-					},
-					{
-						title: t("sidebar.auditLogs"),
-						url: "/workspace/audit-logs",
-						icon: ScrollText,
-						description: t("sidebar.descAuditLogs"),
-						hasAccess: hasAuditLogsAccess,
-					},
 				],
 			},
 			{
@@ -672,7 +613,7 @@ export default function AppSidebar() {
 				url: "/workspace/config",
 				icon: Settings2Icon,
 				description: t("sidebar.descSettings"),
-				hasAccess: hasSettingsAccess || hasAuditLogsAccess || hasUserProvisioningAccess,
+				hasAccess: hasSettingsAccess,
 				subItems: [
 					{
 						title: t("sidebar.clientSettings"),
@@ -704,14 +645,14 @@ export default function AppSidebar() {
 					},
 					...(IS_ENTERPRISE
 						? [
-							{
-								title: t("sidebar.proxy"),
-								url: "/workspace/config/proxy",
-								icon: Globe,
-								description: t("sidebar.descProxy"),
-								hasAccess: hasSettingsAccess,
-							},
-						]
+								{
+									title: t("sidebar.proxy"),
+									url: "/workspace/config/proxy",
+									icon: Globe,
+									description: t("sidebar.descProxy"),
+									hasAccess: hasSettingsAccess,
+								},
+							]
 						: []),
 					{
 						title: t("sidebar.apiKeys"),
@@ -736,21 +677,21 @@ export default function AppSidebar() {
 					},
 					...(IS_ENTERPRISE
 						? [
-							{
-								title: t("sidebar.branding"),
-								url: "/workspace/config/branding",
-								icon: Palette,
-								description: t("sidebar.descBranding"),
-								hasAccess: hasSettingsAccess,
-							},
-							{
-								title: t("sidebar.licenseInfo"),
-								url: "/workspace/config/license",
-								icon: BadgeInfo,
-								description: t("sidebar.descLicenseInfo"),
-								hasAccess: hasSettingsAccess,
-							},
-						]
+								{
+									title: t("sidebar.branding"),
+									url: "/workspace/config/branding",
+									icon: Palette,
+									description: t("sidebar.descBranding"),
+									hasAccess: hasSettingsAccess,
+								},
+								{
+									title: t("sidebar.licenseInfo"),
+									url: "/workspace/config/license",
+									icon: BadgeInfo,
+									description: t("sidebar.descLicenseInfo"),
+									hasAccess: hasSettingsAccess,
+								},
+							]
 						: []),
 				],
 			},
@@ -762,15 +703,9 @@ export default function AppSidebar() {
 			hasDashboardAccess,
 			hasModelProvidersAccess,
 			hasGovernanceLegacyAccess,
-			hasUsersAccess,
-			hasUserProvisioningAccess,
-			hasAuditLogsAccess,
 			hasCustomersAccess,
 			hasTeamsAccess,
-			hasBusinessUnitsAccess,
-			hasRbacAccess,
 			hasVirtualKeysAccess,
-			hasAccessProfilesAccess,
 			hasAnyGovernanceAccess,
 			hasRoutingRulesAccess,
 			hasCircuitBreakerAccess,
@@ -1024,9 +959,7 @@ export default function AppSidebar() {
 				title: t("sidebar.setupChecklistIncomplete"),
 				description: (
 					<div className="flex h-full flex-col gap-2 text-xs text-amber-700 dark:text-amber-300/80">
-						<p>
-							{t("sidebar.stepsRemaining", { count: remainingSteps })}
-						</p>
+						<p>{t("sidebar.stepsRemaining", { count: remainingSteps })}</p>
 						<button
 							type="button"
 							onClick={handleResumeOnboarding}
@@ -1148,13 +1081,7 @@ export default function AppSidebar() {
 						{/* max-w caps an unusually wide uploaded logo so it cannot push the
 						    collapse button out of the header; object-contain preserves its
 						    aspect ratio within that box. */}
-						<img
-							className="h-[22px] w-auto max-w-[150px] object-contain"
-							src={logoSrc}
-							alt={logoAlt}
-							width={70}
-							height={70}
-						/>
+						<img className="h-[22px] w-auto max-w-[150px] object-contain" src={logoSrc} alt={logoAlt} width={70} height={70} />
 					</Link>
 					<button
 						onClick={toggleSidebar}
@@ -1171,14 +1098,7 @@ export default function AppSidebar() {
 					className="hidden w-full cursor-pointer flex-col items-center gap-2 py-2 group-data-[collapsible=icon]:flex"
 					onClick={toggleSidebar}
 				>
-					<img
-						className="h-[22px] w-auto object-contain"
-						src={iconSrc}
-						alt={logoAlt}
-						width={22}
-						height={22}
-						style={{ width: 18 }}
-					/>
+					<img className="h-[22px] w-auto object-contain" src={iconSrc} alt={logoAlt} width={22} height={22} style={{ width: 18 }} />
 				</div>
 			</SidebarHeader>
 			{envLabel && (

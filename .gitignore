@@ -38,6 +38,11 @@ target/
 # Go workspaces (local only)
 go.work
 go.work.sum
+.gocache/
+.gopath/
+
+# Local deployment notes
+docs-bifrost-logs-api.md
 
 # Generated schema copy (created by go generate)
 transports/schema/config.schema.json
