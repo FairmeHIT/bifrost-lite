@@ -65,8 +65,12 @@ echo "==> on branch: $BRANCH"
 echo "==> applying 3-way merge (denylist-aware) ..."
 $PY merge --base "$BASE" --tip "$TIP"
 
-echo "==> staging merged files ..."
-git add -A -- . ':(exclude)scripts/upstream-sync/sync-output/'
+echo "==> staging merged files (upstream-delta paths only; unrelated worktree edits stay untouched) ..."
+DELTA_PATHS="$DIR/sync-output/.delta_paths"
+git diff --name-status -M "$BASE" "$TIP" \
+  | awk -F'\t' '{print $2; if ($1 ~ /^R/) print $3}' | sort -u > "$DELTA_PATHS"
+git add -A --literal-pathspecs --pathspec-from-file="$DELTA_PATHS"
+git add .gitignore
 
 echo "==> guards: deleted-package imports in merged Go/UI files ..."
 grep -q GO "$DIR/sync-output/guards.txt" 2>/dev/null && { echo "!! guard violations:"; cat "$DIR/sync-output/guards.txt"; echo "!! resolve and re-run before merging this branch"; } || true
@@ -78,9 +82,16 @@ for m in $(find . -name go.mod -not -path './node_modules/*' 2>/dev/null | sed '
   fi
 done
 
-echo "==> build gates (go build + ui tsc) ..."
+echo "==> build gates (per-module go build + ui tsc) ..."
 set +e
-go build ./... > "$DIR/sync-output/go-build.log" 2>&1; GO_RC=$?
+: > "$DIR/sync-output/go-build.log"
+GO_RC=0
+for m in $(sed -n 's/^\t\.\/\(.*\)$/\1/p' go.work); do
+  echo "== $m ==" >> "$DIR/sync-output/go-build.log"
+  if ! ( cd "$m" && go build ./... 2>&1 | head -60 ) >> "$DIR/sync-output/go-build.log" 2>&1; then
+    GO_RC=1
+  fi
+done
 ( cd ui && npx tsc --noEmit > ../"$DIR"/sync-output/tsc.log 2>&1 ); TS_RC=$?
 set -e
 echo "    go build rc=$GO_RC   tsc rc=$TS_RC  (logs: $DIR/sync-output/)"
@@ -90,7 +101,7 @@ echo "==> writing report ..."
 
 echo
 echo "DONE.  Next steps:"
-echo "  - review scripts/upstream-sync/sync-report.md"
+echo "  - review scripts/upstream-sync/sync-output/report.md"
 echo "  - resolve ./scripts/upstream-sync/sync-output/conflicts/ (worktree kept the lite version for those)"
 echo "  - fix go-build.log / tsc.log errors, re-run guards, then merge '$BRANCH' into main yourself"
 echo "  - after a successful merge, bump scripts/upstream-sync/base.txt to $(git rev-parse --short "$TIP")"

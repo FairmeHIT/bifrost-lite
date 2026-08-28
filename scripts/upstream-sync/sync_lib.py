@@ -379,11 +379,12 @@ def cmd_report(args):
     lines = []
     lines.append("# Bifrost Lite — upstream sync report")
     lines.append("")
+    delta_n = len(compute_delta(base, tip))
     lines.append(f"- base (last synced): `{base}`")
     lines.append(f"- tip (upstream)    : `{tip}` ({run(['git','log','-1','--format=%ci %s',tip]).stdout.strip()})")
-    lines.append(f"- delta paths       : {len(skipped) + len(merged)} (from `git diff --name-status -M {base}..{tip}`)")
+    lines.append(f"- delta paths       : {delta_n} (from `git diff --name-status -M {base}..{tip}`)")
     lines.append(f"- SKIPPED (enterprise/deleted): {len(skipped)}")
-    lines.append(f"- merged clean      : {len(merged) - len(added) - len(conflicts)} modified + {len(added)} added")
+    lines.append(f"- merged clean      : {len(merged) - len(added)} modified + {len(added)} added")
     lines.append(f"- CONFLICTS (worktree kept lite version; 3-way attempt in `sync-output/conflicts/`): {len(conflicts)}")
     lines.append("")
 

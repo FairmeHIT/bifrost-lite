@@ -65,6 +65,24 @@ Then:
 runs `sync.sh`, and opens a PR when the sync branch contains changes. Keep the
 PR draft until the build gates pass.
 
+### Environment notes (learned on a restricted network)
+
+- **Go toolchain**: upstream now requires **Go 1.27.0** (`go.work` directive).
+  If `GOTOOLCHAIN=auto` can't download it (proxy blocked), fetch the tarball from
+  `dl.google.com` and point `PATH` at it; keep `GOTOOLCHAIN=local`.
+- **Writable caches**: this sandbox mounts `$HOME` read-only. Point the Go caches
+  into the repo before building:
+  ```bash
+  export GOMODCACHE="$PWD/.gomodcache" GOCACHE="$PWD/tmp/gocache"
+  ```
+  (both paths are gitignored). Without this, `go build` fails with
+  `open /home/.../.cache/go-build/...: read-only file system`.
+- **Module proxy**: if `proxy.golang.org` times out, use a reachable mirror,
+  e.g. `export GOPROXY=https://goproxy.cn,direct`. `GOPROXY=direct` also works
+  but is much slower (full git clones per module).
+- **Checksum DB**: if `sum.golang.org` is unreachable/read-only, set
+  `export GOSUMDB=off` (verify a trusted `go.sum` in CI instead).
+
 ## Guard rails ("don't break lite")
 
 - the tool **refuses to run on `main`**; sync always happens on a branch
