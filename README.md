@@ -71,6 +71,7 @@ bifrost/
 ├── plugins/            # Extensible plugin system
 │   ├── governance/     # Budget management, rate limiting, RBAC
 │   ├── logging/        # Request/response logging
+│   ├── secretredact/   # Secret detection & redaction before provider calls
 │   ├── semanticcache/  # Semantic response caching
 │   ├── telemetry/      # Prometheus metrics
 │   └── …
