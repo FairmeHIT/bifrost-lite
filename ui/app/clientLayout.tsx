@@ -108,22 +108,22 @@ function AppContent({ children }: { children: React.ReactNode }) {
 
 	return (
 		<I18nProvider>
-		<WebSocketProvider>
-			<CookiesProvider>
-				<StoreSyncInitializer />
-				<SidebarProvider>
-					<Sidebar />
-					<div className="corner-brackets dark:bg-card custom-scrollbar content-container my-[0.5rem] mr-[0.5rem] h-[calc(100dvh-1rem)] w-full min-w-xl overflow-auto rounded-[2px] border border-gray-200 bg-white px-10 dark:border-zinc-800">
-						<span className="corner-brackets-bottom" aria-hidden="true" />
-						<TrialExpiryBanner />
-						<main className="custom-scrollbar content-container-inner relative mx-auto flex h-full min-h-0 flex-col overflow-y-hidden p-4">
-							{isLoading ? <FullPageLoader /> : <FullPage config={bifrostConfig}>{children}</FullPage>}
-						</main>
-						{bifrostConfig?.is_db_connected && <OnboardingWidget />}
-					</div>
-				</SidebarProvider>
-			</CookiesProvider>
-		</WebSocketProvider>
+			<WebSocketProvider>
+				<CookiesProvider>
+					<StoreSyncInitializer />
+					<SidebarProvider>
+						<Sidebar />
+						<div className="corner-brackets dark:bg-card custom-scrollbar content-container my-[0.5rem] mr-[0.5rem] h-[calc(100dvh-1rem)] w-full min-w-xl overflow-auto rounded-[2px] border border-gray-200 bg-white px-10 dark:border-zinc-800">
+							<span className="corner-brackets-bottom" aria-hidden="true" />
+							<TrialExpiryBanner />
+							<main className="custom-scrollbar content-container-inner relative mx-auto flex h-full min-h-0 flex-col overflow-y-hidden p-4">
+								{isLoading ? <FullPageLoader /> : <FullPage config={bifrostConfig}>{children}</FullPage>}
+							</main>
+							{bifrostConfig?.is_db_connected && <OnboardingWidget />}
+						</div>
+					</SidebarProvider>
+				</CookiesProvider>
+			</WebSocketProvider>
 		</I18nProvider>
 	);
 }

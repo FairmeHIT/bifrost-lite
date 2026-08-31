@@ -199,11 +199,9 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 				}}
 				data-testid="model-catalog-attribute-sheet"
 			>
-				<SheetHeader className="flex flex-col items-start p-0 px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10">
+				<SheetHeader className="flex flex-col items-start p-0 px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10">
 					<SheetTitle>{t("modelCatalog.attributes.sheetTitle")}</SheetTitle>
-					<SheetDescription>
-						{t("modelCatalog.attributes.sheetDescription")}
-					</SheetDescription>
+					<SheetDescription>{t("modelCatalog.attributes.sheetDescription")}</SheetDescription>
 				</SheetHeader>
 
 				<div className="flex h-full flex-col gap-6">
@@ -322,10 +320,13 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 												<div className="flex flex-wrap items-center gap-2">
 													<span className="text-sm font-medium">{override.name || override.id}</span>
 													<Badge variant="secondary">{override.scope_kind}</Badge>
-													{override.id === model.applied_override_id && <Badge variant="outline">{t("modelCatalog.overrides.applied")}</Badge>}
+													{override.id === model.applied_override_id && (
+														<Badge variant="outline">{t("modelCatalog.overrides.applied")}</Badge>
+													)}
 												</div>
 												<p className="text-muted-foreground font-mono text-xs">
-													{override.match_type === "wildcard" ? t("modelCatalog.overrides.matches") : t("modelCatalog.overrides.exact")} {override.pattern}
+													{override.match_type === "wildcard" ? t("modelCatalog.overrides.matches") : t("modelCatalog.overrides.exact")}{" "}
+													{override.pattern}
 												</p>
 												{caveat && <p className="text-muted-foreground text-xs">{t(caveat)}</p>}
 												{override.request_types && override.request_types.length > 0 && (
@@ -381,9 +382,7 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 								</Button>
 							</div>
 							{extraRows.length === 0 ? (
-								<p className="text-muted-foreground text-xs">
-									{t("modelCatalog.attributes.noAdditionalAttributes")}
-								</p>
+								<p className="text-muted-foreground text-xs">{t("modelCatalog.attributes.noAdditionalAttributes")}</p>
 							) : (
 								<div className="space-y-2">
 									{extraRows.map((row, i) => (
@@ -418,7 +417,7 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 						</div>
 					</div>
 
-					<div className="bg-card sticky bottom-0 shrink-0 border-t px-8 py-4">
+					<div className="bg-surface-solid sticky bottom-0 shrink-0 border-t px-8 py-4">
 						<div className="flex items-center justify-end gap-3">
 							{!hasUpdateAccess && <p className="text-destructive text-sm">{t("modelCatalog.attributes.noPermission")}</p>}
 							<Button type="button" variant="outline" onClick={handleClose} data-testid="model-catalog-attribute-cancel">

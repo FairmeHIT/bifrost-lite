@@ -36,7 +36,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedModel === "all" ? (
 					<>
@@ -48,7 +48,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								<div key={model} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-muted-foreground">{isOther ? OTHER_SERIES_LABEL : model}</span>
+										<span className="text-muted-foreground max-w-[120px] truncate">{isOther ? OTHER_SERIES_LABEL : model}</span>
 									</span>
 									<span className="font-medium" style={{ color: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }}>
 										{formatCost(cost)}
@@ -56,9 +56,9 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								</div>
 							);
 						})}
-						<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+						<div className="border-popover flex items-center justify-between gap-4 border-t pt-1">
 							<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
-							<span className="font-medium text-popover-foreground">{formatCost(data.total_cost)}</span>
+							<span className="text-popover-foreground font-medium">{formatCost(data.total_cost)}</span>
 						</div>
 					</>
 				) : (
@@ -67,7 +67,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 							<span className="h-2 w-2 rounded-full" style={{ backgroundColor: getModelColor(0) }} />
 							<span className="text-muted-foreground">{selectedModel}</span>
 						</span>
-						<span className="font-medium text-popover-foreground">{formatCost(data.by_model?.[selectedModel] || 0)}</span>
+						<span className="text-popover-foreground font-medium">{formatCost(data.by_model?.[selectedModel] || 0)}</span>
 					</div>
 				)}
 			</div>

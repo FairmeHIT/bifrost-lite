@@ -48,7 +48,9 @@ export default function OverriddenPrice({ base, override, variant, overrideName,
 						</span>
 					</span>
 				</TooltipTrigger>
-				<TooltipContent>{overrideName ? t("modelCatalog.pricing.overriddenByName", { name: overrideName }) : t("modelCatalog.pricing.overriddenByCustom")}</TooltipContent>
+				<TooltipContent>
+					{overrideName ? t("modelCatalog.pricing.overriddenByName", { name: overrideName }) : t("modelCatalog.pricing.overriddenByCustom")}
+				</TooltipContent>
 			</Tooltip>
 		</TooltipProvider>
 	);

@@ -313,11 +313,9 @@ export default function ModelLimitSheet({ modelConfig, onSave, onCancel }: Model
 				}}
 				data-testid="model-limit-sheet"
 			>
-				<SheetHeader className="flex flex-col items-start p-0 px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10">
+				<SheetHeader className="flex flex-col items-start p-0 px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10">
 					<SheetTitle>{isEditing ? t("modelLimits.sheet.titleEdit") : t("modelLimits.sheet.titleCreate")}</SheetTitle>
-					<SheetDescription>
-						{isEditing ? t("modelLimits.sheet.descEdit") : t("modelLimits.sheet.descCreate")}
-					</SheetDescription>
+					<SheetDescription>{isEditing ? t("modelLimits.sheet.descEdit") : t("modelLimits.sheet.descCreate")}</SheetDescription>
 				</SheetHeader>
 
 				<Form {...form}>
@@ -545,7 +543,9 @@ export default function ModelLimitSheet({ modelConfig, onSave, onCancel }: Model
 										<div className="bg-muted/50 grid grid-cols-2 gap-4 rounded-lg p-4">
 											{(modelConfig?.budgets ?? []).map((b) => (
 												<div key={b.id} className="space-y-1">
-													<p className="text-muted-foreground text-xs">{t("modelLimits.usage.budgetLabel", { duration: b.reset_duration })}</p>
+													<p className="text-muted-foreground text-xs">
+														{t("modelLimits.usage.budgetLabel", { duration: b.reset_duration })}
+													</p>
 													<p className="text-sm font-medium">
 														${b.current_usage.toFixed(2)} / ${b.max_limit.toFixed(2)}
 													</p>
@@ -576,7 +576,7 @@ export default function ModelLimitSheet({ modelConfig, onSave, onCancel }: Model
 						</div>
 
 						{/* Footer */}
-						<div className="bg-card sticky bottom-0 shrink-0 border-t px-8 py-4">
+						<div className="bg-surface-solid sticky bottom-0 shrink-0 border-t px-8 py-4">
 							<div className="flex items-center justify-end gap-3">
 								{!canSubmit && <p className="text-destructive text-sm">{t("modelLimits.sheet.noPermission")}</p>}
 								<Button type="button" variant="outline" onClick={handleClose}>

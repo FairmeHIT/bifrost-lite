@@ -41,7 +41,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedModel === "all" ? (
 					<>
@@ -53,7 +53,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								<div key={model} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-muted-foreground">{isOther ? OTHER_SERIES_LABEL : model}</span>
+										<span className="text-muted-foreground max-w-[120px] truncate">{isOther ? OTHER_SERIES_LABEL : model}</span>
 									</span>
 									<span className="font-medium" style={{ color: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }}>
 										{total.toLocaleString()}
@@ -87,9 +87,7 @@ function CustomTooltip({ active, payload, selectedModel, displayModels }: any) {
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS.cancelled }} />
 								<span className="text-muted-foreground">{t("dashboardCharts.cancelled")}</span>
 							</span>
-							<span className="font-medium text-muted-foreground">
-								{(data.by_model?.[selectedModel]?.cancelled || 0).toLocaleString()}
-							</span>
+							<span className="text-muted-foreground font-medium">{(data.by_model?.[selectedModel]?.cancelled || 0).toLocaleString()}</span>
 						</div>
 					</>
 				)}

@@ -19,10 +19,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
 	const setLang = useCallback((next: Lang) => setLangState(next), []);
 
-	const t = useCallback(
-		(path: string, params?: Record<string, string | number>) => translate(lang, path, params),
-		[lang],
-	);
+	const t = useCallback((path: string, params?: Record<string, string | number>) => translate(lang, path, params), [lang]);
 
 	const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
 

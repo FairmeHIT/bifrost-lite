@@ -43,7 +43,14 @@ interface BudgetOverrideManagerDialogProps {
  * e.g. a provider's own budget plus one section per model beneath it. Each row's
  * additive override can be added, edited, or removed inline and independently.
  */
-export function BudgetOverrideManagerDialog({ title, sections, onSave, onRemove, disabled, triggerLabel }: BudgetOverrideManagerDialogProps) {
+export function BudgetOverrideManagerDialog({
+	title,
+	sections,
+	onSave,
+	onRemove,
+	disabled,
+	triggerLabel,
+}: BudgetOverrideManagerDialogProps) {
 	const { t } = useI18n();
 	const [open, setOpen] = useState(false);
 	const resolvedTriggerLabel = triggerLabel ?? t("budgetOverride.addOverride");
@@ -187,7 +194,10 @@ export function BudgetOverrideManagerDialog({ title, sections, onSave, onRemove,
 									{t("budgetOverride.additionalBudget")}
 								</Label>
 								<div className="relative">
-									<span className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm" aria-hidden="true">
+									<span
+										className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm"
+										aria-hidden="true"
+									>
 										$
 									</span>
 									<Input
@@ -249,10 +259,25 @@ export function BudgetOverrideManagerDialog({ title, sections, onSave, onRemove,
 						) : null}
 
 						<div className="flex justify-end gap-2">
-							<Button type="button" variant="ghost" size="sm" className="rounded-sm" onClick={closeForm} disabled={busy} data-testid={`budget-override-cancel-${b.id}`}>
+							<Button
+								type="button"
+								variant="ghost"
+								size="sm"
+								className="rounded-sm"
+								onClick={closeForm}
+								disabled={busy}
+								data-testid={`budget-override-cancel-${b.id}`}
+							>
 								{t("common.cancel")}
 							</Button>
-							<Button type="button" size="sm" className="rounded-sm" onClick={() => submit(row)} isLoading={busy} data-testid="budget-override-save">
+							<Button
+								type="button"
+								size="sm"
+								className="rounded-sm"
+								onClick={() => submit(row)}
+								isLoading={busy}
+								data-testid="budget-override-save"
+							>
 								{active ? t("budgetOverride.update") : t("budgetOverride.add")}
 							</Button>
 						</div>
@@ -274,7 +299,14 @@ export function BudgetOverrideManagerDialog({ title, sections, onSave, onRemove,
 			}}
 		>
 			<DialogTrigger asChild>
-				<Button type="button" variant="ghost" size="sm" className="h-7 gap-1.5 rounded-sm px-2 text-xs" disabled={disabled} data-testid="budget-override-open">
+				<Button
+					type="button"
+					variant="ghost"
+					size="sm"
+					className="h-7 gap-1.5 rounded-sm px-2 text-xs"
+					disabled={disabled}
+					data-testid="budget-override-open"
+				>
 					<Plus className="h-3 w-3" />
 					{triggerLabel}
 				</Button>

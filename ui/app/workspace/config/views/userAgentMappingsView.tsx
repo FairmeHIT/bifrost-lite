@@ -128,7 +128,14 @@ export default function UserAgentMappingsView({ disabled }: UserAgentMappingsVie
 					<p className="text-muted-foreground text-sm">{t("userAgentMappings.description")}</p>
 				</div>
 				<div className="pt-2">
-					<Button type="button" variant="outline" size="sm" onClick={openAddSheet} disabled={controlsDisabled} data-testid="user-agent-mapping-add-btn">
+					<Button
+						type="button"
+						variant="outline"
+						size="sm"
+						onClick={openAddSheet}
+						disabled={controlsDisabled}
+						data-testid="user-agent-mapping-add-btn"
+					>
 						<Plus className="h-4 w-4" />
 						{t("userAgentMappings.add")}
 					</Button>
@@ -145,7 +152,12 @@ export default function UserAgentMappingsView({ disabled }: UserAgentMappingsVie
 						<MappingForm draft={draft} onChange={setDraft} disabled={controlsDisabled} />
 					</div>
 					<SheetFooter className="flex-row justify-end border-t px-6 py-4">
-						<Button type="button" variant="outline" onClick={() => handleSheetOpenChange(false)} data-testid="user-agent-mapping-cancel-btn">
+						<Button
+							type="button"
+							variant="outline"
+							onClick={() => handleSheetOpenChange(false)}
+							data-testid="user-agent-mapping-cancel-btn"
+						>
 							{t("common.cancel")}
 						</Button>
 						<Button type="button" onClick={handleSubmit} disabled={controlsDisabled} data-testid="user-agent-mapping-submit-btn">
@@ -198,7 +210,11 @@ export default function UserAgentMappingsView({ disabled }: UserAgentMappingsVie
 										</span>
 									</TableCell>
 									<TableCell>
-										{logoSrc ? <img src={logoSrc} alt={mapping.app} className="size-7 rounded-sm border object-contain" /> : <span className="text-muted-foreground text-sm">-</span>}
+										{logoSrc ? (
+											<img src={logoSrc} alt={mapping.app} className="size-7 rounded-sm border object-contain" />
+										) : (
+											<span className="text-muted-foreground text-sm">-</span>
+										)}
 									</TableCell>
 									<TableCell>
 										<span className={mapping.is_active ? "text-sm text-emerald-700" : "text-muted-foreground text-sm"}>
@@ -239,7 +255,9 @@ export default function UserAgentMappingsView({ disabled }: UserAgentMappingsVie
 													<AlertDialogDescription>{t("userAgentMappings.deleteConfirmDescription")}</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
-													<AlertDialogCancel data-testid={`user-agent-mapping-delete-cancel-${mapping.id}`}>{t("common.cancel")}</AlertDialogCancel>
+													<AlertDialogCancel data-testid={`user-agent-mapping-delete-cancel-${mapping.id}`}>
+														{t("common.cancel")}
+													</AlertDialogCancel>
 													<AlertDialogAction
 														data-testid={`user-agent-mapping-delete-confirm-${mapping.id}`}
 														onClick={() => handleDelete(mapping.id)}
@@ -427,11 +445,17 @@ function mappingToPayload(mapping: UserAgentMapping): UserAgentMappingPayload {
 	};
 }
 
-function getMatchTypeLabel(matchType: UserAgentMappingMatchType, t: (path: string, params?: Record<string, string | number>) => string): string {
+function getMatchTypeLabel(
+	matchType: UserAgentMappingMatchType,
+	t: (path: string, params?: Record<string, string | number>) => string,
+): string {
 	return t(matchTypeLabelKeys[matchType] ?? matchType);
 }
 
-function validateDraft(draft?: UserAgentMappingPayload, t?: (path: string, params?: Record<string, string | number>) => string): UserAgentMappingPayload | null {
+function validateDraft(
+	draft?: UserAgentMappingPayload,
+	t?: (path: string, params?: Record<string, string | number>) => string,
+): UserAgentMappingPayload | null {
 	const translate = t ?? ((path: string) => path);
 	if (!draft || !draft.pattern.trim() || !draft.app.trim()) {
 		toast.error(translate("userAgentMappings.requiredFields"));

@@ -297,9 +297,9 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 		const submitPromise =
 			isEditing && editingRule
 				? updateRoutingRule({
-					id: editingRule.id,
-					data: payload,
-				}).unwrap()
+						id: editingRule.id,
+						data: payload,
+					}).unwrap()
 				: createRoutingRule(payload).unwrap();
 
 		submitPromise
@@ -339,11 +339,9 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className="flex w-full min-w-1/2 flex-col gap-4 overflow-x-hidden p-0 pt-4">
-				<SheetHeader className="flex flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10">
+				<SheetHeader className="flex flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10">
 					<SheetTitle>{isEditing ? t("routingRules.sheet.titleEdit") : t("routingRules.sheet.titleCreate")}</SheetTitle>
-					<SheetDescription>
-						{isEditing ? t("routingRules.sheet.descEdit") : t("routingRules.sheet.descCreate")}
-					</SheetDescription>
+					<SheetDescription>{isEditing ? t("routingRules.sheet.descEdit") : t("routingRules.sheet.descCreate")}</SheetDescription>
 				</SheetHeader>
 
 				<form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col">
@@ -364,7 +362,12 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						{/* Description */}
 						<div className="space-y-3">
 							<Label htmlFor="description">{t("common.description")}</Label>
-							<Textarea id="description" placeholder={t("routingRules.sheet.descriptionPlaceholder")} rows={2} {...register("description")} />
+							<Textarea
+								id="description"
+								placeholder={t("routingRules.sheet.descriptionPlaceholder")}
+								rows={2}
+								{...register("description")}
+							/>
 						</div>
 
 						{/* Enabled Switch */}
@@ -380,9 +383,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						<div className="flex items-center justify-between rounded-lg border p-4">
 							<div className="space-y-0.5">
 								<Label htmlFor="chain_rule">{t("routingRules.sheet.chainRule")}</Label>
-								<p className="text-muted-foreground text-sm">
-									{t("routingRules.sheet.chainRuleDesc")}
-								</p>
+								<p className="text-muted-foreground text-sm">{t("routingRules.sheet.chainRuleDesc")}</p>
 							</div>
 							<Switch
 								id="chain_rule"
@@ -442,7 +443,13 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						{scope !== "global" && (
 							<div className="space-y-2">
 								<Label htmlFor="scope_id">
-									{scope === "team" ? t("routingRules.sheet.team") : scope === "customer" ? t("routingRules.sheet.customer") : scope === "user" ? t("routingRules.sheet.user") : t("routingRules.sheet.virtualKey")}{" "}
+									{scope === "team"
+										? t("routingRules.sheet.team")
+										: scope === "customer"
+											? t("routingRules.sheet.customer")
+											: scope === "user"
+												? t("routingRules.sheet.user")
+												: t("routingRules.sheet.virtualKey")}{" "}
 									<span className="text-red-500">*</span>
 								</Label>
 								{/* A rule stores only its scope_id, so there is no name to seed
@@ -466,7 +473,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 									))}
 								{/* Teams, customers and virtual keys are all searched lazily inside their
 								    selectors, each of which surfaces its own empty state. */}
-								{errors.scope_id &&<p className="text-destructive text-sm">{errors.scope_id.message}</p>}
+								{errors.scope_id && <p className="text-destructive text-sm">{errors.scope_id.message}</p>}
 							</div>
 						)}
 
@@ -475,9 +482,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						{/* CEL Rule Builder */}
 						<div className="space-y-3">
 							<Label>{t("routingRules.sheet.ruleBuilder")}</Label>
-							<p className="text-muted-foreground text-sm">
-								{t("routingRules.sheet.ruleBuilderDesc")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("routingRules.sheet.ruleBuilderDesc")}</p>
 							<CELRuleBuilder
 								key={builderKey}
 								initialQuery={query}
@@ -494,9 +499,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						</div>
 
 						{/* Note about Token/Request Limits and Budget Configuration */}
-						<p className="text-muted-foreground text-xs">
-							{t("routingRules.sheet.budgetNote")}
-						</p>
+						<p className="text-muted-foreground text-xs">{t("routingRules.sheet.budgetNote")}</p>
 
 						<Separator />
 
@@ -505,9 +508,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 							<div className="flex items-center justify-between">
 								<div>
 									<Label>{t("routingRules.sheet.routingTargets")}</Label>
-									<p className="text-muted-foreground mt-0.5 text-xs">
-										{t("routingRules.sheet.targetsHint")}
-									</p>
+									<p className="text-muted-foreground mt-0.5 text-xs">{t("routingRules.sheet.targetsHint")}</p>
 								</div>
 								<Button
 									type="button"
@@ -551,9 +552,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 							<div className="flex items-center justify-between">
 								<div>
 									<Label>{t("routingRules.sheet.fallbacks")}</Label>{" "}
-									<p className="text-muted-foreground mt-0.5 text-xs">
-										{t("routingRules.sheet.fallbackHint")}
-									</p>
+									<p className="text-muted-foreground mt-0.5 text-xs">{t("routingRules.sheet.fallbackHint")}</p>
 								</div>
 								<Button
 									type="button"
@@ -639,7 +638,7 @@ export function RoutingRuleSheet({ open, onOpenChange, editingRule, onSuccess }:
 						</div>
 					</div>
 					{/* Action Buttons */}
-					<div className="bg-card sticky bottom-0 flex justify-end gap-3 border-t px-8 py-4">
+					<div className="bg-surface-solid sticky bottom-0 flex justify-end gap-3 border-t px-8 py-4">
 						<Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
 							{t("common.cancel")}
 						</Button>

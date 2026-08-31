@@ -54,14 +54,7 @@ interface MCPToolSelectorProps {
 
 export function MCPToolSelector(props: MCPToolSelectorProps) {
 	const { t } = useI18n();
-	const {
-		value,
-		onChange,
-		mcpClients,
-		placeholder = t("mcpToolSelector.searchToolsPlaceholder"),
-		disabled = false,
-		className,
-	} = props;
+	const { value, onChange, mcpClients, placeholder = t("mcpToolSelector.searchToolsPlaceholder"), disabled = false, className } = props;
 	const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
 	// Flatten all tools from all MCP clients into searchable options
@@ -190,18 +183,18 @@ export function MCPToolSelector(props: MCPToolSelectorProps) {
 								{...optionProps}
 								className={cn(
 									"my-1 flex w-full cursor-pointer flex-col gap-0.5 rounded-sm p-2 text-sm",
-									optionProps.isFocused && "bg-accent dark:!bg-card",
-									"hover:bg-accent",
-									optionProps.isSelected && "bg-accent dark:!bg-card",
+									optionProps.isFocused && "bg-select-option-active-bg",
+									"hover:bg-select-option-active-bg",
+									optionProps.isSelected && "bg-select-option-active-bg",
 								)}
 							>
 								<div className="flex items-center gap-2">
-									<span className="text-content-primary font-medium">{data.meta?.toolName}</span>
+									<span className="text-foreground font-medium">{data.meta?.toolName}</span>
 									<Badge variant="outline" className="text-xs">
 										{data.meta?.mcpClientName}
 									</Badge>
 								</div>
-								{data.meta?.description && <span className="text-content-tertiary line-clamp-2 text-xs">{data.meta.description}</span>}
+								{data.meta?.description && <span className="text-muted-foreground line-clamp-2 text-xs">{data.meta.description}</span>}
 							</Option>
 						);
 					},

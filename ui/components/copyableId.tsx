@@ -46,7 +46,9 @@ export function CopyableId({ id, entityLabel, className, testId }: CopyableIdPro
 				</button>
 			</TooltipTrigger>
 			<TooltipContent className="flex flex-col items-start gap-0.5 px-2 py-1">
-				<span className="text-xs">{t("copy.copy")} {noun}</span>
+				<span className="text-xs">
+					{t("copy.copy")} {noun}
+				</span>
 				<span className="font-mono text-xs opacity-80">{value}</span>
 			</TooltipContent>
 		</Tooltip>

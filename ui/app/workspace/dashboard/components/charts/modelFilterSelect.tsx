@@ -9,13 +9,7 @@ interface ModelFilterSelectProps {
 	"data-testid"?: string;
 }
 
-export function ModelFilterSelect({
-	models,
-	selectedModel,
-	onModelChange,
-	placeholder,
-	"data-testid": testId,
-}: ModelFilterSelectProps) {
+export function ModelFilterSelect({ models, selectedModel, onModelChange, placeholder, "data-testid": testId }: ModelFilterSelectProps) {
 	const { t } = useI18n();
 	const resolvedPlaceholder = placeholder ?? t("filter.allModels");
 	return (

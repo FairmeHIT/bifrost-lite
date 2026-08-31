@@ -4,7 +4,6 @@
 // model-catalog detail sheet) can reuse the labels without pulling that
 // component's form/mutation dependencies into their bundle.
 
-
 import { t } from "@/lib/i18n";
 export const REQUEST_TYPE_GROUPS = [
 	{

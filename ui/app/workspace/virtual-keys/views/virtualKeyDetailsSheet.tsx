@@ -138,7 +138,7 @@ export default function VirtualKeyDetailSheet({
 			<SheetContent className="flex w-full flex-col overflow-x-hidden p-0 pt-4 sm:max-w-2xl">
 				<SheetHeader
 					className="flex flex-row items-center justify-between px-0 py-4"
-					headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8"
+					headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10 px-8"
 				>
 					<div className="flex min-w-0 flex-col items-start">
 						<div className="flex min-w-0 items-center gap-1">
@@ -181,7 +181,13 @@ export default function VirtualKeyDetailSheet({
 									{(() => {
 										const isExpired = !!virtualKey.expires_at && Date.now() >= new Date(virtualKey.expires_at).getTime();
 										const variant = !virtualKey.is_active ? "secondary" : isExpired || isExhausted ? "destructive" : "default";
-										const label = !virtualKey.is_active ? t("virtualKeys.statusInactive") : isExpired ? t("virtualKeys.statusExpired") : isExhausted ? t("virtualKeys.statusExhausted") : t("virtualKeys.statusActive");
+										const label = !virtualKey.is_active
+											? t("virtualKeys.statusInactive")
+											: isExpired
+												? t("virtualKeys.statusExpired")
+												: isExhausted
+													? t("virtualKeys.statusExhausted")
+													: t("virtualKeys.statusActive");
 										return <Badge variant={variant}>{label}</Badge>;
 									})()}
 								</div>
@@ -222,7 +228,11 @@ export default function VirtualKeyDetailSheet({
 									<span className="text-muted-foreground text-sm">{t("virtualKeys.assignedTo")}</span>
 									<div className="col-span-2 flex items-center gap-2">
 										<Badge variant={entityInfo.type === "None" ? "outline" : "secondary"}>
-											{entityInfo.type === "Team" ? t("teams.entityLabel") : entityInfo.type === "Customer" ? t("customers.entityLabel") : t("common.none")}
+											{entityInfo.type === "Team"
+												? t("teams.entityLabel")
+												: entityInfo.type === "Customer"
+													? t("customers.entityLabel")
+													: t("common.none")}
 										</Badge>
 										<span className="text-sm">{entityInfo.name}</span>
 									</div>
@@ -252,11 +262,18 @@ export default function VirtualKeyDetailSheet({
 												</div>
 												<div className="flex items-center gap-2">
 													<Badge variant="outline" className="font-mono text-xs">
-														{t("virtualKeys.weightLabel")} {config.weight != null ? config.weight : <span className="text-muted-foreground italic">{t("virtualKeys.notSet")}</span>}
+														{t("virtualKeys.weightLabel")}{" "}
+														{config.weight != null ? (
+															config.weight
+														) : (
+															<span className="text-muted-foreground italic">{t("virtualKeys.notSet")}</span>
+														)}
 													</Badge>
 													{!isManagedByProfile ? (
 														<BudgetOverrideManagerDialog
-															title={t("virtualKeys.providerBudgetOverridesTitle", { provider: ProviderLabels[config.provider as ProviderName] || config.provider })}
+															title={t("virtualKeys.providerBudgetOverridesTitle", {
+																provider: ProviderLabels[config.provider as ProviderName] || config.provider,
+															})}
 															sections={buildProviderOverrideSections(config)}
 															onSave={saveBudgetOverride}
 															onRemove={clearBudgetOverride}
@@ -348,13 +365,18 @@ export default function VirtualKeyDetailSheet({
 																	<UsageLine current={b.current_usage} max={getEffectiveBudgetLimit(b)} format={formatCurrency} />
 																	{hasActiveBudgetOverride(b) ? (
 																		<p className="text-muted-foreground text-xs">
-																			{t("governance.basePlusOverride", { base: formatCurrency(b.max_limit), override: formatCurrency(b.override_amount ?? 0) })}
+																			{t("governance.basePlusOverride", {
+																				base: formatCurrency(b.max_limit),
+																				override: formatCurrency(b.override_amount ?? 0),
+																			})}
 																		</p>
 																	) : null}
 																	<div className="text-muted-foreground flex items-center justify-between text-xs">
 																		<span>
 																			{t("governance.resets", { duration: parseResetPeriod(b.reset_duration) })}
-																			{virtualKey.calendar_aligned && supportsCalendarAlignment(b.reset_duration) && t("governance.calendarSuffix")}
+																			{virtualKey.calendar_aligned &&
+																				supportsCalendarAlignment(b.reset_duration) &&
+																				t("governance.calendarSuffix")}
 																		</span>
 																		{b.last_reset ? (
 																			<span>
@@ -397,7 +419,9 @@ export default function VirtualKeyDetailSheet({
 																		</span>
 																		{config.rate_limit.token_last_reset ? (
 																			<span>
-																				{t("governance.lastResetTime", { time: formatDistanceToNow(new Date(config.rate_limit.token_last_reset), { addSuffix: true }) })}
+																				{t("governance.lastResetTime", {
+																					time: formatDistanceToNow(new Date(config.rate_limit.token_last_reset), { addSuffix: true }),
+																				})}
 																			</span>
 																		) : null}
 																	</div>
@@ -415,14 +439,18 @@ export default function VirtualKeyDetailSheet({
 																	/>
 																	<div className="text-muted-foreground flex items-center justify-between text-xs">
 																		<span>
-																			{t("governance.resets", { duration: parseResetPeriod(config.rate_limit.request_reset_duration || "") })}
+																			{t("governance.resets", {
+																				duration: parseResetPeriod(config.rate_limit.request_reset_duration || ""),
+																			})}
 																			{virtualKey.calendar_aligned &&
 																				supportsCalendarAlignment(config.rate_limit.request_reset_duration || "") &&
 																				t("governance.calendarSuffix")}
 																		</span>
 																		{config.rate_limit.request_last_reset ? (
 																			<span>
-																				{t("governance.lastResetTime", { time: formatDistanceToNow(new Date(config.rate_limit.request_last_reset), { addSuffix: true }) })}
+																				{t("governance.lastResetTime", {
+																					time: formatDistanceToNow(new Date(config.rate_limit.request_last_reset), { addSuffix: true }),
+																				})}
 																			</span>
 																		) : null}
 																	</div>
@@ -453,16 +481,25 @@ export default function VirtualKeyDetailSheet({
 																					<UsageLine current={b.current_usage} max={getEffectiveBudgetLimit(b)} format={formatCurrency} />
 																					{hasActiveBudgetOverride(b) ? (
 																						<p className="text-muted-foreground text-xs">
-																							{t("governance.basePlusOverride", { base: formatCurrency(b.max_limit), override: formatCurrency(b.override_amount ?? 0) })}
+																							{t("governance.basePlusOverride", {
+																								base: formatCurrency(b.max_limit),
+																								override: formatCurrency(b.override_amount ?? 0),
+																							})}
 																						</p>
 																					) : null}
 																					<div className="text-muted-foreground flex items-center justify-between text-xs">
 																						<span>
 																							{t("governance.resets", { duration: parseResetPeriod(b.reset_duration) })}
-																							{virtualKey.calendar_aligned && supportsCalendarAlignment(b.reset_duration) && t("governance.calendarSuffix")}
+																							{virtualKey.calendar_aligned &&
+																								supportsCalendarAlignment(b.reset_duration) &&
+																								t("governance.calendarSuffix")}
 																						</span>
 																						{b.last_reset ? (
-																							<span>{t("governance.lastResetTime", { time: formatDistanceToNow(new Date(b.last_reset), { addSuffix: true }) })}</span>
+																							<span>
+																								{t("governance.lastResetTime", {
+																									time: formatDistanceToNow(new Date(b.last_reset), { addSuffix: true }),
+																								})}
+																							</span>
 																						) : null}
 																					</div>
 																				</div>
@@ -573,7 +610,9 @@ export default function VirtualKeyDetailSheet({
 							<h3 className="font-semibold">
 								{t("virtualKeys.budgetInformation")}
 								{isManagedByProfile && managingProfile?.budgets?.length ? (
-									<span className="text-muted-foreground ml-2 text-xs font-normal">{t("governance.fromProfile", { name: managingProfile.name })}</span>
+									<span className="text-muted-foreground ml-2 text-xs font-normal">
+										{t("governance.fromProfile", { name: managingProfile.name })}
+									</span>
 								) : null}
 							</h3>
 							{isManagedByProfile && managingProfile?.user_id ? <ViewUserDetailsButton userId={managingProfile.user_id} /> : null}
@@ -597,8 +636,13 @@ export default function VirtualKeyDetailSheet({
 										<UsageLine current={b.current_usage} max={getEffectiveBudgetLimit(b)} format={formatCurrency} />
 										{hasActiveBudgetOverride(b) ? (
 											<p className="text-muted-foreground text-xs">
-												{t("governance.basePlusOverride", { base: formatCurrency(b.max_limit), override: formatCurrency(b.override_amount ?? 0) })}
-												{b.override_mode === "cycles" ? t("governance.overrideCyclesRemaining", { count: b.override_cycles_remaining ?? 0 }) : t("governance.overrideUntilRemoved")}
+												{t("governance.basePlusOverride", {
+													base: formatCurrency(b.max_limit),
+													override: formatCurrency(b.override_amount ?? 0),
+												})}
+												{b.override_mode === "cycles"
+													? t("governance.overrideCyclesRemaining", { count: b.override_cycles_remaining ?? 0 })
+													: t("governance.overrideUntilRemoved")}
 											</p>
 										) : null}
 										<div className="text-muted-foreground flex items-center justify-between text-xs">
@@ -629,7 +673,9 @@ export default function VirtualKeyDetailSheet({
 						<h3 className="font-semibold">
 							{t("virtualKeys.rateLimits")}
 							{isManagedByProfile && hasApRateLimit ? (
-								<span className="text-muted-foreground ml-2 text-xs font-normal">{t("governance.fromProfile", { name: managingProfile?.name ?? "" })}</span>
+								<span className="text-muted-foreground ml-2 text-xs font-normal">
+									{t("governance.fromProfile", { name: managingProfile?.name ?? "" })}
+								</span>
 							) : null}
 						</h3>
 

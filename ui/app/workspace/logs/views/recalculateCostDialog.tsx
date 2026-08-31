@@ -53,9 +53,7 @@ export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, 
 			>
 				<DialogHeader className="pb-2">
 					<DialogTitle>{t("logs.recalculate")}</DialogTitle>
-					<DialogDescription>
-						{t("logs.recalculateDialog.desc")}
-					</DialogDescription>
+					<DialogDescription>{t("logs.recalculateDialog.desc")}</DialogDescription>
 				</DialogHeader>
 
 				<div className="flex flex-col gap-2">
@@ -93,7 +91,7 @@ export function RecalculateCostDialog({ open, onOpenChange, filters, totalLogs, 
 					)}
 				</p>
 
-				<div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-muted-foreground">
+				<div className="text-muted-foreground flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-3 text-xs">
 					<Info className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-500" />
 					<span>{t("recalculateCost.affectsDashboardOnly")}</span>
 				</div>
@@ -127,12 +125,14 @@ function RecalculateModeOption({
 			type="button"
 			onClick={onSelect}
 			aria-pressed={selected}
-			className={`flex items-start cursor-pointer gap-3 rounded-md border p-3 text-left transition-colors ${selected ? "border-primary bg-primary/5" : "border-input hover:bg-accent/50"
-				}`}
+			className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 text-left transition-colors ${
+				selected ? "border-primary bg-primary/5" : "border-input hover:bg-accent/50"
+			}`}
 		>
 			<span
-				className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40"
-					}`}
+				className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full border ${
+					selected ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40"
+				}`}
 			>
 				{selected && <Check className="size-3" />}
 			</span>

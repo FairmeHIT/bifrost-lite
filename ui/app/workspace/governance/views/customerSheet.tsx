@@ -303,16 +303,12 @@ export default function CustomerSheet({ open, onOpenChange, customer, onSuccess 
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className="max-w-[900px] p-0 pt-4 sm:max-w-2xl" data-testid="customer-dialog-content">
-				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8">
+				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10 px-8">
 					<SheetTitle className="flex items-center gap-2">
 						{isEditing ? t("customers.editTitle") : t("customers.createTitle")}
 						{customer?.id && <CopyableId id={customer.id} entityLabel={t("customers.entityLabel")} />}
 					</SheetTitle>
-					<SheetDescription>
-						{isEditing
-							? t("customers.updateDescription")
-							: t("customers.createDescription")}
-					</SheetDescription>
+					<SheetDescription>{isEditing ? t("customers.updateDescription") : t("customers.createDescription")}</SheetDescription>
 				</SheetHeader>
 
 				<form onSubmit={handleSubmit} className="flex flex-1 flex-col">
@@ -367,9 +363,7 @@ export default function CustomerSheet({ open, onOpenChange, customer, onSuccess 
 										<Label htmlFor="customer-calendar-aligned-toggle" className="text-sm font-normal">
 											{t("governance.calendarAlign")}
 										</Label>
-										<p className="text-muted-foreground text-xs">
-											{t("governance.calendarAlignDescription")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("governance.calendarAlignDescription")}</p>
 									</div>
 									<Switch
 										id="customer-calendar-aligned-toggle"
@@ -385,9 +379,8 @@ export default function CustomerSheet({ open, onOpenChange, customer, onSuccess 
 									<AlertDialogHeader>
 										<AlertDialogTitle>{t("governance.resetUsageTitle")}</AlertDialogTitle>
 										<AlertDialogDescription>
-											{t("governance.resetUsagePrefix")} <span className="font-semibold">$0.00</span>{" "}
-											{t("governance.resetUsageBetween")} <span className="font-semibold">0</span>{" "}
-											{t("governance.resetUsageSuffix", { entity: t("customers.entityLabel") })}
+											{t("governance.resetUsagePrefix")} <span className="font-semibold">$0.00</span> {t("governance.resetUsageBetween")}{" "}
+											<span className="font-semibold">0</span> {t("governance.resetUsageSuffix", { entity: t("customers.entityLabel") })}
 										</AlertDialogDescription>
 									</AlertDialogHeader>
 									<AlertDialogFooter>
@@ -414,7 +407,7 @@ export default function CustomerSheet({ open, onOpenChange, customer, onSuccess 
 						</div>
 					</div>
 
-					<SheetFooter className="bg-card sticky bottom-0 flex-row justify-end gap-2 border-t px-6 py-4">
+					<SheetFooter className="bg-surface-solid sticky bottom-0 flex-row justify-end gap-2 border-t px-6 py-4">
 						<Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
 							{t("common.cancel")}
 						</Button>

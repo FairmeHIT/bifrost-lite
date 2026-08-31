@@ -44,9 +44,7 @@ export default function BudgetUsageResetDialog({
 			<AlertDialogContent data-testid={testId}>
 				<AlertDialogHeader>
 					<AlertDialogTitle>{t("budgetReset.title")}</AlertDialogTitle>
-					<AlertDialogDescription>
-						{t("budgetReset.description", { ownerLabel })}
-					</AlertDialogDescription>
+					<AlertDialogDescription>{t("budgetReset.description", { ownerLabel })}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel onClick={() => onChoice(false)} data-testid={testId ? `${testId}-preserve-btn` : undefined}>

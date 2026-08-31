@@ -24,7 +24,7 @@ export default function FieldLabel({ label, helpText, htmlFor, onClear, children
 					<TooltipProvider delayDuration={200}>
 						<Tooltip>
 							<TooltipTrigger>
-								<HelpCircle className="text-content-disabled h-3.5 w-3.5" />
+								<HelpCircle className="text-muted-foreground/70 h-3.5 w-3.5" />
 							</TooltipTrigger>
 							<TooltipContent className="max-w-xs">{helpText}</TooltipContent>
 						</Tooltip>

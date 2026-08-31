@@ -978,8 +978,8 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 											<>
 												<Separator orientation="vertical" className="flex h-full min-h-6" />
 												<CommandItem onSelect={handleClear} className="flex-1 cursor-pointer justify-center">
-												{t("multiSelect.clear")}
-											</CommandItem>
+													{t("multiSelect.clear")}
+												</CommandItem>
 											</>
 										)}
 									</div>

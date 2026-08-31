@@ -159,7 +159,12 @@ export default function ProxyView() {
 											<FormItem>
 												<FormLabel>{t("config.proxy.username")}</FormLabel>
 												<FormControl>
-													<Input placeholder={t("config.proxy.usernamePlaceholder")} disabled={!watchedEnabled} {...field} value={field.value || ""} />
+													<Input
+														placeholder={t("config.proxy.usernamePlaceholder")}
+														disabled={!watchedEnabled}
+														{...field}
+														value={field.value || ""}
+													/>
 												</FormControl>
 												<FormMessage />
 											</FormItem>

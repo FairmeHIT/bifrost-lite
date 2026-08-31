@@ -24,7 +24,13 @@ export function ColumnConfigDropdown({ entries, labels = {}, onToggleVisibility,
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
-				<Button variant="outline" size="sm" className="h-7.5 w-7.5" data-testid="column-config-trigger" aria-label={t("columnConfig.ariaLabel")}>
+				<Button
+					variant="outline"
+					size="sm"
+					className="h-7.5 w-7.5"
+					data-testid="column-config-trigger"
+					aria-label={t("columnConfig.ariaLabel")}
+				>
 					<Columns3 className="h-4 w-4" />
 				</Button>
 			</PopoverTrigger>

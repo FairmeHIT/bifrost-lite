@@ -118,7 +118,11 @@ function scopeLabel(override: PricingOverride, t: (path: string, params?: Record
 }
 
 // Returns the key label for the override, or "-" when no specific key is scoped.
-function keyLabel(override: PricingOverride, keyLabelMap: Map<string, string>, t: (path: string, params?: Record<string, string | number>) => string): string {
+function keyLabel(
+	override: PricingOverride,
+	keyLabelMap: Map<string, string>,
+	t: (path: string, params?: Record<string, string | number>) => string,
+): string {
 	if (!override.provider_key_id) {
 		if (!override.provider_id) return "-";
 		return t("pricingOverrides.allKeys");
@@ -378,14 +382,14 @@ export default function ScopedPricingOverridesView() {
 					<div className="p-4 text-sm text-red-500">{t("pricingOverrides.loadFailedPage")}</div>
 				) : (
 					<Table containerClassName="h-full overflow-auto">
-						<TableHeader className="bg-muted sticky top-0 z-10">
+						<TableHeader className="bg-surface-solid-muted sticky top-0 z-10">
 							<TableRow className="bg-muted/50">
 								<TableHead className="font-semibold">{t("common.name")}</TableHead>
 								<TableHead className="font-semibold">{t("pricingOverrides.scope")}</TableHead>
 								<TableHead className="font-semibold">{t("pricingOverrides.provider")}</TableHead>
 								<TableHead className="font-semibold">{t("pricingOverrides.key")}</TableHead>
 								<TableHead className="font-semibold">{t("pricingOverrides.model")}</TableHead>
-								<TableHead className={`bg-muted sticky right-0 z-30 w-[50px] text-right font-semibold ${PIN_SHADOW_RIGHT}`}>
+								<TableHead className={`bg-surface-solid-muted sticky right-0 z-30 w-[50px] text-right font-semibold ${PIN_SHADOW_RIGHT}`}>
 									{t("common.actions")}
 								</TableHead>
 							</TableRow>
@@ -419,7 +423,7 @@ export default function ScopedPricingOverridesView() {
 										<TableCell>{keyLabel(row, providerKeyLabelMap, t)}</TableCell>
 										<TableCell>{row.pattern}</TableCell>
 										<TableCell
-											className={`group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
+											className={`group-hover:bg-muted dark:bg-surface-solid dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
 											onClick={(e) => e.stopPropagation()}
 										>
 											<div className="flex items-center justify-center">
@@ -460,7 +464,9 @@ export default function ScopedPricingOverridesView() {
 						<div className="flex items-center gap-1">
 							<span>{t("logs.page")}</span>
 							<span>{Math.floor(offset / PAGE_SIZE) + 1}</span>
-							<span>{t("logs.ofPages")} {Math.ceil(totalCount / PAGE_SIZE)}</span>
+							<span>
+								{t("logs.ofPages")} {Math.ceil(totalCount / PAGE_SIZE)}
+							</span>
 						</div>
 
 						<Button

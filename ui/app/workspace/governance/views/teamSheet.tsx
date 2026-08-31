@@ -364,14 +364,12 @@ export default function TeamSheet({ team, onSave, onCancel }: TeamSheetProps) {
 				onInteractOutside={(e) => e.preventDefault()}
 				onEscapeKeyDown={() => onCancel()}
 			>
-				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8">
+				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10 px-8">
 					<SheetTitle className="flex items-center gap-2">
 						{isEditing ? t("teams.editTitle") : t("teams.createTitle")}
 						{team?.id && <CopyableId id={team.id} entityLabel={t("teams.entityLabel")} />}
 					</SheetTitle>
-					<SheetDescription>
-						{isEditing ? t("teams.updateDescription") : t("teams.createDescription")}
-					</SheetDescription>
+					<SheetDescription>{isEditing ? t("teams.updateDescription") : t("teams.createDescription")}</SheetDescription>
 				</SheetHeader>
 
 				<form onSubmit={handleSubmit} className="flex h-full flex-col gap-6">
@@ -440,9 +438,7 @@ export default function TeamSheet({ team, onSave, onCancel }: TeamSheetProps) {
 									{t("governance.addBudget")}
 								</button>
 							</div>
-							{formData.budgets.length === 0 && (
-								<p className="text-muted-foreground text-xs">{t("teams.noBudgetsHint")}</p>
-							)}
+							{formData.budgets.length === 0 && <p className="text-muted-foreground text-xs">{t("teams.noBudgetsHint")}</p>}
 							{formData.budgets.map((row, idx) => (
 								<div key={row.id} className="space-y-2 rounded-md border p-3" data-testid={`team-budget-row-${idx}`}>
 									<div className="flex items-start gap-2">
@@ -525,9 +521,7 @@ export default function TeamSheet({ team, onSave, onCancel }: TeamSheetProps) {
 										<Label htmlFor="team-calendar-aligned-toggle" className="text-sm font-normal">
 											{t("governance.calendarAlign")}
 										</Label>
-										<p className="text-muted-foreground text-xs">
-											{t("governance.calendarAlignDescription")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("governance.calendarAlignDescription")}</p>
 									</div>
 									<Switch
 										id="team-calendar-aligned-toggle"
@@ -545,9 +539,8 @@ export default function TeamSheet({ team, onSave, onCancel }: TeamSheetProps) {
 								<AlertDialogHeader>
 									<AlertDialogTitle>{t("governance.resetUsageTitle")}</AlertDialogTitle>
 									<AlertDialogDescription>
-										{t("governance.resetUsagePrefix")} <span className="font-semibold">$0.00</span>{" "}
-										{t("governance.resetUsageBetween")} <span className="font-semibold">0</span>{" "}
-										{t("governance.resetUsageSuffix", { entity: t("teams.entityLabel") })}
+										{t("governance.resetUsagePrefix")} <span className="font-semibold">$0.00</span> {t("governance.resetUsageBetween")}{" "}
+										<span className="font-semibold">0</span> {t("governance.resetUsageSuffix", { entity: t("teams.entityLabel") })}
 									</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
@@ -659,7 +652,7 @@ export default function TeamSheet({ team, onSave, onCancel }: TeamSheetProps) {
 						)}
 					</div>
 
-					<div className="border-border bg-card sticky bottom-0 z-10 border-t px-8 py-4">
+					<div className="border-border bg-surface-solid sticky bottom-0 z-10 border-t px-8 py-4">
 						<div className="flex justify-end gap-2">
 							<Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
 								{t("common.cancel")}

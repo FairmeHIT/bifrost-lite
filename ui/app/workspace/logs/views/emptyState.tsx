@@ -247,9 +247,7 @@ const result = await chain.invoke({ input: "What is LangChain?" });`,
 			{error && (
 				<Alert>
 					<AlertTriangle className="h-4 w-4" />
-					<AlertDescription>
-						{isUnexpectedError ? t("logs.logStoreNotConfigured") : error}
-					</AlertDescription>
+					<AlertDescription>{isUnexpectedError ? t("logs.logStoreNotConfigured") : error}</AlertDescription>
 				</Alert>
 			)}
 

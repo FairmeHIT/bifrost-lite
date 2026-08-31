@@ -120,7 +120,7 @@ const StringInput = (props: {
 
 			<Trash
 				onClick={() => props.onDelete(props.index)}
-				className="text-content-error absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer opacity-80 hover:opacity-100"
+				className="text-destructive absolute top-1/2 right-2 h-3.5 w-3.5 -translate-y-1/2 cursor-pointer opacity-80 hover:opacity-100"
 			/>
 		</div>
 	);

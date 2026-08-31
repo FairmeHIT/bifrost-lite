@@ -30,7 +30,7 @@ function TopDimensionTooltip({ active, payload }: any) {
 	if (!data) return null;
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{data.displayName}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{data.displayName}</div>
 			<div className="text-sm font-medium">
 				{data.total_requests.toLocaleString()} {t("dashboardCharts.requests")}
 			</div>
@@ -142,7 +142,7 @@ function TopDimensionChart({
 											<foreignObject x={x - labelWidth} y={y - 9} width={labelWidth} height={18} style={{ overflow: "visible" }}>
 												<div
 													title={payload.value}
-													className="truncate text-right text-[11px] leading-[18px] text-muted-foreground"
+													className="text-muted-foreground truncate text-right text-[11px] leading-[18px]"
 													style={{ width: labelWidth }}
 												>
 													{payload.value}
@@ -264,7 +264,13 @@ function DimensionRankingsTabImpl({ data, loading, dimensionLabel, testIdPrefix,
 									/>
 								</TableHead>
 								<TableHead className="text-right">
-									<SortableHeader label={t("dashboardCharts.cost")} field="total_cost" currentSort={sortField} currentOrder={sortOrder} onSort={handleSort} />
+									<SortableHeader
+										label={t("dashboardCharts.cost")}
+										field="total_cost"
+										currentSort={sortField}
+										currentOrder={sortOrder}
+										onSort={handleSort}
+									/>
 								</TableHead>
 							</TableRow>
 						</TableHeader>

@@ -311,9 +311,7 @@ function GoroutineHealthSection({
 					})}
 
 					{problemGoroutines.length === 0 && skippedGoroutines.size > 0 && (
-						<div className="rounded bg-zinc-800/30 py-2 text-center text-[10px] text-zinc-500">
-							{t("devProfiler.allLeaksHidden")}
-						</div>
+						<div className="rounded bg-zinc-800/30 py-2 text-center text-[10px] text-zinc-500">{t("devProfiler.allLeaksHidden")}</div>
 					)}
 					{problemGoroutines.length === 0 &&
 						skippedGoroutines.size === 0 &&
@@ -498,7 +496,11 @@ export function DevProfiler(): React.ReactNode {
 					>
 						{isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
 					</button>
-					<button onClick={handleToggleVisible} className="rounded p-1 transition-colors hover:bg-zinc-700" title={t("devProfiler.minimize")}>
+					<button
+						onClick={handleToggleVisible}
+						className="rounded p-1 transition-colors hover:bg-zinc-700"
+						title={t("devProfiler.minimize")}
+					>
 						<ChevronDown className="h-4 w-4" />
 					</button>
 					<button onClick={handleDismiss} className="rounded p-1 transition-colors hover:bg-zinc-700" title={t("devProfiler.dismiss")}>
@@ -507,7 +509,9 @@ export function DevProfiler(): React.ReactNode {
 				</div>
 			</div>
 
-			{Boolean(error) && <div className="border-b border-zinc-700 bg-red-900/30 px-3 py-2 text-red-300">{t("devProfiler.failedToLoad")}</div>}
+			{Boolean(error) && (
+				<div className="border-b border-zinc-700 bg-red-900/30 px-3 py-2 text-red-300">{t("devProfiler.failedToLoad")}</div>
+			)}
 
 			{isExpanded && data && (
 				<div className="custom-scrollbar max-h-[70vh] overflow-x-hidden overflow-y-auto">
@@ -656,7 +660,14 @@ export function DevProfiler(): React.ReactNode {
 										}}
 										labelStyle={{ color: "#a1a1aa" }}
 									/>
-									<Area type="monotone" dataKey="alloc" stroke="#22d3ee" strokeWidth={1.5} fill="url(#allocGradient)" name={t("devProfiler.alloc")} />
+									<Area
+										type="monotone"
+										dataKey="alloc"
+										stroke="#22d3ee"
+										strokeWidth={1.5}
+										fill="url(#allocGradient)"
+										name={t("devProfiler.alloc")}
+									/>
 									<Area
 										type="monotone"
 										dataKey="heapInuse"
@@ -723,9 +734,8 @@ export function DevProfiler(): React.ReactNode {
 
 					{/* Footer with info */}
 					<div className="border-t border-zinc-700 bg-zinc-800 px-3 py-2 text-[10px] text-zinc-500">
-						{t("devProfiler.cpus")} {data.runtime.num_cpu} | {t("devProfiler.gomaxprocs")} {data.runtime.gomaxprocs} |{" "}
-						{t("devProfiler.gc")} {data.runtime.num_gc} | {t("devProfiler.objects")}{" "}
-						{data.memory.heap_objects.toLocaleString()}
+						{t("devProfiler.cpus")} {data.runtime.num_cpu} | {t("devProfiler.gomaxprocs")} {data.runtime.gomaxprocs} | {t("devProfiler.gc")}{" "}
+						{data.runtime.num_gc} | {t("devProfiler.objects")} {data.memory.heap_objects.toLocaleString()}
 					</div>
 				</div>
 			)}

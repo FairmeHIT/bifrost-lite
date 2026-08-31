@@ -23,9 +23,7 @@ export function NoPermissionView({ entity, className, align = "middle" }: NoPerm
 			</div>
 			<div className="flex flex-col items-center gap-1">
 				<h1 className="text-muted-foreground text-xl font-medium">{t("permission.noAccessEntity", { entity })}</h1>
-				<p className="text-muted-foreground mt-2 max-w-[400px] text-sm font-normal">
-					{t("permission.contactAdmin")}
-				</p>
+				<p className="text-muted-foreground mt-2 max-w-[400px] text-sm font-normal">{t("permission.contactAdmin")}</p>
 			</div>
 		</div>
 	);

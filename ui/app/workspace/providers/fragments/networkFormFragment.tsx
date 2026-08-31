@@ -38,7 +38,8 @@ const secondsToHumanReadable = (seconds: number, t: (path: string, params?: Reco
 		const minutes = Math.floor(seconds / 60);
 		const remainingSeconds = seconds % 60;
 		const parts: string[] = [`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`];
-		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
+		if (remainingSeconds > 0)
+			parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 		return parts.join(" ");
 	}
 	if (seconds < 86400) {
@@ -47,7 +48,8 @@ const secondsToHumanReadable = (seconds: number, t: (path: string, params?: Reco
 		const remainingSeconds = seconds % 60;
 		const parts: string[] = [`${hours} ${t(hours === 1 ? "providers.network.timeHour" : "providers.network.timeHours")}`];
 		if (minutes > 0) parts.push(`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`);
-		if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
+		if (remainingSeconds > 0)
+			parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 		return parts.join(" ");
 	}
 	// For >= 1 day, only show non-zero components
@@ -59,7 +61,8 @@ const secondsToHumanReadable = (seconds: number, t: (path: string, params?: Reco
 	parts.push(`${days} ${t(days === 1 ? "providers.network.timeDay" : "providers.network.timeDays")}`);
 	if (hours > 0) parts.push(`${hours} ${t(hours === 1 ? "providers.network.timeHour" : "providers.network.timeHours")}`);
 	if (minutes > 0) parts.push(`${minutes} ${t(minutes === 1 ? "providers.network.timeMinute" : "providers.network.timeMinutes")}`);
-	if (remainingSeconds > 0) parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
+	if (remainingSeconds > 0)
+		parts.push(`${remainingSeconds} ${t(remainingSeconds === 1 ? "providers.network.timeSecond" : "providers.network.timeSeconds")}`);
 	return parts.join(" ");
 };
 
@@ -549,7 +552,7 @@ export function NetworkFormFragment({ provider }: NetworkFormFragmentProps) {
 				</div>
 
 				{/* Form Actions */}
-				<div className="bg-card sticky bottom-0 flex justify-end space-x-2 rounded-b-sm border-t px-6 py-4">
+				<div className="bg-surface-solid sticky bottom-0 flex justify-end space-x-2 rounded-b-sm border-t px-6 py-4">
 					{!hideBaseURL && (
 						<Button
 							type="button"

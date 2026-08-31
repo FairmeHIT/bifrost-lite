@@ -36,7 +36,7 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{selectedProvider === "all" ? (
 					<>
@@ -48,15 +48,13 @@ function CustomTooltip({ active, payload, selectedProvider, displayProviders }: 
 								<div key={provider} className="flex items-center justify-between gap-4">
 									<span className="flex items-center gap-1.5">
 										<span className="h-2 w-2 rounded-full" style={{ backgroundColor: isOther ? OTHER_SERIES_COLOR : getModelColor(idx) }} />
-										<span className="max-w-[120px] truncate text-muted-foreground">
-											{isOther ? OTHER_SERIES_LABEL : provider}
-										</span>
+										<span className="text-muted-foreground max-w-[120px] truncate">{isOther ? OTHER_SERIES_LABEL : provider}</span>
 									</span>
 									<span className="font-medium">{formatCost(cost)}</span>
 								</div>
 							);
 						})}
-						<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+						<div className="border-popover flex items-center justify-between gap-4 border-t pt-1">
 							<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
 							<span className="font-medium">{formatCost(data.total_cost)}</span>
 						</div>

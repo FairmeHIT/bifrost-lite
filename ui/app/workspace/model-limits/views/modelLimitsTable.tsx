@@ -245,7 +245,7 @@ export default function ModelLimitsTable({
 								model:
 									deletingModelConfig?.model_name && deletingModelConfig.model_name.length > 30
 										? `${deletingModelConfig.model_name.slice(0, 30)}...`
-										: deletingModelConfig?.model_name ?? "",
+										: (deletingModelConfig?.model_name ?? ""),
 							})}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
@@ -266,9 +266,7 @@ export default function ModelLimitsTable({
 				<div className="mb-4 flex items-center justify-between">
 					<div>
 						<h1 className="text-lg font-semibold">{t("modelLimits.table.heading")}</h1>
-						<p className="text-muted-foreground text-sm">
-							{t("modelLimits.table.description")}
-						</p>
+						<p className="text-muted-foreground text-sm">{t("modelLimits.table.description")}</p>
 					</div>
 					<Button onClick={handleAddModelLimit} disabled={!hasCreateAccess} data-testid="model-limits-button-create">
 						<Plus className="h-4 w-4" />
@@ -339,7 +337,7 @@ export default function ModelLimitsTable({
 
 				<div className="mb-2 overflow-hidden rounded-sm border" data-testid="model-limits-table">
 					<Table containerClassName="h-full overflow-auto">
-						<TableHeader className="bg-muted sticky top-0 z-10">
+						<TableHeader className="bg-surface-solid-muted sticky top-0 z-10">
 							<TableRow className="hover:bg-transparent">
 								<TableHead className="font-medium">{t("modelLimits.table.columnModel")}</TableHead>
 								<TableHead className="font-medium">{t("modelLimits.table.columnProvider")}</TableHead>
@@ -347,7 +345,7 @@ export default function ModelLimitsTable({
 								<TableHead className="font-medium">{t("modelLimits.table.columnScopeTarget")}</TableHead>
 								<TableHead className="font-medium">{t("modelLimits.table.columnBudget")}</TableHead>
 								<TableHead className="font-medium">{t("modelLimits.table.columnRateLimit")}</TableHead>
-								<TableHead className={`bg-muted sticky right-0 z-30 w-[50px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
+								<TableHead className={`bg-surface-solid-muted sticky right-0 z-30 w-[50px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -452,7 +450,9 @@ export default function ModelLimitsTable({
 																</span>
 																<span className="text-muted-foreground text-xs">
 																	{t("modelLimits.table.resets", { duration: formatResetDuration(b.reset_duration) })}
-																	{config.calendar_aligned && supportsCalendarAlignment(b.reset_duration) && t("modelLimits.table.resetsCalendar", { duration: formatResetDuration(b.reset_duration) })}
+																	{config.calendar_aligned &&
+																		supportsCalendarAlignment(b.reset_duration) &&
+																		t("modelLimits.table.resetsCalendar", { duration: formatResetDuration(b.reset_duration) })}
 																</span>
 															</div>
 														))}
@@ -543,7 +543,7 @@ export default function ModelLimitsTable({
 											</TableCell>
 											<TableCell
 												className={cn(
-													"group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right",
+													"group-hover:bg-muted dark:bg-surface-solid dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right",
 													PIN_SHADOW_RIGHT,
 												)}
 												onClick={(e) => e.stopPropagation()}

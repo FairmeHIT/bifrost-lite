@@ -359,9 +359,7 @@ export default function ComplexityRouterPage() {
 				<div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 					<div className="space-y-1.5">
 						<h1 className="text-2xl font-semibold tracking-tight">{t("complexityRouter.title")}</h1>
-						<p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-							{t("complexityRouter.description")}
-						</p>
+						<p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">{t("complexityRouter.description")}</p>
 					</div>
 					<Button asChild variant="outline" size="sm" className="w-fit shrink-0" data-testid="complexity-router-docs-link">
 						<a href={"https://docs.getbifrost.ai/features/governance/complexity-router"} target="_blank" rel="noopener noreferrer">
@@ -374,7 +372,9 @@ export default function ComplexityRouterPage() {
 				{/* ── Complexity Spectrum ── */}
 				<div className="bg-card space-y-4 rounded-sm border p-5">
 					<div className="flex items-center justify-between">
-						<p className="text-muted-foreground font-mono text-xs font-semibold tracking-widest uppercase">{t("complexityRouter.complexitySpectrum")}</p>
+						<p className="text-muted-foreground font-mono text-xs font-semibold tracking-widest uppercase">
+							{t("complexityRouter.complexitySpectrum")}
+						</p>
 						<div className="flex items-center gap-4">
 							{Object.values(TIER_PALETTE).map(({ color, name }) => (
 								<div key={name} className="flex items-center gap-1.5">
@@ -477,9 +477,7 @@ export default function ComplexityRouterPage() {
 				<div className="space-y-3">
 					<div className="flex items-baseline gap-2.5">
 						<h2 className="text-sm font-semibold">{t("complexityRouter.keywordLists")}</h2>
-						<span className="text-muted-foreground text-xs">
-							{t("complexityRouter.keywordHint")}
-						</span>
+						<span className="text-muted-foreground text-xs">{t("complexityRouter.keywordHint")}</span>
 					</div>
 
 					<div className="grid gap-3 md:grid-cols-2">
@@ -538,7 +536,7 @@ export default function ComplexityRouterPage() {
 				)}
 
 				{/* ── Action footer ── */}
-				<div className="bg-card sticky bottom-0 flex flex-wrap items-center justify-end gap-2.5 border-t py-4 z-10">
+				<div className="bg-surface-solid sticky bottom-0 z-10 flex flex-wrap items-center justify-end gap-2.5 border-t py-4">
 					<Button
 						data-testid="complexity-router-restore-defaults-button"
 						type="button"
@@ -576,9 +574,7 @@ export default function ComplexityRouterPage() {
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("complexityRouter.restoreDefaultsTitle")}</AlertDialogTitle>
-						<AlertDialogDescription>
-							{t("complexityRouter.restoreDefaultsDesc")}
-						</AlertDialogDescription>
+						<AlertDialogDescription>{t("complexityRouter.restoreDefaultsDesc")}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel

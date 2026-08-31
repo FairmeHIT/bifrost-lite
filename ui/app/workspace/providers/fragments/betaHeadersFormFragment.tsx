@@ -263,9 +263,7 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)} data-testid="provider-config-beta-headers-content">
 				<div className="space-y-2 px-6 pb-6">
-					<p className="text-muted-foreground text-xs">
-						{t("providers.betaHeaders.description")}
-					</p>
+					<p className="text-muted-foreground text-xs">{t("providers.betaHeaders.description")}</p>
 					<div className="rounded-md border">
 						<table className="w-full text-sm">
 							<thead>
@@ -404,7 +402,7 @@ export function BetaHeadersFormFragment({ provider }: BetaHeadersFormFragmentPro
 					</div>
 				</div>
 
-				<div className="bg-card sticky bottom-0 flex justify-end gap-2 rounded-b-sm border-t px-6 py-4">
+				<div className="bg-surface-solid sticky bottom-0 flex justify-end gap-2 rounded-b-sm border-t px-6 py-4">
 					<Button
 						type="submit"
 						disabled={!isManuallyDirty || !hasUpdateProviderAccess || isUpdatingProvider}

@@ -180,7 +180,7 @@ export function DateTimePickerWithRange(props: DateTimePickerWithRangeProps) {
 						data-testid={props.triggerTestId}
 						className={cn(
 							"justify-start text-left font-normal",
-							!date && "text-content-disabled",
+							!date && "text-muted-foreground/70",
 							buttonClassName,
 							isOpen && "border-black",
 						)}
@@ -445,7 +445,7 @@ export function DateTimePicker(props: DateTimePickerProps) {
 						variant={buttonVariant ?? "default"}
 						className={cn(
 							"w-max justify-start text-left font-normal",
-							!date && "text-content-disabled",
+							!date && "text-muted-foreground/70",
 							buttonClassName,
 							isOpen && "border-black",
 						)}

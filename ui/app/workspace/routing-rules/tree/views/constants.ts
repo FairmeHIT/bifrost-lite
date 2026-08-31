@@ -1,6 +1,5 @@
 // ─── Scope config ──────────────────────────────────────────────────────────
 
-
 import { t } from "@/lib/i18n";
 export const SCOPE_CONFIG = {
 	virtual_key: { label: t("routingRules.tree.virtualKey"), color: "#7c3aed", headerClass: "bg-purple-100 dark:bg-purple-900/30" },

@@ -135,7 +135,9 @@ function MetricCard({
 										</span>
 									</div>
 									<div className="text-xs">
-										<span className="text-muted-foreground">{t("providers.governanceTable.resets", { duration: formatResetDuration(resetDuration) })}</span>
+										<span className="text-muted-foreground">
+											{t("providers.governanceTable.resets", { duration: formatResetDuration(resetDuration) })}
+										</span>
 									</div>
 								</div>
 							</TooltipTrigger>

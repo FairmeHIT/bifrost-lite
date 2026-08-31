@@ -70,9 +70,7 @@ function resolvePath(dict: Dict, path: string): string | undefined {
 /** Interpolates {placeholder} tokens in a translated string. */
 export function interpolate(template: string, params?: Record<string, string | number>): string {
 	if (!params) return template;
-	return template.replace(/\{(\w+)\}/g, (match, key: string) =>
-		key in params ? String(params[key]) : match,
-	);
+	return template.replace(/\{(\w+)\}/g, (match, key: string) => (key in params ? String(params[key]) : match));
 }
 
 /** Translate a dot-path key in the given language dictionary. Falls back to en, then the raw key. */

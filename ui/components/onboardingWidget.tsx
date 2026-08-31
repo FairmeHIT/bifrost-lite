@@ -259,9 +259,7 @@ export default function OnboardingWidget() {
 						</span>
 						<div className="min-w-0 flex-1">
 							<div className="text-sm font-semibold">{t("onboarding.setupChecklist")}</div>
-							<div className="text-muted-foreground text-xs">
-								{t("onboarding.stepsComplete", { done: doneCount, total: steps.length })}
-							</div>
+							<div className="text-muted-foreground text-xs">{t("onboarding.stepsComplete", { done: doneCount, total: steps.length })}</div>
 						</div>
 					</div>
 					<div className="flex flex-shrink-0 items-center gap-1">
@@ -366,11 +364,7 @@ export default function OnboardingWidget() {
 						}}
 					>
 						<PopoverTrigger asChild>
-							<button
-								type="button"
-								data-testid="onboarding-later"
-								className="text-muted-foreground hover:text-foreground py-2 text-center"
-							>
+							<button type="button" data-testid="onboarding-later" className="text-muted-foreground hover:text-foreground py-2 text-center">
 								{t("onboarding.remindLater")}
 							</button>
 						</PopoverTrigger>

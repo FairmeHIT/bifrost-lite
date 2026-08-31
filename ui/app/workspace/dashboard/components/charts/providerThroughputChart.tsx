@@ -32,7 +32,7 @@ function AllProvidersTooltip({ active, payload, displayProviders: providers }: a
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				{providers.map((provider: string, idx: number) => {
 					const stats = data.by_provider?.[provider];
@@ -41,7 +41,7 @@ function AllProvidersTooltip({ active, payload, displayProviders: providers }: a
 						<div key={provider} className="flex items-center justify-between gap-4">
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: getModelColor(idx) }} />
-								<span className="max-w-[120px] truncate text-muted-foreground">{provider}</span>
+								<span className="text-muted-foreground max-w-[120px] truncate">{provider}</span>
 							</span>
 							<span className="font-medium">{formatTokensPerSecond(stats.tokens_per_second)}</span>
 						</div>
@@ -61,7 +61,7 @@ function SingleProviderTooltip({ active, payload }: any) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
@@ -74,7 +74,7 @@ function SingleProviderTooltip({ active, payload }: any) {
 					<span className="text-muted-foreground">{t("dashboardCharts.completionTokens")}</span>
 					<span className="font-medium">{data.total_completion_tokens?.toLocaleString() || 0}</span>
 				</div>
-				<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+				<div className="border-popover flex items-center justify-between gap-4 border-t pt-1">
 					<span className="text-muted-foreground">{t("dashboardCharts.requests")}</span>
 					<span className="font-medium">{data.total_requests?.toLocaleString() || 0}</span>
 				</div>
@@ -156,7 +156,10 @@ function ProviderThroughputChartImpl({ data, chartType, startTime, endTime, sele
 						/>
 						{mode === "single" ? (
 							<>
-								<Tooltip content={<SingleProviderTooltip provider={selectedProvider} />} cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }} />
+								<Tooltip
+									content={<SingleProviderTooltip provider={selectedProvider} />}
+									cursor={{ fill: "var(--primary)", fillOpacity: 0.12 }}
+								/>
 								<Bar
 									isAnimationActive={false}
 									dataKey="tokens_per_second"

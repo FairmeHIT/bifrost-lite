@@ -39,7 +39,7 @@ function TotalChip({
 			data-testid={testId ? `${testId}-total` : undefined}
 		>
 			{totalLabel && <span>{totalLabel}</span>}
-			<span className="text-primary font-num text-sm font-semibold text-glow">{total}</span>
+			<span className="text-primary font-num text-glow text-sm font-semibold">{total}</span>
 		</span>
 	);
 

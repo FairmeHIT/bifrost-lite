@@ -117,7 +117,7 @@ export function CustomDropdown<T = {}>({
 		<div className={cn("flex flex-col rounded-md border p-2", className)} ref={containerRef} style={style}>
 			{options.length === 0 ? (
 				<div className="w-[350px]">
-					<p className="text-content-secondary text-md">{emptyViewText}</p>
+					<p className="text-secondary-foreground text-md">{emptyViewText}</p>
 				</div>
 			) : (
 				<>

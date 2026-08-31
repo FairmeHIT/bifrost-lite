@@ -208,16 +208,16 @@ export function EntityAssociationSelect({
 							<div
 								className={cn(
 									"flex w-full cursor-pointer flex-col gap-0.5 rounded-sm p-2 text-sm",
-									props.isFocused && "bg-background-highlight-primary/60",
-									props.isSelected && "bg-background-highlight-primary/40",
+									props.isFocused && "bg-select-option-active-bg",
+									props.isSelected && "bg-select-option-active-bg",
 								)}
 								onClick={() => props.selectOption(props.data)}
 							>
 								<div className="flex items-center justify-between">
-									<span className="text-content-primary font-medium">{data.label}</span>
+									<span className="text-foreground font-medium">{data.label}</span>
 									{props.isSelected && <span className="text-primary text-xs">{t("entityAssociation.selected")}</span>}
 								</div>
-								{data.meta?.description && <span className="text-content-tertiary line-clamp-1 text-xs">{data.meta.description}</span>}
+								{data.meta?.description && <span className="text-muted-foreground line-clamp-1 text-xs">{data.meta.description}</span>}
 							</div>
 						);
 					},

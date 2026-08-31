@@ -209,13 +209,16 @@ export function LogsHeaderView({
 				// report the partial result rather than framing it as a failure.
 				toast.info(t("logs.recalcCancelled"), {
 					id: RECALC_TOAST_ID,
-					description: recalcJobStatus.message || t("logs.recalcStoppedAfter", { updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped }),
+					description:
+						recalcJobStatus.message || t("logs.recalcStoppedAfter", { updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped }),
 					duration: 5000,
 				});
 			} else {
 				toast.success(t("logs.recalcComplete"), {
 					id: RECALC_TOAST_ID,
-					description: recalcJobStatus.message || t("logs.recalcUpdatedSkipped", { updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped }),
+					description:
+						recalcJobStatus.message ||
+						t("logs.recalcUpdatedSkipped", { updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped }),
 					duration: 5000,
 				});
 			}
@@ -239,7 +242,11 @@ export function LogsHeaderView({
 			description:
 				total > 0
 					? t("logs.recalcProgressWithTotal", { processed, total, updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped })
-					: t("logs.recalcProgressNoTotal", { processed: recalcJobStatus.processed, updated: recalcJobStatus.updated, skipped: recalcJobStatus.skipped }),
+					: t("logs.recalcProgressNoTotal", {
+							processed: recalcJobStatus.processed,
+							updated: recalcJobStatus.updated,
+							skipped: recalcJobStatus.skipped,
+						}),
 			action: {
 				label: t("common.cancel"),
 				// preventDefault keeps the toast mounted so it can report the cancellation;
@@ -305,7 +312,8 @@ export function LogsHeaderView({
 				</TooltipTrigger>
 				<TooltipContent sideOffset={6} className="max-w-64">
 					{t("logs.groupTooltipDesc")}
-					<br /><br />
+					<br />
+					<br />
 					{t("logs.groupTooltipSlow")}
 				</TooltipContent>
 			</Tooltip>

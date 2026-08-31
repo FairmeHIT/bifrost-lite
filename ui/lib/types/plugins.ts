@@ -2,6 +2,7 @@
 
 export const SEMANTIC_CACHE_PLUGIN = "semantic_cache";
 export const MAXIM_PLUGIN = "maxim";
+export const SECRETREDACT_PLUGIN = "secretredact";
 
 export type PluginType = "llm" | "mcp" | "http";
 

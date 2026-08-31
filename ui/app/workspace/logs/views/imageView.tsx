@@ -158,7 +158,13 @@ export default function ImageView({ imageInput, imageEditInput, imageVariationIn
 
 								{totalImages > 1 && (
 									<div className="mt-3 flex items-center justify-center gap-4">
-										<Button variant="outline" size="sm" onClick={goToPrevious} aria-label={t("logs.previousImage")} title={t("logs.previousImage")}>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={goToPrevious}
+											aria-label={t("logs.previousImage")}
+											title={t("logs.previousImage")}
+										>
 											<ChevronLeft className="h-4 w-4" />
 										</Button>
 										<span className="text-muted-foreground text-sm">

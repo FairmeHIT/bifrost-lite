@@ -12,12 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ProviderIconType, RenderProviderIcon } from "@/lib/constants/icons";
 import { getProviderLabel, RequestTypeLabels } from "@/lib/constants/logs";
-import {
-	getErrorMessage,
-	useCreatePricingOverrideMutation,
-	useGetProvidersQuery,
-	useUpdatePricingOverrideMutation,
-} from "@/lib/store";
+import { getErrorMessage, useCreatePricingOverrideMutation, useGetProvidersQuery, useUpdatePricingOverrideMutation } from "@/lib/store";
 import { useGetAllKeysQuery } from "@/lib/store/apis/providersApi";
 import { getUserPicker } from "@/lib/registries/userPicker";
 import { ModelProvider, RequestType } from "@/lib/types/config";
@@ -79,7 +74,11 @@ export const defaultFormState: FormState = {
 	pricingValues: {},
 };
 
-export function patternError(matchType: PricingOverrideMatchType, pattern: string, t: (path: string, params?: Record<string, string | number>) => string): string | undefined {
+export function patternError(
+	matchType: PricingOverrideMatchType,
+	pattern: string,
+	t: (path: string, params?: Record<string, string | number>) => string,
+): string | undefined {
 	const trimmed = pattern.trim();
 	if (!trimmed) return t("pricingOverrides.patternRequired");
 	if (matchType === "exact") {
@@ -93,7 +92,10 @@ export function patternError(matchType: PricingOverrideMatchType, pattern: strin
 	return undefined;
 }
 
-export function buildPatchFromForm(form: FormState, t: (path: string, params?: Record<string, string | number>) => string): { patch: PricingOverridePatch; errors: FieldErrors } {
+export function buildPatchFromForm(
+	form: FormState,
+	t: (path: string, params?: Record<string, string | number>) => string,
+): { patch: PricingOverridePatch; errors: FieldErrors } {
 	const errors: FieldErrors = {};
 	const patch: PricingOverridePatch = {};
 
@@ -362,8 +364,8 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 				providerKeyID: scopeLock.providerKeyID ?? "",
 				scopeRoot:
 					scopeLock.scopeKind === "virtual_key" ||
-						scopeLock.scopeKind === "virtual_key_provider" ||
-						scopeLock.scopeKind === "virtual_key_provider_key"
+					scopeLock.scopeKind === "virtual_key_provider" ||
+					scopeLock.scopeKind === "virtual_key_provider_key"
 						? "virtual_key"
 						: scopeLock.scopeKind === "user" || scopeLock.scopeKind === "user_provider" || scopeLock.scopeKind === "user_provider_key"
 							? "user"
@@ -597,7 +599,7 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 	return (
 		<Sheet open={open} onOpenChange={(o) => (o ? onOpenChange(true) : handleCloseDrawer())}>
 			<SheetContent side="right" className="dark:bg-card flex w-full flex-col overflow-x-hidden bg-white p-0 pt-4 sm:max-w-2xl">
-				<SheetHeader className="flex flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10">
+				<SheetHeader className="flex flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10">
 					<SheetTitle className="">{editingOverride ? t("pricingOverrides.editTitle") : t("pricingOverrides.createTitle")}</SheetTitle>
 				</SheetHeader>
 
@@ -791,7 +793,9 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 															</SelectContent>
 														</Select>
 														{providersError ? (
-															<p className="text-destructive mt-1 text-xs">{t("pricingOverrides.failedToLoadProviders", { error: getErrorMessage(providersError) })}</p>
+															<p className="text-destructive mt-1 text-xs">
+																{t("pricingOverrides.failedToLoadProviders", { error: getErrorMessage(providersError) })}
+															</p>
 														) : null}
 													</FormItem>
 												)}
@@ -865,7 +869,11 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 												<FormControl>
 													<Input
 														data-testid="pricing-override-pattern-input"
-														placeholder={matchType === "exact" ? t("pricingOverrides.patternExactPlaceholder") : t("pricingOverrides.patternWildcardPlaceholder")}
+														placeholder={
+															matchType === "exact"
+																? t("pricingOverrides.patternExactPlaceholder")
+																: t("pricingOverrides.patternWildcardPlaceholder")
+														}
 														{...field}
 														onChange={(e) => {
 															field.onChange(e);
@@ -927,7 +935,7 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 																				const current = field.value;
 																				const next = current.includes(requestType as RequestType)
 																					? current.filter((item) => item !== requestType)
-													: [...current, requestType as RequestType];
+																					: [...current, requestType as RequestType];
 																				field.onChange(next);
 																				if (next.length > 0) clearErrors("requestTypes");
 																			}}
@@ -1001,7 +1009,7 @@ export default function PricingOverrideSheet({ open, onOpenChange, editingOverri
 							</div>
 						</div>
 
-						<div className="bg-card sticky bottom-0 flex justify-end gap-3 border-t px-7 py-4">
+						<div className="bg-surface-solid sticky bottom-0 flex justify-end gap-3 border-t px-7 py-4">
 							<Button
 								data-testid="pricing-override-cancel-btn"
 								type="button"

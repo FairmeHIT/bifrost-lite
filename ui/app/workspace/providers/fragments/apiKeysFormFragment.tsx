@@ -317,9 +317,7 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 					name={`key.value`}
 					render={({ field }) => (
 						<FormItem>
-							<FormLabel>
-								{isVLLM ? t("providers.keyForm.labels.apiKeyOptional") : t("providers.keyForm.labels.apiKey")}
-							</FormLabel>
+							<FormLabel>{isVLLM ? t("providers.keyForm.labels.apiKeyOptional") : t("providers.keyForm.labels.apiKey")}</FormLabel>
 							<FormControl>
 								<SecretVarInput placeholder={t("providers.keyForm.placeholders.apiKey")} type="text" {...field} />
 							</FormControl>
@@ -730,7 +728,12 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								<FormItem>
 									<FormLabel>{t("providers.keyForm.vertex.labels.apiKeyGemini")}</FormLabel>
 									<FormControl>
-										<SecretVarInput data-testid="apikey-vertex-api-key-input" placeholder={t("providers.keyForm.placeholders.apiKey")} type="text" {...field} />
+										<SecretVarInput
+											data-testid="apikey-vertex-api-key-input"
+											placeholder={t("providers.keyForm.placeholders.apiKey")}
+											type="text"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -786,7 +789,11 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								<FormLabel>{t("providers.keyForm.labels.serverUrlRequired")}</FormLabel>
 								<FormDescription>{t("providers.keyForm.vllm.descriptions.serverUrl")}</FormDescription>
 								<FormControl>
-									<SecretVarInput data-testid="key-input-vllm-url" placeholder={t("providers.keyForm.vllm.placeholders.serverUrl")} {...field} />
+									<SecretVarInput
+										data-testid="key-input-vllm-url"
+										placeholder={t("providers.keyForm.vllm.placeholders.serverUrl")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -800,7 +807,11 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 								<FormLabel>{t("providers.keyForm.labels.modelNameRequired")}</FormLabel>
 								<FormDescription>{t("providers.keyForm.vllm.descriptions.modelName")}</FormDescription>
 								<FormControl>
-									<Input data-testid="key-input-vllm-model-name" placeholder={t("providers.keyForm.vllm.placeholders.modelName")} {...field} />
+									<Input
+										data-testid="key-input-vllm-model-name"
+										placeholder={t("providers.keyForm.vllm.placeholders.modelName")}
+										{...field}
+									/>
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -817,14 +828,14 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 							<FormItem>
 								<FormLabel>{t("providers.keyForm.labels.serverUrlRequired")}</FormLabel>
 								<FormDescription>
-									{isOllama
-										? t("providers.keyForm.ollama.descriptions.serverUrl")
-										: t("providers.keyForm.sgl.descriptions.serverUrl")}
+									{isOllama ? t("providers.keyForm.ollama.descriptions.serverUrl") : t("providers.keyForm.sgl.descriptions.serverUrl")}
 								</FormDescription>
 								<FormControl>
 									<SecretVarInput
 										data-testid={`key-input-${isOllama ? "ollama" : "sgl"}-url`}
-										placeholder={isOllama ? t("providers.keyForm.ollama.placeholders.serverUrl") : t("providers.keyForm.sgl.placeholders.serverUrl")}
+										placeholder={
+											isOllama ? t("providers.keyForm.ollama.placeholders.serverUrl") : t("providers.keyForm.sgl.placeholders.serverUrl")
+										}
 										{...field}
 									/>
 								</FormControl>
@@ -842,7 +853,9 @@ export function ApiKeyFormFragment({ control, providerName, baseProviderType, fo
 						render={({ field }) => (
 							<FormItem className="flex flex-row items-center justify-between rounded-sm border p-2">
 								<div className="space-y-1.5">
-									<FormLabel htmlFor="use-anthropic-endpoints-alias-override-switch">{t("providers.keyForm.switchLabels.useAnthropicEndpoints")}</FormLabel>
+									<FormLabel htmlFor="use-anthropic-endpoints-alias-override-switch">
+										{t("providers.keyForm.switchLabels.useAnthropicEndpoints")}
+									</FormLabel>
 									<FormDescription>{t("providers.keyForm.descriptions.useAnthropicEndpoints")}</FormDescription>
 								</div>
 								<FormControl>

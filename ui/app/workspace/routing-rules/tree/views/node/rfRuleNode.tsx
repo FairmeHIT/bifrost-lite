@@ -70,7 +70,9 @@ export function RFRuleNode({ data }: { data: any }) {
 				{/* rule name */}
 				<div className="px-3 py-2">
 					<p className="text-foreground truncate text-xs font-semibold">{rule.name}</p>
-					{rule.priority > 0 && <p className="text-muted-foreground mt-0.5 text-[10px]">{t("routingRules.tree.priority", { priority: rule.priority })}</p>}
+					{rule.priority > 0 && (
+						<p className="text-muted-foreground mt-0.5 text-[10px]">{t("routingRules.tree.priority", { priority: rule.priority })}</p>
+					)}
 				</div>
 
 				{/* targets footer */}
@@ -114,9 +116,7 @@ export function RFRuleNode({ data }: { data: any }) {
 						{rule.chain_rule && (
 							<div className="mb-1 flex items-start gap-2 border-b px-3 pb-1.5">
 								<Link2 className="mt-0.5 h-3 w-3 shrink-0" style={{ color: scopeColor }} />
-								<p className="text-muted-foreground text-[10px] leading-snug">
-									{t("routingRules.tree.chainRuleDesc")}
-								</p>
+								<p className="text-muted-foreground text-[10px] leading-snug">{t("routingRules.tree.chainRuleDesc")}</p>
 							</div>
 						)}
 						<p className="mb-1 px-3 text-[10px] font-semibold tracking-wide uppercase" style={{ color: scopeColor }}>
@@ -133,10 +133,18 @@ export function RFRuleNode({ data }: { data: any }) {
 									)}
 									<div className="min-w-0 flex-1">
 										<p className="text-foreground truncate text-xs font-medium">
-											{isPassthrough ? t("routingRules.tree.passthrough") : target.provider ? getProviderLabel(target.provider) : target.model}
+											{isPassthrough
+												? t("routingRules.tree.passthrough")
+												: target.provider
+													? getProviderLabel(target.provider)
+													: target.model}
 										</p>
-										{target.model && target.provider && <p className="text-muted-foreground truncate font-mono text-[10px]">{target.model}</p>}
-										{isPassthrough && <p className="text-muted-foreground/60 text-[10px] italic">{t("routingRules.tree.originalProviderModel")}</p>}
+										{target.model && target.provider && (
+											<p className="text-muted-foreground truncate font-mono text-[10px]">{target.model}</p>
+										)}
+										{isPassthrough && (
+											<p className="text-muted-foreground/60 text-[10px] italic">{t("routingRules.tree.originalProviderModel")}</p>
+										)}
 									</div>
 									{multi && (
 										<span className="ml-1 shrink-0 text-[11px] font-semibold" style={{ color: scopeColor }}>

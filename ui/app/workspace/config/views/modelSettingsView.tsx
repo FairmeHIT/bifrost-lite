@@ -223,9 +223,7 @@ export default function ModelSettingsView() {
 					<div className="space-y-2 rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<Label htmlFor="live-models-sync-interval">{t("modelSettings.modelDiscoveryInterval")}</Label>
-							<p className="text-muted-foreground text-sm">
-								{t("modelSettings.modelDiscoveryIntervalDescription")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("modelSettings.modelDiscoveryIntervalDescription")}</p>
 						</div>
 						<Input
 							id="live-models-sync-interval"
@@ -251,9 +249,7 @@ export default function ModelSettingsView() {
 							<p className="text-destructive text-sm">{errors.live_models_sync_interval_minutes.message}</p>
 						)}
 						{formValues.live_models_sync_interval_minutes === 0 && !errors.live_models_sync_interval_minutes && (
-							<p className="text-muted-foreground text-sm">
-								{t("modelSettings.discoveryOff")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("modelSettings.discoveryOff")}</p>
 						)}
 					</div>
 
@@ -261,9 +257,7 @@ export default function ModelSettingsView() {
 					<div className="flex items-center justify-between rounded-sm border p-4">
 						<div className="space-y-0.5">
 							<Label htmlFor="routing-chain-max-depth">{t("modelSettings.routingChainMaxDepth")}</Label>
-							<p className="text-muted-foreground text-sm">
-								{t("modelSettings.routingChainMaxDepthDescription")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("modelSettings.routingChainMaxDepthDescription")}</p>
 						</div>
 						<Input
 							id="routing-chain-max-depth"

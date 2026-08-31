@@ -134,7 +134,9 @@ export default function OCRView({ ocrInput, ocrOutput }: OCRViewProps) {
 
 								{pageImages.length > 0 && (
 									<div>
-										<div className="text-muted-foreground mb-2 text-xs font-medium">{t("logs.extractedImages", { count: pageImages.length })}</div>
+										<div className="text-muted-foreground mb-2 text-xs font-medium">
+											{t("logs.extractedImages", { count: pageImages.length })}
+										</div>
 										<div className="flex flex-wrap gap-2">
 											{pageImages.map((img) => (
 												<img

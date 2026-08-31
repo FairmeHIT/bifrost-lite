@@ -276,14 +276,7 @@ export function CELRuleBuilder({
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
 						<Label>{mode === "cel" ? t("ui.celBuilder.celExpression") : t("ui.celBuilder.celExpressionPreview")}</Label>
-						<Button
-							variant="outline"
-							size="sm"
-							onClick={() => copy(copyValue)}
-							disabled={!copyValue}
-							className="gap-2"
-							type="button"
-						>
+						<Button variant="outline" size="sm" onClick={() => copy(copyValue)} disabled={!copyValue} className="gap-2" type="button">
 							{copied ? (
 								<>
 									<Check className="h-4 w-4" />
@@ -326,9 +319,7 @@ export function CELRuleBuilder({
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("ui.celBuilder.switchToBuilder")}</AlertDialogTitle>
-						<AlertDialogDescription>
-							{t("ui.celBuilder.switchDescription")}
-						</AlertDialogDescription>
+						<AlertDialogDescription>{t("ui.celBuilder.switchDescription")}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>

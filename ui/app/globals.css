@@ -55,10 +55,10 @@
 
 :root {
 	--font-geist-sans:
-		"Geist", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", ui-sans-serif, system-ui,
-		-apple-system, "Segoe UI", "Roboto", sans-serif;
-	--font-geist-mono: "Geist Mono", "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", "Monaco", "Liberation Mono",
-		Consolas, monospace;
+		"Geist", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+		"Roboto", sans-serif;
+	--font-geist-mono:
+		"Geist Mono", "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", "Monaco", "Liberation Mono", Consolas, monospace;
 	--chamfer-lg: polygon(16px 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%, 0 16px);
 	--chamfer-md: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
 	--chamfer-sm: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
@@ -98,6 +98,18 @@
 	--color-popover: var(--popover);
 	--color-card-foreground: var(--card-foreground);
 	--color-card: var(--card);
+
+	/* Solid (opaque) surfaces for dropdown/select/menu/tag — see :root comment */
+	--color-select-control-bg: var(--select-control-bg);
+	--color-select-menu-bg: var(--select-menu-bg);
+	--color-select-tag-bg: var(--select-tag-bg);
+	--color-select-tag-border: var(--select-tag-border);
+	--color-select-option-active-bg: var(--select-option-active-bg);
+	--color-select-input-bg: var(--select-input-bg);
+
+	/* Solid (opaque) surface for sticky table headers/rows & sheet headers/footers */
+	--color-surface-solid: var(--surface-solid);
+	--color-surface-solid-muted: var(--surface-solid-muted);
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
@@ -162,6 +174,29 @@
 	--muted-foreground: #718096;
 	--accent: rgba(8, 145, 178, 0.1);
 	--accent-foreground: #1d4a6d;
+
+	/* ─── Solid (opaque) tokens for dropdown/select/menu/tag surfaces ───
+	 * --accent and --card are deliberately translucent for the "cockpit" design
+	 * language. Using them as the *background* of a dropdown menu, a select
+	 * control, a multi-value tag chip, or a focused option row lets page content
+	 * bleed through and creates the "content overlapping background" bug. These
+	 * solid tokens are the opaque equivalents intended only for those surfaces.
+	 */
+	--select-control-bg: #ffffff;
+	--select-menu-bg: #ffffff;
+	--select-tag-bg: rgba(8, 145, 178, 0.16);
+	--select-tag-border: rgba(8, 145, 178, 0.32);
+	--select-option-active-bg: rgba(8, 145, 178, 0.16);
+	--select-input-bg: #ffffff;
+
+	/* ─── Solid (opaque) surface for sticky table headers/rows & sheet headers/footers ───
+	 * --card (dark 55% transparent) and --muted (8%/10% transparent) let adjacent
+	 * table rows and sheet content bleed through when used as the *background* of a
+	 * sticky column, a sticky table header, or a sticky sheet header/footer. This
+	 * token is the opaque equivalent for those pinned surfaces.
+	 */
+	--surface-solid: #ffffff;
+	--surface-solid-muted: #e6eef5;
 	--destructive: #dc2626;
 	--border: rgba(36, 90, 150, 0.26);
 	--input: rgba(36, 90, 150, 0.4);
@@ -202,6 +237,25 @@
 	--muted-foreground: #8fa3c8;
 	--accent: rgba(47, 215, 255, 0.1);
 	--accent-foreground: #bfe9ff;
+
+	/* ─── Solid (opaque) tokens for dropdown/select/menu/tag surfaces ───
+	 * Tuned to sit harmoniously on the cockpit dark palette: bases echo
+	 * --popover (#0a162c) so they read as the same "deep space navy", while
+	 * tag/option-active use a stronger cyan fill (not the 10% --accent) so
+	 * label text stays legible on the chip and selected rows stay readable.
+	 */
+	--select-control-bg: #0a162c;
+	--select-menu-bg: #0a162c;
+	--select-tag-bg: #123049;
+	--select-tag-border: rgba(47, 215, 255, 0.55);
+	--select-option-active-bg: rgba(47, 215, 255, 0.28);
+	--select-input-bg: #0a162c;
+
+	/* Solid (opaque) surface for sticky table headers/rows & sheet headers/footers.
+	 * --surface-solid mirrors --popover; --surface-solid-muted is a touch lighter
+	 * with a cyan tint so sticky headers read as a distinct but cohesive band. */
+	--surface-solid: #0a162c;
+	--surface-solid-muted: #11233f;
 	--destructive: #ff6b7a;
 	--border: rgba(47, 215, 255, 0.34);
 	--input: rgba(47, 215, 255, 0.45);
@@ -239,12 +293,9 @@
 		background-image:
 			/* Top cyan glow */
 			radial-gradient(1200px 520px at 50% -10%, rgba(47, 215, 255, 0.14), transparent 62%),
-			/* Bottom-left blue aura */
-			radial-gradient(900px 600px at -12% 108%, rgba(91, 157, 255, 0.1), transparent 60%),
-			/* Bottom-right violet aura */
-			radial-gradient(800px 500px at 112% 100%, rgba(155, 140, 255, 0.07), transparent 60%),
-			/* 42px grid lines — signature engineering-blueprint feel */
-			linear-gradient(rgba(47, 215, 255, 0.033) 1px, transparent 1px),
+			/* Bottom-left blue aura */ radial-gradient(900px 600px at -12% 108%, rgba(91, 157, 255, 0.1), transparent 60%),
+			/* Bottom-right violet aura */ radial-gradient(800px 500px at 112% 100%, rgba(155, 140, 255, 0.07), transparent 60%),
+			/* 42px grid lines — signature engineering-blueprint feel */ linear-gradient(rgba(47, 215, 255, 0.033) 1px, transparent 1px),
 			linear-gradient(90deg, rgba(47, 215, 255, 0.033) 1px, transparent 1px);
 		background-size:
 			100% 100%,

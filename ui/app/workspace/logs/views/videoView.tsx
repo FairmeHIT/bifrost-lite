@@ -80,7 +80,11 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 											<div className="text-muted-foreground text-xs font-medium">{t("logs.id")}</div>
 											<div className="flex items-center gap-1">
 												<div className="font-mono text-xs break-all">{downloadOutput.video_id}</div>
-												<CopyableId id={downloadOutput.video_id} entityLabel={t("logs.methodType")} testId="video-view-copy-download-video-id-button" />
+												<CopyableId
+													id={downloadOutput.video_id}
+													entityLabel={t("logs.methodType")}
+													testId="video-view-copy-download-video-id-button"
+												/>
 											</div>
 										</div>
 									)}
@@ -119,7 +123,11 @@ export default function VideoView({ videoInput, videoOutput, videoListOutput, re
 											<div className="text-muted-foreground text-xs font-medium">{t("logs.id")}</div>
 											<div className="flex items-center gap-1">
 												<div className="font-mono text-xs break-all">{generationOutput.id}</div>
-												<CopyableId id={generationOutput.id} entityLabel={t("logs.methodType")} testId="video-view-copy-generation-video-id-button" />
+												<CopyableId
+													id={generationOutput.id}
+													entityLabel={t("logs.methodType")}
+													testId="video-view-copy-generation-video-id-button"
+												/>
 											</div>
 										</div>
 									)}

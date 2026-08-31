@@ -166,16 +166,19 @@ export default function SecurityView() {
 		setAuthConfig((prev) => ({ ...prev, is_enabled: checked }));
 	}, []);
 
-	const handleAuthFieldChange = useCallback((field: "admin_username" | "admin_password", value: SecretVar) => {
-		if (field === "admin_password") {
-			passwordUnchangedRef.current = false;
-			const passwordPolicyFailures = !value.ref && value.value ? getPasswordPolicyFailures(value.value, false) : [];
-			setPasswordError(
-				passwordPolicyFailures.length > 0 ? t("securityView.passwordPolicyError", { items: passwordPolicyFailures.join(", ") }) : "",
-			);
-		}
-		setAuthConfig((prev) => ({ ...prev, [field]: value }));
-	}, [t]);
+	const handleAuthFieldChange = useCallback(
+		(field: "admin_username" | "admin_password", value: SecretVar) => {
+			if (field === "admin_password") {
+				passwordUnchangedRef.current = false;
+				const passwordPolicyFailures = !value.ref && value.value ? getPasswordPolicyFailures(value.value, false) : [];
+				setPasswordError(
+					passwordPolicyFailures.length > 0 ? t("securityView.passwordPolicyError", { items: passwordPolicyFailures.join(", ") }) : "",
+				);
+			}
+			setAuthConfig((prev) => ({ ...prev, [field]: value }));
+		},
+		[t],
+	);
 
 	const handleSave = useCallback(async () => {
 		try {
@@ -209,11 +212,11 @@ export default function SecurityView() {
 				client_config: localConfig,
 				...(showPasswordSection
 					? {
-						auth_config: {
-							...(authConfig.is_enabled && hasUsername && hasPassword ? authConfig : { ...authConfig, is_enabled: false }),
-							...(isFirstTimeSetup ? { setup_token: setupToken.trim() } : {}),
-						},
-					}
+							auth_config: {
+								...(authConfig.is_enabled && hasUsername && hasPassword ? authConfig : { ...authConfig, is_enabled: false }),
+								...(isFirstTimeSetup ? { setup_token: setupToken.trim() } : {}),
+							},
+						}
 					: {}),
 			}).unwrap();
 			setSetupToken("");
@@ -246,9 +249,7 @@ export default function SecurityView() {
 				{IS_ENTERPRISE && !authTypeLoading && authTypeError ? (
 					<Alert variant="destructive" data-testid="security-auth-type-error">
 						<AlertTriangle className="h-4 w-4" />
-						<AlertDescription>
-							{t("securityView.authTypeError", { error: getErrorMessage(authTypeError) })}
-						</AlertDescription>
+						<AlertDescription>{t("securityView.authTypeError", { error: getErrorMessage(authTypeError) })}</AlertDescription>
 					</Alert>
 				) : null}
 				{showPasswordSection && (
@@ -259,9 +260,7 @@ export default function SecurityView() {
 									<Label htmlFor="auth-enabled" className="text-sm font-medium">
 										{t("securityView.passwordProtect")} <Badge variant="secondary">BETA</Badge>
 									</Label>
-									<p className="text-muted-foreground text-sm">
-										{t("securityView.passwordProtectDescription")}
-									</p>
+									<p className="text-muted-foreground text-sm">{t("securityView.passwordProtectDescription")}</p>
 								</div>
 								<Switch id="auth-enabled" checked={authConfig.is_enabled} onCheckedChange={handleAuthToggle} />
 							</div>
@@ -290,9 +289,7 @@ export default function SecurityView() {
 										disabled={!authConfig.is_enabled}
 										onChange={(value) => handleAuthFieldChange("admin_password", value)}
 									/>
-									<p className="text-muted-foreground text-xs">
-										{t("securityView.passwordHint")}
-									</p>
+									<p className="text-muted-foreground text-xs">{t("securityView.passwordHint")}</p>
 									{passwordError ? (
 										<p id="admin-password-error" className="text-destructive text-xs" role="alert">
 											{passwordError}
@@ -312,9 +309,8 @@ export default function SecurityView() {
 											onChange={(e) => setSetupToken(e.target.value)}
 										/>
 										<p className="text-muted-foreground text-xs">
-											{t("securityView.setupTokenDescription")}{" "}
-											<code>setup_token</code> {t("securityView.setupTokenDescriptionIn")} <code>config.json</code>{" "}
-											{t("securityView.setupTokenDescriptionOr")} <code>BIFROST_SETUP_TOKEN</code>{" "}
+											{t("securityView.setupTokenDescription")} <code>setup_token</code> {t("securityView.setupTokenDescriptionIn")}{" "}
+											<code>config.json</code> {t("securityView.setupTokenDescriptionOr")} <code>BIFROST_SETUP_TOKEN</code>{" "}
 											{t("securityView.setupTokenDescriptionEnvVar")}
 										</p>
 									</div>
@@ -330,8 +326,7 @@ export default function SecurityView() {
 							{IS_ENTERPRISE ? t("securityView.enableAuthOnInference") : t("securityView.enforceVirtualKeysOnInference")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							{IS_ENTERPRISE ? t("securityView.enforceAuthDescription") : t("securityView.enforceVkDescription")}{" "}
-							{t("securityView.see")}{" "}
+							{IS_ENTERPRISE ? t("securityView.enforceAuthDescription") : t("securityView.enforceVkDescription")} {t("securityView.see")}{" "}
 							<a
 								href="https://docs.getbifrost.ai/features/governance/virtual-keys"
 								target="_blank"
@@ -360,18 +355,24 @@ export default function SecurityView() {
 							</label>
 							<p className="text-muted-foreground text-sm">
 								{t("securityView.dccPrefix")} (<b>Authorization: Bearer</b>) {t("securityView.dccAnd")} (<b>x-bf-vk</b>).{" "}
-								<b>{t("securityView.preferIdp")}</b> {t("securityView.dccIdpUses")}{" "}
-								<b>{t("securityView.preferVk")}</b> {t("securityView.dccVkDrops")}{" "}
-								<b>{t("securityView.rejectRequest")}</b> {t("securityView.dccReturns")}
+								<b>{t("securityView.preferIdp")}</b> {t("securityView.dccIdpUses")} <b>{t("securityView.preferVk")}</b>{" "}
+								{t("securityView.dccVkDrops")} <b>{t("securityView.rejectRequest")}</b> {t("securityView.dccReturns")}
 							</p>
 						</div>
 						<Select
 							value={localConfig.dual_credential_conflict_behavior || "prefer_idp"}
 							onValueChange={(value) =>
-								setLocalConfig((prev) => ({ ...prev, dual_credential_conflict_behavior: value as CoreConfig["dual_credential_conflict_behavior"] }))
+								setLocalConfig((prev) => ({
+									...prev,
+									dual_credential_conflict_behavior: value as CoreConfig["dual_credential_conflict_behavior"],
+								}))
 							}
 						>
-							<SelectTrigger id="dual-credential-conflict-behavior" data-testid="dual-credential-conflict-behavior-select" className="w-[180px]">
+							<SelectTrigger
+								id="dual-credential-conflict-behavior"
+								data-testid="dual-credential-conflict-behavior-select"
+								className="w-[180px]"
+							>
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
@@ -389,7 +390,8 @@ export default function SecurityView() {
 							{t("securityView.allowDirectKeys")}
 						</label>
 						<p className="text-muted-foreground text-sm">
-							{t("securityView.allowDirectKeysDescriptionPrefix")} <b>Authorization</b>, <b>x-api-key</b>, {t("securityView.or")} <b>x-goog-api-key</b> {t("securityView.allowDirectKeysDescriptionMid")} <b>x-bf-direct-key: true</b>.{" "}
+							{t("securityView.allowDirectKeysDescriptionPrefix")} <b>Authorization</b>, <b>x-api-key</b>, {t("securityView.or")}{" "}
+							<b>x-goog-api-key</b> {t("securityView.allowDirectKeysDescriptionMid")} <b>x-bf-direct-key: true</b>.{" "}
 							{t("securityView.allowDirectKeysDescriptionSuffix")}
 						</p>
 					</div>
@@ -408,9 +410,7 @@ export default function SecurityView() {
 							<label htmlFor="allowed-origins" className="text-sm font-medium">
 								{t("securityView.allowedOrigins")}
 							</label>
-							<p className="text-muted-foreground text-sm">
-								{t("securityView.allowedOriginsDescription")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("securityView.allowedOriginsDescription")}</p>
 						</div>
 						<Textarea
 							id="allowed-origins"
@@ -446,9 +446,7 @@ export default function SecurityView() {
 							<label htmlFor="required-headers" className="text-sm font-medium">
 								{t("securityView.requiredHeaders")}
 							</label>
-							<p className="text-muted-foreground text-sm">
-								{t("securityView.requiredHeadersDescription")}
-							</p>
+							<p className="text-muted-foreground text-sm">{t("securityView.requiredHeadersDescription")}</p>
 						</div>
 						<Textarea
 							id="required-headers"
@@ -468,8 +466,8 @@ export default function SecurityView() {
 								{t("securityView.whitelistedRoutes")}
 							</label>
 							<p className="text-muted-foreground text-sm">
-								{t("securityView.whitelistedRoutesDescriptionPrefix")} <b>/health</b>, <b>/api/session/login</b>, {t("securityView.and")} <b>/api/session/is-auth-enabled</b>{" "}
-								{t("securityView.whitelistedRoutesDescriptionSuffix")}
+								{t("securityView.whitelistedRoutesDescriptionPrefix")} <b>/health</b>, <b>/api/session/login</b>, {t("securityView.and")}{" "}
+								<b>/api/session/is-auth-enabled</b> {t("securityView.whitelistedRoutesDescriptionSuffix")}
 							</p>
 						</div>
 						<Textarea
@@ -483,7 +481,7 @@ export default function SecurityView() {
 					</div>
 				</div>
 			</div>
-			<div className="bg-card sticky bottom-0 flex justify-end py-2">
+			<div className="bg-surface-solid sticky bottom-0 flex justify-end py-2">
 				<Button onClick={handleSave} disabled={!hasChanges || isLoading || !hasSettingsUpdateAccess}>
 					{isLoading ? t("common.saving") : t("securityView.saveChanges")}
 				</Button>

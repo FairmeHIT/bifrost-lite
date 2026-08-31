@@ -204,7 +204,10 @@ const KeySchema = z.object({
 	name: z.string().min(1, { error: () => t("providerForm.nameIsRequiredForTheKey") }),
 	value: z.string(),
 	models: z.array(z.string()),
-	weight: z.number().min(0.1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") }).max(1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") }),
+	weight: z
+		.number()
+		.min(0.1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") })
+		.max(1, { error: () => t("providerForm.keyWeightsMustBeBetween01And1") }),
 	aliases: z
 		.record(z.string(), aliasConfigSchema)
 		.optional()

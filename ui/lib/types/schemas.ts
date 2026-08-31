@@ -27,7 +27,7 @@ z.config({
 				return t("schemas.minNumber", { min: Number(issue.minimum) });
 			}
 			if (issue.origin === "array" && issue.minimum === 1) {
-			return t("schemas.atLeastOneItem");
+				return t("schemas.atLeastOneItem");
 			}
 		}
 		if (issue.code === "too_big") {
@@ -52,7 +52,7 @@ z.config({
 export const knownProviderSchema = z.enum(KnownProvidersNames as unknown as [string, ...string[]]);
 
 // Custom provider name schema (branded type simulation)
-export const customProviderNameSchema = z.string().min(1,  { error: () => t("schemas.customProviderNameIsRequired") });
+export const customProviderNameSchema = z.string().min(1, { error: () => t("schemas.customProviderNameIsRequired") });
 
 // Model provider name schema (union of known and custom providers)
 export const modelProviderNameSchema = z.union([knownProviderSchema, customProviderNameSchema]);
@@ -143,7 +143,7 @@ export const vertexKeyConfigSchema = z
 
 // S3 bucket configuration for Bedrock batch operations
 export const s3BucketConfigSchema = z.object({
-	bucket_name: z.string().min(1,  { error: () => t("schemas.bucketNameIsRequired") }),
+	bucket_name: z.string().min(1, { error: () => t("schemas.bucketNameIsRequired") }),
 	prefix: z.string().optional(),
 	is_default: z.boolean().optional(),
 });
@@ -247,7 +247,10 @@ export const bedrockMantleKeyConfigSchema = z
 export const vllmKeyConfigSchema = z
 	.object({
 		url: secretVarSchema.optional(),
-		model_name: z.string().trim().min(1,  { error: () => t("schemas.modelNameIsRequired") }),
+		model_name: z
+			.string()
+			.trim()
+			.min(1, { error: () => t("schemas.modelNameIsRequired") }),
 	})
 	.refine((data) => isSecretVarSet(data.url), {
 		error: () => t("schemas.serverURLIsRequired"),
@@ -297,7 +300,10 @@ export const modelFamilySchema = z.enum([
 // provider sub-configs flattened to top-level optional fields (matches Go's
 // embedded-pointer-struct JSON output).
 const aliasConfigObjectSchema = z.object({
-	model_id: z.string().trim().min(1,  { error: () => t("schemas.modelIDIsRequired") }),
+	model_id: z
+		.string()
+		.trim()
+		.min(1, { error: () => t("schemas.modelIDIsRequired") }),
 	model_name: z.string().trim().optional(),
 	model_family: modelFamilySchema.optional(),
 	description: z.string().optional(),
@@ -329,8 +335,8 @@ export const aliasConfigSchema = z.preprocess(
 // Model provider key schema
 export const modelProviderKeySchema = z
 	.object({
-		id: z.string().min(1,  { error: () => t("schemas.idIsRequired") }),
-		name: z.string().min(1,  { error: () => t("schemas.nameIsRequired") }),
+		id: z.string().min(1, { error: () => t("schemas.idIsRequired") }),
+		name: z.string().min(1, { error: () => t("schemas.nameIsRequired") }),
 		value: secretVarSchema.optional(),
 		models: z.array(z.string()).optional().default(["*"]),
 		blacklisted_models: z.array(z.string()).default([]).optional(),
@@ -351,7 +357,12 @@ export const modelProviderKeySchema = z
 				}
 				return num;
 			})
-			.pipe(z.number().min(0,  { error: () => t("schemas.weightMustBeEqualToOrGreaterThan0") }).max(1,  { error: () => t("schemas.weightMustBeEqualToOrLessThan1") })),
+			.pipe(
+				z
+					.number()
+					.min(0, { error: () => t("schemas.weightMustBeEqualToOrGreaterThan0") })
+					.max(1, { error: () => t("schemas.weightMustBeEqualToOrLessThan1") }),
+			),
 		aliases: z.record(z.string(), aliasConfigSchema).optional(),
 		azure_key_config: azureKeyConfigSchema.optional(),
 		vertex_key_config: vertexKeyConfigSchema.optional(),
@@ -412,41 +423,44 @@ export const modelProviderKeySchema = z
 // Network config schema
 export const networkConfigSchema = z
 	.object({
-		base_url: z.union([z.string().url( { error: () => t("schemas.mustBeAValidURL") }), z.string().length(0)]).optional(),
+		base_url: z.union([z.string().url({ error: () => t("schemas.mustBeAValidURL") }), z.string().length(0)]).optional(),
 		extra_headers: z.record(z.string(), z.string()).optional(),
 		default_request_timeout_in_seconds: z
 			.number()
-			.min(1,  { error: () => t("schemas.timeoutMustBeGreaterThan0Seconds") })
-			.max(3600,  { error: () => t("schemas.timeoutMustBeLessThan3600Seconds") }),
-		max_retries: z.number().min(0,  { error: () => t("schemas.maxRetriesMustBeGreaterThan0") }).max(10,  { error: () => t("schemas.maxRetriesMustBeLessThan10") }),
+			.min(1, { error: () => t("schemas.timeoutMustBeGreaterThan0Seconds") })
+			.max(3600, { error: () => t("schemas.timeoutMustBeLessThan3600Seconds") }),
+		max_retries: z
+			.number()
+			.min(0, { error: () => t("schemas.maxRetriesMustBeGreaterThan0") })
+			.max(10, { error: () => t("schemas.maxRetriesMustBeLessThan10") }),
 		retry_backoff_initial: z.number().min(100),
 		retry_backoff_max: z.number().min(100),
 		insecure_skip_verify: z.boolean().optional(),
 		ca_cert_pem: secretVarSchema.optional(),
 		stream_idle_timeout_in_seconds: z
 			.number()
-			.int( { error: () => t("schemas.streamIdleTimeoutMustBeAWholeNumberOfSeconds") })
-			.min(5,  { error: () => t("schemas.streamIdleTimeoutMustBeAtLeast5Seconds") })
-			.max(3600,  { error: () => t("schemas.streamIdleTimeoutMustBeAtMost3600SecondsIE60Minutes") })
+			.int({ error: () => t("schemas.streamIdleTimeoutMustBeAWholeNumberOfSeconds") })
+			.min(5, { error: () => t("schemas.streamIdleTimeoutMustBeAtLeast5Seconds") })
+			.max(3600, { error: () => t("schemas.streamIdleTimeoutMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		keep_alive_timeout_in_seconds: z
 			.number()
-			.int( { error: () => t("schemas.keepAliveTimeoutMustBeAWholeNumberOfSeconds") })
-			.min(1,  { error: () => t("schemas.keepAliveTimeoutMustBeAtLeast1Second") })
-			.max(3600,  { error: () => t("schemas.keepAliveTimeoutMustBeAtMost3600SecondsIE60Minutes") })
+			.int({ error: () => t("schemas.keepAliveTimeoutMustBeAWholeNumberOfSeconds") })
+			.min(1, { error: () => t("schemas.keepAliveTimeoutMustBeAtLeast1Second") })
+			.max(3600, { error: () => t("schemas.keepAliveTimeoutMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		max_conns_per_host: z
 			.number()
-			.int( { error: () => t("schemas.maxConnectionsMustBeAWholeNumber") })
-			.min(1,  { error: () => t("schemas.maxConnectionsMustBeAtLeast1") })
-			.max(10000,  { error: () => t("schemas.maxConnectionsMustBeAtMost10000") })
+			.int({ error: () => t("schemas.maxConnectionsMustBeAWholeNumber") })
+			.min(1, { error: () => t("schemas.maxConnectionsMustBeAtLeast1") })
+			.max(10000, { error: () => t("schemas.maxConnectionsMustBeAtMost10000") })
 			.optional(),
 		enforce_http2: z.boolean().optional(),
 		http2_ping_interval_in_seconds: z
 			.number()
-			.int( { error: () => t("schemas.hTTP2PingIntervalMustBeAWholeNumberOfSeconds") })
-			.min(0,  { error: () => t("schemas.hTTP2PingIntervalMustBeAtLeast0Seconds") })
-			.max(3600,  { error: () => t("schemas.hTTP2PingIntervalMustBeAtMost3600SecondsIE60Minutes") })
+			.int({ error: () => t("schemas.hTTP2PingIntervalMustBeAWholeNumberOfSeconds") })
+			.min(0, { error: () => t("schemas.hTTP2PingIntervalMustBeAtLeast0Seconds") })
+			.max(3600, { error: () => t("schemas.hTTP2PingIntervalMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		allow_private_network: z.boolean().optional(),
 	})
@@ -462,7 +476,7 @@ export const networkFormConfigSchema = z
 			.union([
 				z
 					.string()
-					.url( { error: () => t("schemas.mustBeAValidURL") })
+					.url({ error: () => t("schemas.mustBeAValidURL") })
 					.refine((url) => url.startsWith("https://") || url.startsWith("http://"), {
 						error: () => t("schemas.mustBeAValidHTTPOrHTTPSURL"),
 					}),
@@ -471,47 +485,47 @@ export const networkFormConfigSchema = z
 			.optional(),
 		extra_headers: z.record(z.string(), z.string()).optional(),
 		default_request_timeout_in_seconds: z.coerce
-			.number( { error: () => t("schemas.timeoutMustBeANumber") })
-			.min(1,  { error: () => t("schemas.timeoutMustBeGreaterThan0Seconds") })
-			.max(172800,  { error: () => t("schemas.timeoutMustBeLessThan172800SecondsIE48Hours") }),
+			.number({ error: () => t("schemas.timeoutMustBeANumber") })
+			.min(1, { error: () => t("schemas.timeoutMustBeGreaterThan0Seconds") })
+			.max(172800, { error: () => t("schemas.timeoutMustBeLessThan172800SecondsIE48Hours") }),
 		max_retries: z.coerce
-			.number( { error: () => t("schemas.maxRetriesMustBeANumber") })
-			.min(0,  { error: () => t("schemas.maxRetriesMustBeGreaterThan0") })
-			.max(10,  { error: () => t("schemas.maxRetriesMustBeLessThan10") }),
+			.number({ error: () => t("schemas.maxRetriesMustBeANumber") })
+			.min(0, { error: () => t("schemas.maxRetriesMustBeGreaterThan0") })
+			.max(10, { error: () => t("schemas.maxRetriesMustBeLessThan10") }),
 		retry_backoff_initial: z.coerce
-			.number( { error: () => t("schemas.retryBackoffInitialMustBeANumber") })
-			.min(100,  { error: () => t("schemas.retryBackoffInitialMustBeAtLeast100ms") })
-			.max(1000000,  { error: () => t("schemas.retryBackoffInitialMustBeAtMost1000000ms") }),
+			.number({ error: () => t("schemas.retryBackoffInitialMustBeANumber") })
+			.min(100, { error: () => t("schemas.retryBackoffInitialMustBeAtLeast100ms") })
+			.max(1000000, { error: () => t("schemas.retryBackoffInitialMustBeAtMost1000000ms") }),
 		retry_backoff_max: z.coerce
-			.number( { error: () => t("schemas.retryBackoffMaxMustBeANumber") })
-			.min(100,  { error: () => t("schemas.retryBackoffMaxMustBeAtLeast100ms") })
-			.max(1000000,  { error: () => t("schemas.retryBackoffMaxMustBeAtMost1000000ms") }),
+			.number({ error: () => t("schemas.retryBackoffMaxMustBeANumber") })
+			.min(100, { error: () => t("schemas.retryBackoffMaxMustBeAtLeast100ms") })
+			.max(1000000, { error: () => t("schemas.retryBackoffMaxMustBeAtMost1000000ms") }),
 		insecure_skip_verify: z.boolean().optional(),
 		ca_cert_pem: secretVarSchema.optional(),
 		stream_idle_timeout_in_seconds: z.coerce
-			.number( { error: () => t("schemas.streamIdleTimeoutMustBeANumber") })
-			.int( { error: () => t("schemas.streamIdleTimeoutMustBeAWholeNumberOfSeconds") })
-			.min(5,  { error: () => t("schemas.streamIdleTimeoutMustBeAtLeast5Seconds") })
-			.max(3600,  { error: () => t("schemas.streamIdleTimeoutMustBeAtMost3600SecondsIE60Minutes") })
+			.number({ error: () => t("schemas.streamIdleTimeoutMustBeANumber") })
+			.int({ error: () => t("schemas.streamIdleTimeoutMustBeAWholeNumberOfSeconds") })
+			.min(5, { error: () => t("schemas.streamIdleTimeoutMustBeAtLeast5Seconds") })
+			.max(3600, { error: () => t("schemas.streamIdleTimeoutMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		keep_alive_timeout_in_seconds: z.coerce
-			.number( { error: () => t("schemas.keepAliveTimeoutMustBeANumber") })
-			.int( { error: () => t("schemas.keepAliveTimeoutMustBeAWholeNumberOfSeconds") })
-			.min(1,  { error: () => t("schemas.keepAliveTimeoutMustBeAtLeast1Second") })
-			.max(3600,  { error: () => t("schemas.keepAliveTimeoutMustBeAtMost3600SecondsIE60Minutes") })
+			.number({ error: () => t("schemas.keepAliveTimeoutMustBeANumber") })
+			.int({ error: () => t("schemas.keepAliveTimeoutMustBeAWholeNumberOfSeconds") })
+			.min(1, { error: () => t("schemas.keepAliveTimeoutMustBeAtLeast1Second") })
+			.max(3600, { error: () => t("schemas.keepAliveTimeoutMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		max_conns_per_host: z.coerce
-			.number( { error: () => t("schemas.maxConnectionsMustBeANumber") })
-			.int( { error: () => t("schemas.maxConnectionsMustBeAWholeNumber") })
-			.min(1,  { error: () => t("schemas.maxConnectionsMustBeAtLeast1") })
-			.max(10000,  { error: () => t("schemas.maxConnectionsMustBeAtMost10000") })
+			.number({ error: () => t("schemas.maxConnectionsMustBeANumber") })
+			.int({ error: () => t("schemas.maxConnectionsMustBeAWholeNumber") })
+			.min(1, { error: () => t("schemas.maxConnectionsMustBeAtLeast1") })
+			.max(10000, { error: () => t("schemas.maxConnectionsMustBeAtMost10000") })
 			.optional(),
 		enforce_http2: z.boolean().optional(),
 		http2_ping_interval_in_seconds: z.coerce
-			.number( { error: () => t("schemas.hTTP2PingIntervalMustBeANumber") })
-			.int( { error: () => t("schemas.hTTP2PingIntervalMustBeAWholeNumberOfSeconds") })
-			.min(0,  { error: () => t("schemas.hTTP2PingIntervalMustBeAtLeast0Seconds") })
-			.max(3600,  { error: () => t("schemas.hTTP2PingIntervalMustBeAtMost3600SecondsIE60Minutes") })
+			.number({ error: () => t("schemas.hTTP2PingIntervalMustBeANumber") })
+			.int({ error: () => t("schemas.hTTP2PingIntervalMustBeAWholeNumberOfSeconds") })
+			.min(0, { error: () => t("schemas.hTTP2PingIntervalMustBeAtLeast0Seconds") })
+			.max(3600, { error: () => t("schemas.hTTP2PingIntervalMustBeAtMost3600SecondsIE60Minutes") })
 			.optional(),
 		allow_private_network: z.boolean().optional(),
 	})
@@ -522,8 +536,14 @@ export const networkFormConfigSchema = z
 
 // Concurrency and buffer size schema
 export const concurrencyAndBufferSizeSchema = z.object({
-	concurrency: z.number().min(1,  { error: () => t("schemas.concurrencyMustBeGreaterThan0") }).max(100,  { error: () => t("schemas.concurrencyMustBeLessThanOrEqualTo100") }),
-	buffer_size: z.number().min(1,  { error: () => t("schemas.bufferSizeMustBeGreaterThan0") }).max(1000,  { error: () => t("schemas.bufferSizeMustBeLessThanOrEqualTo1000") }),
+	concurrency: z
+		.number()
+		.min(1, { error: () => t("schemas.concurrencyMustBeGreaterThan0") })
+		.max(100, { error: () => t("schemas.concurrencyMustBeLessThanOrEqualTo100") }),
+	buffer_size: z
+		.number()
+		.min(1, { error: () => t("schemas.bufferSizeMustBeGreaterThan0") })
+		.max(1000, { error: () => t("schemas.bufferSizeMustBeLessThanOrEqualTo1000") }),
 });
 
 // Proxy type schema
@@ -688,7 +708,7 @@ export const customProviderConfigSchema = z
 // Form-specific custom provider config schema
 export const formCustomProviderConfigSchema = z
 	.object({
-		base_provider_type: z.string().min(1,  { error: () => t("schemas.baseProviderTypeIsRequired") }),
+		base_provider_type: z.string().min(1, { error: () => t("schemas.baseProviderTypeIsRequired") }),
 		is_key_less: z.boolean().optional(),
 		allowed_requests: allowedRequestsSchema.optional(),
 		request_path_overrides: z.record(z.string(), z.string().optional()).optional(),
@@ -708,7 +728,7 @@ export const formCustomProviderConfigSchema = z
 
 // Full model provider config schema
 export const modelProviderConfigSchema = z.object({
-	keys: z.array(modelProviderKeySchema).min(1,  { error: () => t("schemas.atLeastOneKeyIsRequired") }),
+	keys: z.array(modelProviderKeySchema).min(1, { error: () => t("schemas.atLeastOneKeyIsRequired") }),
 	network_config: networkConfigSchema.optional(),
 	concurrency_and_buffer_size: concurrencyAndBufferSizeSchema.optional(),
 	proxy_config: proxyConfigSchema.optional(),
@@ -725,7 +745,7 @@ export const modelProviderSchema = modelProviderConfigSchema.extend({
 
 // Form-specific model provider config schema
 export const formModelProviderConfigSchema = z.object({
-	keys: z.array(modelProviderKeySchema).min(1,  { error: () => t("schemas.atLeastOneKeyIsRequired") }),
+	keys: z.array(modelProviderKeySchema).min(1, { error: () => t("schemas.atLeastOneKeyIsRequired") }),
 	network_config: networkConfigSchema.optional(),
 	concurrency_and_buffer_size: concurrencyAndBufferSizeSchema.optional(),
 	proxy_config: proxyConfigSchema.optional(),
@@ -737,13 +757,13 @@ export const formModelProviderConfigSchema = z.object({
 
 // Flexible model provider schema for form data - allows any string for name
 export const formModelProviderSchema = formModelProviderConfigSchema.extend({
-	name: z.string().min(1,  { error: () => t("schemas.providerNameIsRequired") }),
+	name: z.string().min(1, { error: () => t("schemas.providerNameIsRequired") }),
 });
 
 // Add provider request schema
 export const addProviderRequestSchema = z.object({
 	provider: modelProviderNameSchema,
-	keys: z.array(modelProviderKeySchema).min(1,  { error: () => t("schemas.atLeastOneKeyIsRequired") }),
+	keys: z.array(modelProviderKeySchema).min(1, { error: () => t("schemas.atLeastOneKeyIsRequired") }),
 	network_config: networkConfigSchema.optional(),
 	concurrency_and_buffer_size: concurrencyAndBufferSizeSchema.optional(),
 	proxy_config: proxyConfigSchema.optional(),
@@ -756,7 +776,7 @@ export const addProviderRequestSchema = z.object({
 
 // Update provider request schema
 export const updateProviderRequestSchema = z.object({
-	keys: z.array(modelProviderKeySchema).min(1,  { error: () => t("schemas.atLeastOneKeyIsRequired") }),
+	keys: z.array(modelProviderKeySchema).min(1, { error: () => t("schemas.atLeastOneKeyIsRequired") }),
 	network_config: networkConfigSchema,
 	concurrency_and_buffer_size: concurrencyAndBufferSizeSchema,
 	proxy_config: proxyConfigSchema,
@@ -792,8 +812,11 @@ const providerBackedCacheConfigSchema = baseCacheConfigSchema
 	.extend({
 		provider: modelProviderNameSchema,
 		keys: z.array(modelProviderKeySchema).optional(),
-		embedding_model: z.string().min(1,  { error: () => t("schemas.embeddingModelIsRequired") }),
-		dimension: z.number().int().min(2,  { error: () => t("schemas.dimensionMustBeGreaterThan1ForProviderBackedSemanticCache") }),
+		embedding_model: z.string().min(1, { error: () => t("schemas.embeddingModelIsRequired") }),
+		dimension: z
+			.number()
+			.int()
+			.min(2, { error: () => t("schemas.dimensionMustBeGreaterThan1ForProviderBackedSemanticCache") }),
 	})
 	.strict();
 
@@ -847,12 +870,12 @@ export const performanceFormSchema = z.object({
 		.object({
 			concurrency: z
 				.number({ error: () => t("schemas.concurrencyMustBeANumber") })
-				.min(1,  { error: () => t("schemas.concurrencyMustBeGreaterThan0") })
-				.max(100000,  { error: () => t("schemas.concurrencyMustBeLessThan100000") }),
+				.min(1, { error: () => t("schemas.concurrencyMustBeGreaterThan0") })
+				.max(100000, { error: () => t("schemas.concurrencyMustBeLessThan100000") }),
 			buffer_size: z
 				.number({ error: () => t("schemas.bufferSizeMustBeANumber") })
-				.min(1,  { error: () => t("schemas.bufferSizeMustBeGreaterThan0") })
-				.max(100000,  { error: () => t("schemas.bufferSizeMustBeLessThan100000") }),
+				.min(1, { error: () => t("schemas.bufferSizeMustBeGreaterThan0") })
+				.max(100000, { error: () => t("schemas.bufferSizeMustBeLessThan100000") }),
 		})
 		.refine((data) => data.concurrency <= data.buffer_size, {
 			error: () => t("schemas.concurrencyMustBeLessThanOrEqualToBufferSize"),
@@ -1008,7 +1031,7 @@ export const otelConfigSchema = z
 // it carries one or more export profiles, each independently enable-able.
 export const otelFormSchema = z.object({
 	enabled: z.boolean().default(true),
-	profiles: z.array(otelConfigSchema).min(1,  { error: () => t("schemas.atLeastOneProfileIsRequired") }),
+	profiles: z.array(otelConfigSchema).min(1, { error: () => t("schemas.atLeastOneProfileIsRequired") }),
 });
 
 // Maxim Configuration Schema
@@ -1124,7 +1147,7 @@ export const mcpClientUpdateSchema = z
 		disabled: z.boolean().optional(),
 		name: z
 			.string()
-			.min(1,  { error: () => t("schemas.nameIsRequired") })
+			.min(1, { error: () => t("schemas.nameIsRequired") })
 			.refine((val) => !val.includes("-"), {
 				error: () => t("schemas.clientNameCannotContainHyphens"),
 			})
@@ -1136,7 +1159,12 @@ export const mcpClientUpdateSchema = z
 			}),
 		headers: z.record(z.string(), secretVarSchema).optional().nullable(),
 		per_user_header_keys: z
-			.array(z.string().trim().min(1,  { error: () => t("schemas.headerNameCannotBeEmpty") }))
+			.array(
+				z
+					.string()
+					.trim()
+					.min(1, { error: () => t("schemas.headerNameCannotBeEmpty") }),
+			)
 			.optional()
 			.refine(
 				(headers) => {
@@ -1182,7 +1210,7 @@ export const mcpClientUpdateSchema = z
 				},
 				{ error: () => t("schemas.duplicateToolNamesAreNotAllowed") },
 			),
-		tool_pricing: z.record(z.string(), z.number().min(0,  { error: () => t("schemas.costMustBeNonNegative") })).optional(),
+		tool_pricing: z.record(z.string(), z.number().min(0, { error: () => t("schemas.costMustBeNonNegative") })).optional(),
 		tool_sync_interval: z.number().optional(), // -1 = disabled, 0 = use global, >0 = custom interval in minutes
 		tool_execution_timeout: z.number().int().min(0).optional(), // 0 = use global, >0 = per-server timeout in seconds
 		allowed_extra_headers: z
@@ -1218,7 +1246,10 @@ export const mcpClientUpdateSchema = z
 			.optional(),
 		token_exchange: z
 			.object({
-				audience: z.string().trim().min(1,  { error: () => t("schemas.audienceIsRequired") }),
+				audience: z
+					.string()
+					.trim()
+					.min(1, { error: () => t("schemas.audienceIsRequired") }),
 				use_idp_credentials: z.boolean().optional(),
 				client_id: secretVarSchema.optional(),
 				client_secret: secretVarSchema.optional(),
@@ -1322,15 +1353,24 @@ export const globalHeaderFilterFormSchema = z.object({
 // Routing rule creation schema
 export const routingRuleSchema = z
 	.object({
-		name: z.string().min(1,  { error: () => t("schemas.ruleNameIsRequired") }).max(255,  { error: () => t("schemas.ruleNameMustBeLessThan255Characters") }),
-		description: z.string().max(1000,  { error: () => t("schemas.descriptionMustBeLessThan1000Characters") }).optional(),
+		name: z
+			.string()
+			.min(1, { error: () => t("schemas.ruleNameIsRequired") })
+			.max(255, { error: () => t("schemas.ruleNameMustBeLessThan255Characters") }),
+		description: z
+			.string()
+			.max(1000, { error: () => t("schemas.descriptionMustBeLessThan1000Characters") })
+			.optional(),
 		cel_expression: z.string().optional(),
-		provider: z.string().min(1,  { error: () => t("schemas.providerIsRequired") }),
+		provider: z.string().min(1, { error: () => t("schemas.providerIsRequired") }),
 		model: z.string().optional(),
 		fallbacks: z.array(z.string()).optional().default([]),
 		scope: z.enum(["global", "team", "customer", "virtual_key"]),
 		scope_id: z.string().optional(),
-		priority: z.number().min(0,  { error: () => t("schemas.priorityMustBe0OrGreater") }).max(1000,  { error: () => t("schemas.priorityMustBe1000OrLess") }),
+		priority: z
+			.number()
+			.min(0, { error: () => t("schemas.priorityMustBe0OrGreater") })
+			.max(1000, { error: () => t("schemas.priorityMustBe1000OrLess") }),
 		enabled: z.boolean().default(true),
 		chain_rule: z.boolean().default(false),
 	})
@@ -1342,7 +1382,9 @@ export const routingRuleSchema = z
 // Budget override form schema (BudgetOverrideDialog)
 export const budgetOverrideFormSchema = z
 	.object({
-		amount: z.number( { error: () => t("schemas.additionalBudgetMustBeGreaterThan0") }).positive( { error: () => t("schemas.additionalBudgetMustBeGreaterThan0") }),
+		amount: z
+			.number({ error: () => t("schemas.additionalBudgetMustBeGreaterThan0") })
+			.positive({ error: () => t("schemas.additionalBudgetMustBeGreaterThan0") }),
 		mode: z.enum(["cycles", "forever"]),
 		cycles: z.number().optional(),
 	})

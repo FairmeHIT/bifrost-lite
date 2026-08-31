@@ -13,6 +13,7 @@ import (
 	"github.com/maximhq/bifrost/plugins/maxim"
 	"github.com/maximhq/bifrost/plugins/modelcatalogresolver"
 	"github.com/maximhq/bifrost/plugins/otel"
+	"github.com/maximhq/bifrost/plugins/secretredact"
 	"github.com/maximhq/bifrost/plugins/semanticcache"
 	"github.com/maximhq/bifrost/plugins/telemetry"
 	"github.com/maximhq/bifrost/transports/bifrost-http/handlers"
@@ -124,6 +125,13 @@ func loadBuiltinPlugin(ctx context.Context, name string, pluginConfig any, bifro
 
 	case modelcatalogresolver.PluginName:
 		return modelcatalogresolver.Init(bifrostConfig.ModelCatalog, logger)
+
+	case secretredact.PluginName:
+		secretredactConfig, err := MarshalPluginConfig[secretredact.Config](pluginConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to marshal secretredact plugin config: %w", err)
+		}
+		return secretredact.Init(secretredactConfig, logger)
 
 	default:
 		return nil, fmt.Errorf("unknown built-in plugin: %s", name)
@@ -253,7 +261,19 @@ func (s *BifrostHTTPServer) loadBuiltinPlugins(ctx context.Context) error {
 	}
 	s.Config.SetPluginOrderInfo(maxim.PluginName, builtinPlacement, schemas.Ptr(8))
 
-	// 9. ModelCatalogResolver (last routing layer — fills req.Provider from catalog only when
+	// 9. SecretRedact (if configured in PluginConfigs). Redacts leaked
+	// credentials in PreRequestHook before any plugin or provider observes the
+	// content; registration order does not affect that guarantee because the
+	// whole PreRequestHook phase completes before PreLLMHooks run.
+	secretredactConfig := s.getPluginConfig(secretredact.PluginName)
+	if secretredactConfig != nil && secretredactConfig.Enabled {
+		s.registerPluginWithStatus(ctx, secretredact.PluginName, nil, secretredactConfig.Config, false)
+	} else {
+		s.markPluginDisabled(secretredact.PluginName)
+	}
+	s.Config.SetPluginOrderInfo(secretredact.PluginName, builtinPlacement, schemas.Ptr(9))
+
+	// 10. ModelCatalogResolver (last routing layer — fills req.Provider from catalog only when
 	// no earlier routing plugin (governance routing rules, governance VK LB, enterprise LB)
 	// already set one. CEL rules can still match on provider == "" because this runs last.
 	// Requires a model catalog; only register when one is configured.

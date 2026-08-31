@@ -328,9 +328,7 @@ export default function ClientSettingsView() {
 						<label htmlFor="disable-db-pings-in-health" className="text-sm font-medium">
 							{t("clientSettings.disableDbPingsInHealthCheck")}
 						</label>
-						<p className="text-muted-foreground text-sm">
-							{t("clientSettings.disableDbPingsInHealthCheckDescription")}
-						</p>
+						<p className="text-muted-foreground text-sm">{t("clientSettings.disableDbPingsInHealthCheckDescription")}</p>
 					</div>
 					<Switch
 						id="disable-db-pings-in-health"
@@ -347,9 +345,7 @@ export default function ClientSettingsView() {
 						<label htmlFor="dump-errors-in-console-logs" className="text-sm font-medium">
 							{t("clientSettings.dumpErrorsInConsoleLogs")}
 						</label>
-						<p className="text-muted-foreground text-sm">
-							{t("clientSettings.dumpErrorsInConsoleLogsDescription")}
-						</p>
+						<p className="text-muted-foreground text-sm">{t("clientSettings.dumpErrorsInConsoleLogsDescription")}</p>
 					</div>
 					<Switch
 						id="dump-errors-in-console-logs"
@@ -366,9 +362,7 @@ export default function ClientSettingsView() {
 						<label htmlFor="async-job-result-ttl" className="text-sm font-medium">
 							{t("clientSettings.asyncJobResultTtl")}
 						</label>
-						<p className="text-muted-foreground text-sm">
-							{t("clientSettings.asyncJobResultTtlDescription")}
-						</p>
+						<p className="text-muted-foreground text-sm">{t("clientSettings.asyncJobResultTtlDescription")}</p>
 					</div>
 					<Input
 						id="async-job-result-ttl"
@@ -405,8 +399,7 @@ export default function ClientSettingsView() {
 								<p className="mb-2 font-medium">{t("clientSettings.twoWaysToForward")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										<span className="font-medium">{t("clientSettings.prefixedHeaders")}</span>{" "}
-										{t("clientSettings.prefixedHeadersDesc")}{" "}
+										<span className="font-medium">{t("clientSettings.prefixedHeaders")}</span> {t("clientSettings.prefixedHeadersDesc")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-*</code>{" "}
 										{t("clientSettings.prefixedHeadersDescMid")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-custom-id</code>{" "}
@@ -414,8 +407,7 @@ export default function ClientSettingsView() {
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>.
 									</li>
 									<li>
-										<span className="font-medium">{t("clientSettings.directHeaders")}</span>{" "}
-										{t("clientSettings.directHeadersDesc")}{" "}
+										<span className="font-medium">{t("clientSettings.directHeaders")}</span> {t("clientSettings.directHeadersDesc")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-beta</code>).
 									</li>
 								</ul>
@@ -424,8 +416,7 @@ export default function ClientSettingsView() {
 								<p className="mb-2 font-medium">{t("clientSettings.howListsWork")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										<span className="font-medium">{t("clientSettings.allowlistEmpty")}</span>{" "}
-										{t("clientSettings.allowlistEmptyDesc")}{" "}
+										<span className="font-medium">{t("clientSettings.allowlistEmpty")}</span> {t("clientSettings.allowlistEmptyDesc")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-*</code>{" "}
 										{t("clientSettings.allowlistEmptySuffix")}
 									</li>
@@ -434,19 +425,15 @@ export default function ClientSettingsView() {
 										{t("clientSettings.allowlistConfiguredDesc")}
 									</li>
 									<li>
-										<span className="font-medium">{t("clientSettings.denylistList")}</span>{" "}
-										{t("clientSettings.denylistListDesc")}
+										<span className="font-medium">{t("clientSettings.denylistList")}</span> {t("clientSettings.denylistListDesc")}
 									</li>
 									<li>
-										<span className="font-medium">{t("clientSettings.wildcards")}</span>{" "}
-										{t("clientSettings.wildcardsDesc")}{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code>{" "}
-										{t("clientSettings.wildcardsDescMid")}{" "}
+										<span className="font-medium">{t("clientSettings.wildcards")}</span> {t("clientSettings.wildcardsDesc")}{" "}
+										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code> {t("clientSettings.wildcardsDescMid")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-*</code>{" "}
 										{t("clientSettings.wildcardsDescSuffix")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">anthropic-</code>).{" "}
-										{t("clientSettings.wildcardsDescEnd")}{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code>{" "}
+										{t("clientSettings.wildcardsDescEnd")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">*</code>{" "}
 										{t("clientSettings.wildcardsDescFinal")}
 									</li>
 								</ul>
@@ -455,18 +442,15 @@ export default function ClientSettingsView() {
 								<p className="mb-2 font-medium">{t("clientSettings.important")}</p>
 								<ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
 									<li>
-										{t("clientSettings.importantDesc")}{" "}
-										<span className="font-medium">{t("clientSettings.importantDescWithout")}</span>{" "}
+										{t("clientSettings.importantDesc")} <span className="font-medium">{t("clientSettings.importantDescWithout")}</span>{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-</code>{" "}
 										{t("clientSettings.importantDescSuffix")}
 									</li>
 									<li>
 										{t("clientSettings.exampleDesc")}{" "}
 										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">x-bf-eh-custom-id</code>{" "}
-										{t("clientSettings.exampleDescOr")}{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>,{" "}
-										{t("clientSettings.exampleDescAdd")}{" "}
-										<code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>{" "}
+										{t("clientSettings.exampleDescOr")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>,{" "}
+										{t("clientSettings.exampleDescAdd")} <code className="bg-muted rounded px-1 py-0.5 font-mono text-xs">custom-id</code>{" "}
 										{t("clientSettings.exampleDescSuffix")}
 									</li>
 								</ul>
@@ -482,9 +466,7 @@ export default function ClientSettingsView() {
 							</span>
 						</AccordionTrigger>
 						<AccordionContent>
-							<p className="text-sm">
-								{t("clientSettings.securityNoteDesc")}
-							</p>
+							<p className="text-sm">{t("clientSettings.securityNoteDesc")}</p>
 							<p className="text-muted-foreground mt-1 font-mono text-xs">
 								proxy-authorization, cookie, host, content-length, connection, transfer-encoding, x-api-key, x-goog-api-key, x-bf-api-key,
 								x-bf-vk
@@ -498,8 +480,7 @@ export default function ClientSettingsView() {
 					<div className="space-y-1">
 						<h4 className="text-sm font-medium">{t("clientSettings.allowlistTitle")}</h4>
 						<p className="text-muted-foreground text-xs">
-							{t("clientSettings.allowlistDesc")}{" "}
-							<code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code>{" "}
+							{t("clientSettings.allowlistDesc")} <code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code>{" "}
 							{t("clientSettings.allowlistDescSuffix")}
 						</p>
 					</div>
@@ -543,8 +524,7 @@ export default function ClientSettingsView() {
 					<div className="space-y-1">
 						<h4 className="text-sm font-medium">{t("clientSettings.denylistTitle")}</h4>
 						<p className="text-muted-foreground text-xs">
-							{t("clientSettings.denylistDesc")}{" "}
-							<code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code>{" "}
+							{t("clientSettings.denylistDesc")} <code className="bg-muted rounded px-1 font-mono">x-bf-eh-</code>{" "}
 							{t("clientSettings.denylistDescSuffix")}
 						</p>
 					</div>

@@ -62,9 +62,9 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 
 		if (collapsedTagLimit === undefined) {
 			return (
-				<div className={cn("border-input dark:bg-accent flex flex-wrap items-center gap-2 rounded-sm border p-1", className)}>
+				<div className={cn("border-input bg-select-input-bg flex flex-wrap items-center gap-2 rounded-sm border p-1", className)}>
 					{value.map((tag) => (
-						<Badge key={tag} variant="secondary" className="bg-accent dark:bg-card flex items-center gap-1">
+						<Badge key={tag} variant="secondary" className="bg-select-tag-bg text-foreground flex items-center gap-1">
 							{tag}
 							<button
 								aria-label={t("ui.tagInput.removeTag", { tag })}
@@ -83,7 +83,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 						onChange={handleInputChange}
 						onKeyDown={handleKeyDown}
 						onBlur={handleBlur}
-						className={cn("dark:bg-accent h-7 min-w-32 flex-1 border-0 py-0 px-2 text-xs shadow-none focus-visible:ring-0")}
+						className={cn("bg-select-input-bg h-7 min-w-32 flex-1 border-0 py-0 px-2 text-xs shadow-none focus-visible:ring-0")}
 						{...props}
 					/>
 				</div>
@@ -91,7 +91,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 		}
 
 		return (
-			<div className={cn("group border-input dark:bg-accent relative overflow-hidden rounded-sm border", className)}>
+			<div className={cn("group border-input bg-select-input-bg relative overflow-hidden rounded-sm border", className)}>
 				{isCollapsed && (
 					<div
 						aria-hidden
@@ -101,7 +101,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 
 				<div className="relative z-[2] flex flex-wrap items-center gap-2 p-2 pb-1">
 					{visibleTags.map((tag) => (
-						<Badge key={tag} variant="secondary" className="bg-accent dark:bg-card flex items-center gap-1">
+						<Badge key={tag} variant="secondary" className="bg-select-tag-bg text-foreground flex items-center gap-1">
 							{tag}
 							<button
 								aria-label={t("ui.tagInput.removeTag", { tag })}
@@ -127,7 +127,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 							type="button"
 							data-testid={expandButtonTestId}
 							onClick={() => setTagsExpanded(true)}
-							className="text-muted-foreground/70 hover:text-foreground/90 group-hover:text-muted-foreground/85 flex w-full cursor-pointer items-center justify-center py-2.5 text-xs font-medium transition-colors absolute top-4"
+							className="text-muted-foreground/70 hover:text-foreground/90 group-hover:text-muted-foreground/85 absolute top-4 flex w-full cursor-pointer items-center justify-center py-2.5 text-xs font-medium transition-colors"
 						>
 							{t("ui.tagInput.showMore", { n: hiddenTagCount })}
 						</button>
@@ -148,7 +148,7 @@ export const TagInput = React.forwardRef<HTMLInputElement, TagInputProps>(
 							onKeyDown={handleKeyDown}
 							onBlur={handleBlur}
 							className={cn(
-								"dark:bg-accent h-7 w-full min-w-0 rounded-sm border-0 py-0 px-2 text-xs shadow-none transition-[background-color,color,opacity] duration-200 focus-visible:ring-0",
+								"bg-select-input-bg h-7 w-full min-w-0 rounded-sm border-0 py-0 px-2 text-xs shadow-none transition-[background-color,color,opacity] duration-200 focus-visible:ring-0",
 								isCollapsed
 									? "text-muted-foreground/25 placeholder:text-muted-foreground/15 bg-transparent opacity-70 group-hover:bg-background/70 group-hover:text-foreground/80 group-hover:placeholder:text-muted-foreground/60 group-hover:opacity-100 group-focus-within:bg-background group-focus-within:text-foreground group-focus-within:placeholder:text-muted-foreground/70 group-focus-within:opacity-100 focus-visible:bg-background focus-visible:text-foreground focus-visible:opacity-100"
 									: undefined,

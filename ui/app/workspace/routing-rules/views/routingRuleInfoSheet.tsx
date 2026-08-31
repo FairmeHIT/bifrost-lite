@@ -89,13 +89,17 @@ function CopyButton({ value, label, testId }: { value: string; label?: string; t
 					size="icon"
 					className="h-6 w-6 shrink-0"
 					onClick={handleCopy}
-					aria-label={copied ? t("routingRules.info.copied", { label: label ?? "value" }) : t("routingRules.info.copy", { label: label ?? "value" })}
+					aria-label={
+						copied ? t("routingRules.info.copied", { label: label ?? "value" }) : t("routingRules.info.copy", { label: label ?? "value" })
+					}
 					data-testid={testId}
 				>
 					{copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
 				</Button>
 			</TooltipTrigger>
-			<TooltipContent>{copied ? t("routingRules.info.copiedShort") : t("routingRules.info.copyAction", { label: label ?? "value" })}</TooltipContent>
+			<TooltipContent>
+				{copied ? t("routingRules.info.copiedShort") : t("routingRules.info.copyAction", { label: label ?? "value" })}
+			</TooltipContent>
 		</Tooltip>
 	);
 }
@@ -179,7 +183,9 @@ function ConditionGroup({ group, depth = 0 }: { group: RuleGroupType; depth?: nu
 
 	return (
 		<div className="border-foreground/25 relative mx-3 my-1 rounded border border-dashed py-1">
-			<span className="bg-background text-muted-foreground absolute -top-2 right-2 rounded px-1 text-[10px] font-medium">{t("routingRules.info.group")}</span>
+			<span className="bg-background text-muted-foreground absolute -top-2 right-2 rounded px-1 text-[10px] font-medium">
+				{t("routingRules.info.group")}
+			</span>
 			{content}
 		</div>
 	);
@@ -283,7 +289,9 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 							<div className="flex flex-col items-start gap-1">
 								<div className="flex w-full flex-wrap items-center gap-2">
 									<SheetTitle className="text-base">{rule.name}</SheetTitle>
-									<Badge variant={rule.enabled ? "default" : "secondary"}>{rule.enabled ? t("common.enabled") : t("common.disabled")}</Badge>
+									<Badge variant={rule.enabled ? "default" : "secondary"}>
+										{rule.enabled ? t("common.enabled") : t("common.disabled")}
+									</Badge>
 									{rule.chain_rule && (
 										<Tooltip>
 											<TooltipTrigger asChild>
@@ -292,9 +300,7 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 													{t("routingRules.info.chainRule")}
 												</Badge>
 											</TooltipTrigger>
-											<TooltipContent className="max-w-64">
-												{t("routingRules.info.chainRuleDesc")}
-											</TooltipContent>
+											<TooltipContent className="max-w-64">{t("routingRules.info.chainRuleDesc")}</TooltipContent>
 										</Tooltip>
 									)}
 								</div>
@@ -339,12 +345,12 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 							<div className="space-y-3">
 								<h3 className="text-sm font-semibold">{t("routingRules.info.conditions")}</h3>
 								{hasQuery ? (
-										<ConditionGroup group={rule.query!} />
-									) : hasCel ? (
-										<p className="text-muted-foreground text-sm">{t("routingRules.info.celDefined")}</p>
-									) : (
-										<p className="text-muted-foreground text-sm">{t("routingRules.info.matchesAll")}</p>
-									)}
+									<ConditionGroup group={rule.query!} />
+								) : hasCel ? (
+									<p className="text-muted-foreground text-sm">{t("routingRules.info.celDefined")}</p>
+								) : (
+									<p className="text-muted-foreground text-sm">{t("routingRules.info.matchesAll")}</p>
+								)}
 
 								{/* CEL expression */}
 								<div className="space-y-1.5">
@@ -362,7 +368,9 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 
 							{/* Targets */}
 							<div className="space-y-3">
-								<h3 className="text-sm font-semibold">{t("routingRules.info.targets")} ({targets.length})</h3>
+								<h3 className="text-sm font-semibold">
+									{t("routingRules.info.targets")} ({targets.length})
+								</h3>
 								{targets.length > 0 ? (
 									<div className="space-y-2">
 										{targets.map((target, i) => (
@@ -391,7 +399,9 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 							{/* Timestamps */}
 							<div className="grid grid-cols-2 gap-4">
 								<div>
-									<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">{t("routingRules.info.created")}</p>
+									<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">
+										{t("routingRules.info.created")}
+									</p>
 									<span className="text-sm">
 										{formatDistanceToNow(new Date(rule.created_at), {
 											addSuffix: true,
@@ -399,7 +409,9 @@ export function RoutingRuleInfoSheet({ rule, open, onOpenChange, onNavigate, has
 									</span>
 								</div>
 								<div>
-									<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">{t("routingRules.info.lastUpdated")}</p>
+									<p className="text-muted-foreground mb-1 text-xs font-medium tracking-wider uppercase">
+										{t("routingRules.info.lastUpdated")}
+									</p>
 									<span className="text-sm">
 										{formatDistanceToNow(new Date(rule.updated_at), {
 											addSuffix: true,

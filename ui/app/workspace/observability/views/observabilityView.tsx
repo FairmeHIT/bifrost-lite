@@ -138,7 +138,7 @@ export default function ObservabilityView() {
 		<div className="flex h-full flex-row gap-4 p-4">
 			<div className="flex flex-col">
 				<div className="flex w-[270px] flex-col gap-2 pb-10">
-					<div className="rounded-md bg-muted p-4">
+					<div className="bg-muted rounded-md p-4">
 						<div className="flex flex-col gap-1">
 							<div className="text-muted-foreground mb-2 text-xs font-medium">{t("observability.providers")}</div>
 							{supportedPlatforms.map((tab) => (

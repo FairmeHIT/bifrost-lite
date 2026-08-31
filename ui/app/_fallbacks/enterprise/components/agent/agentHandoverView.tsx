@@ -13,9 +13,7 @@ export default function AgentHandoverView() {
 				<div className="bg-primary/10 mx-auto mb-5 flex size-12 items-center justify-center rounded-full">
 					<Icon className="text-primary size-6" />
 				</div>
-				<h1 className="text-xl font-semibold tracking-tight">
-					{isComplete ? t("enterprise.agentComplete") : t("enterprise.agentSignIn")}
-				</h1>
+				<h1 className="text-xl font-semibold tracking-tight">{isComplete ? t("enterprise.agentComplete") : t("enterprise.agentSignIn")}</h1>
 				<p className="text-muted-foreground mt-2 text-sm">
 					{isComplete ? t("enterprise.agentCompleteDesc") : t("enterprise.agentStatus", { status })}
 				</p>

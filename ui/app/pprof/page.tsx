@@ -246,13 +246,13 @@ function StatCard({
 	icon: React.ElementType;
 }) {
 	return (
-		<div className="rounded-sm border border-border bg-card p-4">
-			<div className="flex items-center gap-2 text-sm text-muted-foreground">
+		<div className="border-border bg-card rounded-sm border p-4">
+			<div className="text-muted-foreground flex items-center gap-2 text-sm">
 				<Icon className={`h-4 w-4 ${color}`} />
 				{label}
 			</div>
 			<div className={`mt-1 text-2xl font-semibold ${color}`}>{value}</div>
-			{subValue && <div className="mt-0.5 text-xs text-muted-foreground">{subValue}</div>}
+			{subValue && <div className="text-muted-foreground mt-0.5 text-xs">{subValue}</div>}
 		</div>
 	);
 }
@@ -284,13 +284,13 @@ function AllocationTable({
 		<th
 			scope="col"
 			aria-sort={sortField === field ? (sortDirection === "asc" ? "ascending" : "descending") : "none"}
-			className="px-4 py-3 text-left text-sm font-medium text-muted-foreground"
+			className="text-muted-foreground px-4 py-3 text-left text-sm font-medium"
 		>
 			<button
 				type="button"
 				onClick={() => onSort(field)}
 				data-testid={`${testIdPrefix}-${field}`}
-				className="flex cursor-pointer items-center gap-1 hover:text-foreground"
+				className="hover:text-foreground flex cursor-pointer items-center gap-1"
 			>
 				{children}
 				{sortField === field && <SortIcon className="h-3 w-3" />}
@@ -302,7 +302,7 @@ function AllocationTable({
 		<div className="overflow-x-auto">
 			<table className="w-full">
 				<thead>
-					<tr className="border-b border-border">
+					<tr className="border-border border-b">
 						<th scope="col" className="w-8 px-2 py-3" aria-label={t("pprof.expand")} />
 						<SortHeader field="function">{t("pprof.function")}</SortHeader>
 						<SortHeader field="file">{t("pprof.fileLine")}</SortHeader>
@@ -333,22 +333,22 @@ function AllocationTable({
 											: undefined
 									}
 									data-testid="pprof-alloc-row"
-									className={`border-b border-border/50 hover:bg-muted ${hasStack ? "cursor-pointer" : ""}`}
+									className={`border-border/50 hover:bg-muted border-b ${hasStack ? "cursor-pointer" : ""}`}
 								>
 									<td className="w-8 px-2 py-3 align-top">
 										{hasStack ? (
 											isExpanded ? (
-												<ChevronDown className="h-4 w-4 text-muted-foreground" />
+												<ChevronDown className="text-muted-foreground h-4 w-4" />
 											) : (
-												<ChevronRight className="h-4 w-4 text-muted-foreground" />
+												<ChevronRight className="text-muted-foreground h-4 w-4" />
 											)
 										) : null}
 									</td>
 									<td className="px-4 py-3">
-										<code className="text-sm break-all text-foreground">{alloc.function}</code>
+										<code className="text-foreground text-sm break-all">{alloc.function}</code>
 									</td>
 									<td className="px-4 py-3">
-										<code className="text-sm text-muted-foreground">
+										<code className="text-muted-foreground text-sm">
 											{alloc.file}:{alloc.line}
 										</code>
 									</td>
@@ -356,17 +356,17 @@ function AllocationTable({
 										<span className={`font-mono text-sm ${bytesColorClass}`}>{formatBytes(alloc.bytes)}</span>
 									</td>
 									<td className="px-4 py-3">
-										<span className="font-mono text-sm text-foreground">{alloc.count.toLocaleString()}</span>
+										<span className="text-foreground font-mono text-sm">{alloc.count.toLocaleString()}</span>
 									</td>
 								</tr>
 								{isExpanded && hasStack && (
-									<tr className="border-b border-border/50 bg-muted/50">
+									<tr className="border-border/50 bg-muted/50 border-b">
 										<td />
 										<td colSpan={4} className="px-4 py-3">
-											<div className="mb-2 text-xs font-medium text-muted-foreground">{t("pprof.stackTrace")}</div>
+											<div className="text-muted-foreground mb-2 text-xs font-medium">{t("pprof.stackTrace")}</div>
 											<div className="space-y-0.5 font-mono text-xs">
 												{alloc.stack.map((line, j) => (
-													<div key={j} className="break-all text-muted-foreground">
+													<div key={j} className="text-muted-foreground break-all">
 														{line}
 													</div>
 												))}
@@ -379,7 +379,7 @@ function AllocationTable({
 					})}
 					{allocations.length === 0 && (
 						<tr>
-							<td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+							<td colSpan={5} className="text-muted-foreground px-4 py-8 text-center">
 								{t("pprof.noAllocationsData")}
 							</td>
 						</tr>
@@ -405,27 +405,27 @@ function LeakTable({
 		<div className="overflow-x-auto">
 			<table className="w-full">
 				<thead>
-					<tr className="border-b border-border">
+					<tr className="border-border border-b">
 						<th scope="col" className="w-8 px-2 py-3" aria-label={t("pprof.expand")} />
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.severity")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.function")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.fileLine")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.live")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.retention")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.trend")}
 						</th>
-						<th scope="col" className="px-4 py-3 text-left text-sm font-medium text-muted-foreground">
+						<th scope="col" className="text-muted-foreground px-4 py-3 text-left text-sm font-medium">
 							{t("pprof.liveCount")}
 						</th>
 					</tr>
@@ -448,21 +448,29 @@ function LeakTable({
 										}
 									}}
 									data-testid="pprof-leak-row"
-									className="cursor-pointer border-b border-border/50 hover:bg-muted"
+									className="border-border/50 hover:bg-muted cursor-pointer border-b"
 								>
 									<td className="w-8 px-2 py-3 align-top">
-										{isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+										{isExpanded ? (
+											<ChevronDown className="text-muted-foreground h-4 w-4" />
+										) : (
+											<ChevronRight className="text-muted-foreground h-4 w-4" />
+										)}
 									</td>
 									<td className="px-4 py-3">
 										<span className={`rounded border px-2 py-0.5 text-xs uppercase ${getLeakSeverityClasses(c.severity)}`}>
-											{c.severity === "high" ? t("pprof.levelHigh") : c.severity === "medium" ? t("pprof.levelMedium") : t("pprof.levelLow")}
+											{c.severity === "high"
+												? t("pprof.levelHigh")
+												: c.severity === "medium"
+													? t("pprof.levelMedium")
+													: t("pprof.levelLow")}
 										</span>
 									</td>
 									<td className="px-4 py-3">
-										<code className="text-sm break-all text-foreground">{c.function}</code>
+										<code className="text-foreground text-sm break-all">{c.function}</code>
 									</td>
 									<td className="px-4 py-3">
-										<code className="text-sm text-muted-foreground">
+										<code className="text-muted-foreground text-sm">
 											{c.file}:{c.line}
 										</code>
 									</td>
@@ -478,18 +486,18 @@ function LeakTable({
 												<TrendingUp className="h-3 w-3" />+{formatBytes(c.growthBytes)}
 											</span>
 										) : (
-											<span className="text-xs text-muted-foreground">{t("pprof.stable")}</span>
+											<span className="text-muted-foreground text-xs">{t("pprof.stable")}</span>
 										)}
 									</td>
 									<td className="px-4 py-3">
-										<span className="font-mono text-sm text-foreground">{c.liveCount.toLocaleString()}</span>
+										<span className="text-foreground font-mono text-sm">{c.liveCount.toLocaleString()}</span>
 									</td>
 								</tr>
 								{isExpanded && (
-									<tr className="border-b border-border/50 bg-muted/50">
+									<tr className="border-border/50 bg-muted/50 border-b">
 										<td />
 										<td colSpan={7} className="px-4 py-3">
-											<div className="mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+											<div className="text-muted-foreground mb-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
 												<span>
 													{t("pprof.cumulative")}: <span className="text-foreground">{formatBytes(c.cumulativeBytes)}</span>
 												</span>
@@ -503,10 +511,10 @@ function LeakTable({
 													</span>
 												)}
 											</div>
-											<div className="mb-2 text-xs font-medium text-muted-foreground">{t("pprof.stackTrace")}</div>
+											<div className="text-muted-foreground mb-2 text-xs font-medium">{t("pprof.stackTrace")}</div>
 											<div className="space-y-0.5 font-mono text-xs">
 												{c.stack.map((line, j) => (
-													<div key={j} className="break-all text-muted-foreground">
+													<div key={j} className="text-muted-foreground break-all">
 														{line}
 													</div>
 												))}
@@ -519,7 +527,7 @@ function LeakTable({
 					})}
 					{candidates.length === 0 && (
 						<tr>
-							<td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">
+							<td colSpan={8} className="text-muted-foreground px-4 py-8 text-center">
 								{t("pprof.noLeakSignatures")}
 							</td>
 						</tr>
@@ -544,7 +552,7 @@ function GoroutineGroupRow({
 }) {
 	const { t } = useI18n();
 	return (
-		<div className="border-b border-border/50">
+		<div className="border-border/50 border-b">
 			<div
 				role="button"
 				tabIndex={0}
@@ -558,17 +566,21 @@ function GoroutineGroupRow({
 				}}
 				aria-expanded={isExpanded}
 				data-testid="pprof-goroutine-toggle"
-				className="group flex w-full cursor-pointer items-start gap-3 px-4 py-3 hover:bg-muted"
+				className="group hover:bg-muted flex w-full cursor-pointer items-start gap-3 px-4 py-3"
 			>
 				<div className="mt-1 shrink-0">
-					{isExpanded ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+					{isExpanded ? (
+						<ChevronDown className="text-muted-foreground h-4 w-4" />
+					) : (
+						<ChevronRight className="text-muted-foreground h-4 w-4" />
+					)}
 				</div>
 				<div className="min-w-0 flex-1">
 					<div className="flex flex-wrap items-center gap-2">
-						<code className="text-sm break-all text-foreground">{group.top_func}</code>
+						<code className="text-foreground text-sm break-all">{group.top_func}</code>
 						<span className={`rounded border px-2 py-0.5 text-xs ${getCategoryColor(group.category)}`}>{group.category}</span>
-						<span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{group.count}x</span>
-						<span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">{group.state}</span>
+						<span className="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs">{group.count}x</span>
+						<span className="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs">{group.state}</span>
 						{group.wait_minutes != null && group.wait_minutes > 0 && (
 							<span className="rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
 								{t("devProfiler.waiting", { count: group.wait_minutes })}
@@ -576,7 +588,7 @@ function GoroutineGroupRow({
 						)}
 					</div>
 					{group.wait_reason && (
-						<div className="mt-1 text-xs text-muted-foreground">
+						<div className="text-muted-foreground mt-1 text-xs">
 							{t("pprof.waitReason")} <span className="text-amber-400">{group.wait_reason}</span>
 						</div>
 					)}
@@ -590,7 +602,7 @@ function GoroutineGroupRow({
 						if (filePath) onSkip(filePath);
 					}}
 					data-testid="pprof-goroutine-skip"
-					className="shrink-0 rounded p-1.5 text-muted-foreground opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-muted hover:text-foreground focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-ring"
+					className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring shrink-0 rounded p-1.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:ring-2"
 					title={t("devProfiler.hideGoroutines")}
 					aria-label={t("devProfiler.hideGoroutines")}
 				>
@@ -598,11 +610,11 @@ function GoroutineGroupRow({
 				</button>
 			</div>
 			{isExpanded && (
-				<div className="border-t border-border/50 bg-muted/50 px-4 py-3">
-					<div className="mb-2 text-xs font-medium text-muted-foreground">{t("pprof.stackTrace")}</div>
+				<div className="border-border/50 bg-muted/50 border-t px-4 py-3">
+					<div className="text-muted-foreground mb-2 text-xs font-medium">{t("pprof.stackTrace")}</div>
 					<div className="space-y-0.5 font-mono text-xs">
 						{group.stack.map((line, j) => (
-							<div key={j} className="break-all text-muted-foreground">
+							<div key={j} className="text-muted-foreground break-all">
 								{line}
 							</div>
 						))}
@@ -830,7 +842,7 @@ export default function PprofPage() {
 	if (isLoading && !data) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
-				<div className="flex items-center gap-3 text-muted-foreground">
+				<div className="text-muted-foreground flex items-center gap-3">
 					<RefreshCw className="h-5 w-5 animate-spin" />
 					{t("pprof.loadingData")}
 				</div>
@@ -842,9 +854,7 @@ export default function PprofPage() {
 	if (error && !data) {
 		return (
 			<div className="flex min-h-screen items-center justify-center">
-				<div className="rounded-lg border border-red-800 bg-red-900/20 px-6 py-4 text-red-400">
-					{t("pprof.failedToLoadDev")}
-				</div>
+				<div className="rounded-lg border border-red-800 bg-red-900/20 px-6 py-4 text-red-400">{t("pprof.failedToLoadDev")}</div>
 			</div>
 		);
 	}
@@ -854,18 +864,18 @@ export default function PprofPage() {
 			{/* Header */}
 			<div className="mb-8 flex items-center justify-between">
 				<div>
-					<h1 className="text-2xl font-semibold text-foreground">{t("pprof.title")}</h1>
-					<p className="mt-1 text-sm text-muted-foreground">{t("pprof.devOnly")}</p>
+					<h1 className="text-foreground text-2xl font-semibold">{t("pprof.title")}</h1>
+					<p className="text-muted-foreground mt-1 text-sm">{t("pprof.devOnly")}</p>
 				</div>
 				<div className="flex items-center gap-4">
-					<span className="flex items-center gap-2 text-sm text-muted-foreground">
+					<span className="text-muted-foreground flex items-center gap-2 text-sm">
 						<span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
 						{t("pprof.autoRefresh", { seconds: 10 })}
 					</span>
 					<button
 						onClick={() => refetch()}
 						data-testid="pprof-data-refresh"
-						className="flex items-center gap-2 rounded-lg border border-border bg-muted px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
+						className="border-border bg-muted text-foreground hover:bg-muted flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
 					>
 						<RefreshCw className="h-4 w-4" />
 						{t("logs.refresh")}
@@ -877,9 +887,19 @@ export default function PprofPage() {
 				<>
 					{/* Overview Stats */}
 					<div className="mb-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-						<StatCard label={t("devProfiler.cpuUsage")} value={`${data.cpu.usage_percent.toFixed(1)}%`} color="text-orange-400" icon={Cpu} />
+						<StatCard
+							label={t("devProfiler.cpuUsage")}
+							value={`${data.cpu.usage_percent.toFixed(1)}%`}
+							color="text-orange-400"
+							icon={Cpu}
+						/>
 						<StatCard label={t("devProfiler.heapAlloc")} value={formatBytes(data.memory.alloc)} color="text-cyan-400" icon={HardDrive} />
-						<StatCard label={t("devProfiler.heapInUse")} value={formatBytes(data.memory.heap_inuse)} color="text-blue-400" icon={HardDrive} />
+						<StatCard
+							label={t("devProfiler.heapInUse")}
+							value={formatBytes(data.memory.heap_inuse)}
+							color="text-blue-400"
+							icon={HardDrive}
+						/>
 						<StatCard label={t("pprof.systemMemory")} value={formatBytes(data.memory.sys)} color="text-purple-400" icon={HardDrive} />
 						<StatCard
 							label={t("devProfiler.goroutines")}
@@ -900,11 +920,11 @@ export default function PprofPage() {
 					{/* Charts */}
 					<div className="mb-8 grid gap-6 lg:grid-cols-2">
 						{/* CPU Chart */}
-						<div className="rounded-sm border border-border bg-card p-4">
+						<div className="border-border bg-card rounded-sm border p-4">
 							<div className="mb-4 flex items-center gap-2">
 								<Cpu className="h-4 w-4 text-orange-400" />
-								<span className="font-medium text-foreground">{t("pprof.cpuChartTitle")}</span>
-								<span className="text-sm text-muted-foreground">{t("pprof.last5Min")}</span>
+								<span className="text-foreground font-medium">{t("pprof.cpuChartTitle")}</span>
+								<span className="text-muted-foreground text-sm">{t("pprof.last5Min")}</span>
 							</div>
 							<div className="h-64">
 								<ResponsiveContainer width="100%" height="100%">
@@ -981,11 +1001,11 @@ export default function PprofPage() {
 						</div>
 
 						{/* Memory Chart */}
-						<div className="rounded-sm border border-border bg-card p-4">
+						<div className="border-border bg-card rounded-sm border p-4">
 							<div className="mb-4 flex items-center gap-2">
 								<HardDrive className="h-4 w-4 text-cyan-400" />
-								<span className="font-medium text-foreground">{t("pprof.memoryUsage")}</span>
-								<span className="text-sm text-muted-foreground">{t("pprof.last5Min")}</span>
+								<span className="text-foreground font-medium">{t("pprof.memoryUsage")}</span>
+								<span className="text-muted-foreground text-sm">{t("pprof.last5Min")}</span>
 							</div>
 							<div className="h-64">
 								<ResponsiveContainer width="100%" height="100%">
@@ -1018,7 +1038,14 @@ export default function PprofPage() {
 											}}
 											labelStyle={{ color: "#a1a1aa" }}
 										/>
-										<Area type="monotone" dataKey="alloc" stroke="#22d3ee" strokeWidth={2} fill="url(#allocGradient)" name={t("pprof.allocMb")} />
+										<Area
+											type="monotone"
+											dataKey="alloc"
+											stroke="#22d3ee"
+											strokeWidth={2}
+											fill="url(#allocGradient)"
+											name={t("pprof.allocMb")}
+										/>
 										<Area
 											type="monotone"
 											dataKey="heapInuse"
@@ -1044,12 +1071,12 @@ export default function PprofPage() {
 					</div>
 
 					{/* Potential Leaks — stacks accumulating live memory without being freed */}
-					<div className="mb-8 rounded-sm border border-border bg-card">
-						<div className="border-b border-border px-4 py-3">
+					<div className="border-border bg-card mb-8 rounded-sm border">
+						<div className="border-border border-b px-4 py-3">
 							<div className="flex items-center gap-2">
 								<AlertTriangle className="h-4 w-4 text-amber-400" />
-								<span className="font-medium text-foreground">{t("devProfiler.potentialLeaks")}</span>
-								<span className="text-sm text-muted-foreground">{t("pprof.suspiciousCount", { count: leakCandidates.length })}</span>
+								<span className="text-foreground font-medium">{t("devProfiler.potentialLeaks")}</span>
+								<span className="text-muted-foreground text-sm">{t("pprof.suspiciousCount", { count: leakCandidates.length })}</span>
 								{leakSummary.high > 0 && (
 									<span className="rounded border border-red-400/20 bg-red-400/10 px-2 py-0.5 text-xs text-red-400">
 										{leakSummary.high} {t("pprof.levelHigh")}
@@ -1061,25 +1088,25 @@ export default function PprofPage() {
 									</span>
 								)}
 								{leakSummary.low > 0 && (
-									<span className="rounded border border-border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+									<span className="border-border bg-muted text-muted-foreground rounded border px-2 py-0.5 text-xs">
 										{leakSummary.low} {t("pprof.levelLow")}
 									</span>
 								)}
 							</div>
-							<p className="mt-1 text-xs text-muted-foreground">{t("pprof.leaksDesc")}</p>
+							<p className="text-muted-foreground mt-1 text-xs">{t("pprof.leaksDesc")}</p>
 						</div>
 						<LeakTable candidates={leakCandidates} expandedKeys={expandedLeaks} onToggle={toggleLeakExpand} />
 					</div>
 
 					{/* Live Heap Allocations — what's currently consuming the heap */}
-					<div className="mb-8 rounded-sm border border-border bg-card">
-						<div className="border-b border-border px-4 py-3">
+					<div className="border-border bg-card mb-8 rounded-sm border">
+						<div className="border-border border-b px-4 py-3">
 							<div className="flex items-center gap-2">
 								<HardDrive className="h-4 w-4 text-emerald-400" />
-								<span className="font-medium text-foreground">{t("pprof.liveHeapAllocations")}</span>
-								<span className="text-sm text-muted-foreground">{t("pprof.sitesCount", { count: sortedInuseAllocations.length })}</span>
+								<span className="text-foreground font-medium">{t("pprof.liveHeapAllocations")}</span>
+								<span className="text-muted-foreground text-sm">{t("pprof.sitesCount", { count: sortedInuseAllocations.length })}</span>
 							</div>
-							<p className="mt-1 text-xs text-muted-foreground">{t("pprof.liveHeapDesc")}</p>
+							<p className="text-muted-foreground mt-1 text-xs">{t("pprof.liveHeapDesc")}</p>
 						</div>
 						<AllocationTable
 							allocations={sortedInuseAllocations}
@@ -1094,14 +1121,14 @@ export default function PprofPage() {
 					</div>
 
 					{/* Cumulative Memory Allocations — total since process start */}
-					<div className="mb-8 rounded-sm border border-border bg-card">
-						<div className="border-b border-border px-4 py-3">
+					<div className="border-border bg-card mb-8 rounded-sm border">
+						<div className="border-border border-b px-4 py-3">
 							<div className="flex items-center gap-2">
 								<HardDrive className="h-4 w-4 text-rose-400" />
-								<span className="font-medium text-foreground">{t("pprof.cumulativeMemoryAllocations")}</span>
-								<span className="text-sm text-muted-foreground">{t("pprof.sitesCount", { count: sortedAllocations.length })}</span>
+								<span className="text-foreground font-medium">{t("pprof.cumulativeMemoryAllocations")}</span>
+								<span className="text-muted-foreground text-sm">{t("pprof.sitesCount", { count: sortedAllocations.length })}</span>
 							</div>
-							<p className="mt-1 text-xs text-muted-foreground">{t("pprof.cumulativeMemoryDesc")}</p>
+							<p className="text-muted-foreground mt-1 text-xs">{t("pprof.cumulativeMemoryDesc")}</p>
 						</div>
 						<AllocationTable
 							allocations={sortedAllocations}
@@ -1114,11 +1141,11 @@ export default function PprofPage() {
 					</div>
 
 					{/* Goroutine Health */}
-					<div className="mb-8 rounded-sm border border-border bg-card">
-						<div className="flex items-center justify-between border-b border-border px-4 py-3">
+					<div className="border-border bg-card mb-8 rounded-sm border">
+						<div className="border-border flex items-center justify-between border-b px-4 py-3">
 							<div className="flex items-center gap-2">
 								<Activity className="h-4 w-4 text-emerald-400" />
-								<span className="font-medium text-foreground">{t("devProfiler.goroutineHealth")}</span>
+								<span className="text-foreground font-medium">{t("devProfiler.goroutineHealth")}</span>
 								{goroutineTrend?.isGrowing && (
 									<span className="flex items-center gap-1 rounded bg-amber-500/10 px-2 py-0.5 text-xs text-amber-400">
 										<TrendingUp className="h-3 w-3" />
@@ -1145,7 +1172,7 @@ export default function PprofPage() {
 								<button
 									onClick={handleClearSkipped}
 									data-testid="pprof-goroutine-clearskipped"
-									className="flex items-center gap-1 rounded px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground"
+									className="text-muted-foreground hover:bg-muted hover:text-foreground flex items-center gap-1 rounded px-2 py-1 text-sm"
 								>
 									<RotateCcw className="h-3 w-3" />
 									{t("pprof.clearHidden", { count: skippedGoroutines.size })}
@@ -1155,18 +1182,18 @@ export default function PprofPage() {
 
 						{/* Summary Stats */}
 						{goroutineData?.summary && (
-							<div className="grid grid-cols-4 gap-4 border-b border-border p-4">
+							<div className="border-border grid grid-cols-4 gap-4 border-b p-4">
 								<div className="text-center">
 									<div className="text-2xl font-semibold text-emerald-400">{goroutineData.total_goroutines}</div>
-									<div className="text-sm text-muted-foreground">{t("devProfiler.total")}</div>
+									<div className="text-muted-foreground text-sm">{t("devProfiler.total")}</div>
 								</div>
 								<div className="text-center">
 									<div className="text-2xl font-semibold text-blue-400">{goroutineData.summary.background}</div>
-									<div className="text-sm text-muted-foreground">{t("devProfiler.background")}</div>
+									<div className="text-muted-foreground text-sm">{t("devProfiler.background")}</div>
 								</div>
 								<div className="text-center">
 									<div className="text-2xl font-semibold text-amber-400">{goroutineData.summary.per_request}</div>
-									<div className="text-sm text-muted-foreground">{t("devProfiler.perRequest")}</div>
+									<div className="text-muted-foreground text-sm">{t("devProfiler.perRequest")}</div>
 								</div>
 								<div className="text-center">
 									<div
@@ -1174,7 +1201,7 @@ export default function PprofPage() {
 									>
 										{goroutineData.summary.potentially_stuck}
 									</div>
-									<div className="text-sm text-muted-foreground">{t("devProfiler.stuck")}</div>
+									<div className="text-muted-foreground text-sm">{t("devProfiler.stuck")}</div>
 								</div>
 							</div>
 						)}
@@ -1194,18 +1221,16 @@ export default function PprofPage() {
 								);
 							})}
 							{filteredGoroutines.length === 0 && (
-								<div className="px-4 py-8 text-center text-muted-foreground">
-									{skippedGoroutines.size > 0
-										? t("pprof.allGoroutinesHidden")
-										: t("pprof.noGoroutineData")}
+								<div className="text-muted-foreground px-4 py-8 text-center">
+									{skippedGoroutines.size > 0 ? t("pprof.allGoroutinesHidden") : t("pprof.noGoroutineData")}
 								</div>
 							)}
 						</div>
 					</div>
 
 					{/* Runtime Info Footer */}
-					<div className="rounded-sm border border-border bg-card px-4 py-3">
-						<div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
+					<div className="border-border bg-card rounded-sm border px-4 py-3">
+						<div className="text-muted-foreground flex flex-wrap items-center gap-6 text-sm">
 							<span>
 								<span className="text-muted-foreground">{t("pprof.cpus")}</span> {data.runtime.num_cpu}
 							</span>

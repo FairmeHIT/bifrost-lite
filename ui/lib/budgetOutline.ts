@@ -3,7 +3,6 @@
 // compact mono budget labels, allocation-bar math, and the neutral swatch ramp
 // consistent across every screen that renders a provider config.
 
-
 import { t } from "@/lib/i18n";
 export interface BudgetLineLike {
 	max_limit?: number | null;

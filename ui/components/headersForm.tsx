@@ -131,9 +131,7 @@ export default function HeadersForm({
 									<Info className="text-muted-foreground size-3" />
 								</TooltipTrigger>
 								<TooltipContent className="max-w-xs">
-									<p>
-										{t("headersForm.adminHeadersTooltip")}
-									</p>
+									<p>{t("headersForm.adminHeadersTooltip")}</p>
 								</TooltipContent>
 							</Tooltip>
 						</TooltipProvider>

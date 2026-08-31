@@ -13,13 +13,13 @@ function RouteComponent() {
 	return (
 		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
 			<I18nProvider>
-			<ReduxProvider>
-				<NuqsAdapter>
-					<div className="bg-background min-h-screen">
-						<LoginPage />
-					</div>
-				</NuqsAdapter>
-			</ReduxProvider>
+				<ReduxProvider>
+					<NuqsAdapter>
+						<div className="bg-background min-h-screen">
+							<LoginPage />
+						</div>
+					</NuqsAdapter>
+				</ReduxProvider>
 			</I18nProvider>
 		</ThemeProvider>
 	);
@@ -53,9 +53,9 @@ function PendingComponent() {
 	return (
 		<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
 			<I18nProvider>
-			<ReduxProvider>
-				<PendingCard />
-			</ReduxProvider>
+				<ReduxProvider>
+					<PendingCard />
+				</ReduxProvider>
 			</I18nProvider>
 		</ThemeProvider>
 	);

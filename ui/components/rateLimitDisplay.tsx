@@ -93,7 +93,9 @@ function Bar({
 					{current.toLocaleString()} / {max.toLocaleString()} {label}
 				</p>
 				{resetDuration ? (
-					<p className="text-primary-foreground/80 text-xs">{t("rateLimit.resets")} {formatResetDuration(resetDuration, calendarAligned, t)}</p>
+					<p className="text-primary-foreground/80 text-xs">
+						{t("rateLimit.resets")} {formatResetDuration(resetDuration, calendarAligned, t)}
+					</p>
 				) : null}
 			</TooltipContent>
 		</Tooltip>

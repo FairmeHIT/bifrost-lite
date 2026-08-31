@@ -276,10 +276,7 @@ export default function CachingView() {
 				<p className="text-muted-foreground text-sm">
 					<span dangerouslySetInnerHTML={{ __html: t("config.caching.description") }} />{" "}
 					{!isVectorStoreEnabled && (
-						<span
-							className="text-destructive font-medium"
-							dangerouslySetInnerHTML={{ __html: t("config.caching.requiresVectorStore") }}
-						/>
+						<span className="text-destructive font-medium" dangerouslySetInnerHTML={{ __html: t("config.caching.requiresVectorStore") }} />
 					)}
 				</p>
 			</div>
@@ -287,9 +284,7 @@ export default function CachingView() {
 			{configError !== undefined && (
 				<div className="border-destructive/50 bg-destructive/10 rounded-sm border p-4">
 					<p className="text-destructive text-sm font-medium">{t("config.caching.loadFailed")}</p>
-					<p className="text-muted-foreground mt-1 text-sm">
-						{getErrorMessage(configError) || t("config.caching.unexpectedError")}
-					</p>
+					<p className="text-muted-foreground mt-1 text-sm">{getErrorMessage(configError) || t("config.caching.unexpectedError")}</p>
 				</div>
 			)}
 
@@ -340,9 +335,7 @@ export default function CachingView() {
 												value="semantic"
 												data-testid="caching-mode-semantic-tab"
 												disabled={embeddingProviders.length === 0}
-												title={
-													embeddingProviders.length === 0 ? t("config.caching.semanticTooltip") : undefined
-												}
+												title={embeddingProviders.length === 0 ? t("config.caching.semanticTooltip") : undefined}
 											>
 												{t("config.caching.directSemantic")}
 											</TabsTrigger>
@@ -410,9 +403,7 @@ export default function CachingView() {
 														value={cacheConfig.embedding_model ?? ""}
 														onChange={(model) => updateLocal({ embedding_model: model })}
 														placeholder={
-															cacheConfig.provider
-																? t("config.caching.searchEmbeddingModel")
-																: t("config.caching.selectProviderFirst")
+															cacheConfig.provider ? t("config.caching.searchEmbeddingModel") : t("config.caching.selectProviderFirst")
 														}
 														disabled={!cacheConfig.provider}
 													/>
@@ -441,10 +432,8 @@ export default function CachingView() {
 												/>
 												<p className="text-muted-foreground text-xs">
 													{t("config.caching.dimensionDescription")} <code>1536</code>
-													{t("config.caching.dimensionDescriptionForOpenAISmall")} <code>text-embedding-3-small</code>,{" "}
-													<code>3072</code>
-													{t("config.caching.dimensionDescriptionForOpenAILarge")} <code>text-embedding-3-large</code>,{" "}
-													<code>768</code>
+													{t("config.caching.dimensionDescriptionForOpenAISmall")} <code>text-embedding-3-small</code>, <code>3072</code>
+													{t("config.caching.dimensionDescriptionForOpenAILarge")} <code>text-embedding-3-large</code>, <code>768</code>
 													{t("config.caching.dimensionDescriptionSuffix")}
 												</p>
 											</div>

@@ -141,7 +141,7 @@ export default function ProviderKeyForm({ provider, keyId, onCancel, onSave }: P
 					/>
 					{isEditing && currentKey?.config_hash && <ConfigSyncAlert className="mt-4" />}
 				</div>
-				<div className="bg-card sticky bottom-0 border-t px-8 py-4">
+				<div className="bg-surface-solid sticky bottom-0 border-t px-8 py-4">
 					<div className="flex justify-end space-x-3">
 						<Button type="button" variant="outline" onClick={onCancel} data-testid="key-cancel-btn">
 							{t("common.cancel")}

@@ -22,9 +22,7 @@ export function VirtualKeysEmptyState({ onAddClick, canCreate = true }: VirtualK
 			</div>
 			<div className="flex flex-col gap-1">
 				<h1 className="text-muted-foreground text-xl font-medium">{t("virtualKeys.emptyTitle")}</h1>
-				<div className="text-muted-foreground mx-auto mt-2 max-w-[600px] text-sm font-normal">
-					{t("virtualKeys.emptyBody")}
-				</div>
+				<div className="text-muted-foreground mx-auto mt-2 max-w-[600px] text-sm font-normal">{t("virtualKeys.emptyBody")}</div>
 				<div className="mx-auto mt-6 flex flex-row flex-wrap items-center justify-center gap-2">
 					<Button
 						variant="outline"

@@ -193,7 +193,7 @@ export function RoutingRulesTable({
 
 			<div className="mb-2 overflow-hidden rounded-sm border">
 				<Table containerClassName="h-full overflow-auto">
-					<TableHeader className="bg-muted sticky top-0 z-10">
+					<TableHeader className="bg-surface-solid-muted sticky top-0 z-10">
 						<TableRow className="bg-muted/50">
 							<TableHead className="font-semibold">{t("common.name")}</TableHead>
 							<TableHead className="font-semibold">{t("routingRules.table.targets")}</TableHead>
@@ -201,7 +201,7 @@ export function RoutingRulesTable({
 							<TableHead className="text-right font-semibold">{t("routingRules.table.priority")}</TableHead>
 							<TableHead className="font-semibold">{t("routingRules.table.expression")}</TableHead>
 							<TableHead className="font-semibold">{t("common.status")}</TableHead>
-							<TableHead className={`bg-muted sticky right-0 z-30 w-[50px] text-right font-semibold ${PIN_SHADOW_RIGHT}`}>
+							<TableHead className={`bg-surface-solid-muted sticky right-0 z-30 w-[50px] text-right font-semibold ${PIN_SHADOW_RIGHT}`}>
 								{t("common.actions")}
 							</TableHead>
 						</TableRow>
@@ -268,7 +268,7 @@ export function RoutingRulesTable({
 										/>
 									</TableCell>
 									<TableCell
-										className={`group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
+										className={`group-hover:bg-muted dark:bg-surface-solid dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
 										onClick={(e) => e.stopPropagation()}
 									>
 										<div className="flex items-center justify-center">
@@ -314,7 +314,9 @@ export function RoutingRulesTable({
 						<div className="flex items-center gap-1">
 							<span>{t("routingRules.table.page")}</span>
 							<span>{Math.floor(offset / limit) + 1}</span>
-							<span>{t("routingRules.table.of")} {Math.ceil(totalCount / limit)}</span>
+							<span>
+								{t("routingRules.table.of")} {Math.ceil(totalCount / limit)}
+							</span>
 						</div>
 
 						<Button
@@ -335,9 +337,7 @@ export function RoutingRulesTable({
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("routingRules.table.deleteConfirmTitle")}</AlertDialogTitle>
-						<AlertDialogDescription>
-							{t("routingRules.table.deleteConfirmDesc", { name: ruleToDelete?.name ?? "" })}
-						</AlertDialogDescription>
+						<AlertDialogDescription>{t("routingRules.table.deleteConfirmDesc", { name: ruleToDelete?.name ?? "" })}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel disabled={isDeleting}>{t("common.cancel")}</AlertDialogCancel>
@@ -358,7 +358,10 @@ function TargetsSummary({ targets }: { targets: RoutingTarget[] }) {
 	}
 
 	const first = targets[0];
-	const label = [first.provider ? getProviderLabel(first.provider) : t("routingRules.table.any"), first.model || t("routingRules.table.anyModel")].join(" / ");
+	const label = [
+		first.provider ? getProviderLabel(first.provider) : t("routingRules.table.any"),
+		first.model || t("routingRules.table.anyModel"),
+	].join(" / ");
 
 	return (
 		<div className="flex flex-col gap-1">
@@ -367,9 +370,7 @@ function TargetsSummary({ targets }: { targets: RoutingTarget[] }) {
 				<span className="max-w-[160px] truncate text-sm">{label}</span>
 			</div>
 			{targets.length > 1 && (
-				<span className="text-muted-foreground text-xs">
-					{t("routingRules.table.moreTargets", { count: targets.length - 1 })}
-				</span>
+				<span className="text-muted-foreground text-xs">{t("routingRules.table.moreTargets", { count: targets.length - 1 })}</span>
 			)}
 		</div>
 	);

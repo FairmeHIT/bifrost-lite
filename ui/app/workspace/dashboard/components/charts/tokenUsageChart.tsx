@@ -3,7 +3,14 @@ import type { TokenHistogramResponse } from "@/lib/types/logs";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCompactNumber } from "@/lib/utils/numbers";
-import { CHART_COLORS, CHART_GRID_CLASS, CHART_TICK_CLASS, CHART_TOOLTIP_CLASS, formatFullTimestamp, formatTimestamp } from "../../utils/chartUtils";
+import {
+	CHART_COLORS,
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
+	formatFullTimestamp,
+	formatTimestamp,
+} from "../../utils/chartUtils";
 import { ChartErrorBoundary } from "./chartErrorBoundary";
 import type { ChartType } from "./chartTypeToggle";
 
@@ -23,7 +30,7 @@ function CustomTooltip({ active, payload }: any) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
@@ -48,7 +55,7 @@ function CustomTooltip({ active, payload }: any) {
 						<span className="font-medium">{data.cached_read_tokens.toLocaleString()}</span>
 					</div>
 				)}
-				<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+				<div className="border-popover flex items-center justify-between gap-4 border-t pt-1">
 					<span className="text-muted-foreground">{t("dashboardCharts.total")}</span>
 					<span className="font-medium">{data.total_tokens.toLocaleString()}</span>
 				</div>

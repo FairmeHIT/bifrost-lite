@@ -260,7 +260,7 @@ export default function CustomersTable({
 									<TableHead>{t("governance.budget")}</TableHead>
 									<TableHead>{t("governance.rateLimit")}</TableHead>
 									<TableHead>{t("sidebar.virtualKeys")}</TableHead>
-									<TableHead className={`bg-muted ${ACTIONS_COLUMN_CLASS}`}></TableHead>
+									<TableHead className={`bg-surface-solid-muted ${ACTIONS_COLUMN_CLASS}`}></TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -424,7 +424,9 @@ export default function CustomersTable({
 																			{customer.rate_limit.token_max_limit.toLocaleString()} tokens
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			{t("governance.resets", { duration: formatResetDuration(customer.rate_limit.token_reset_duration || "1h") })}
+																			{t("governance.resets", {
+																				duration: formatResetDuration(customer.rate_limit.token_reset_duration || "1h"),
+																			})}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -458,7 +460,9 @@ export default function CustomersTable({
 																			{customer.rate_limit.request_max_limit.toLocaleString()} requests
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			{t("governance.resets", { duration: formatResetDuration(customer.rate_limit.request_reset_duration || "1h") })}
+																			{t("governance.resets", {
+																				duration: formatResetDuration(customer.rate_limit.request_reset_duration || "1h"),
+																			})}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -471,9 +475,7 @@ export default function CustomersTable({
 												<TableCell>
 													{vkCount > 0 ? (
 														<Badge variant="outline" className="text-xs">
-															{vkCount === 1
-																? t("governance.keyCount", { count: vkCount })
-																: t("governance.keysCount", { count: vkCount })}
+															{vkCount === 1 ? t("governance.keyCount", { count: vkCount }) : t("governance.keysCount", { count: vkCount })}
 														</Badge>
 													) : (
 														<span className="text-muted-foreground text-sm">-</span>
@@ -481,7 +483,7 @@ export default function CustomersTable({
 												</TableCell>
 												<TableCell
 													className={cn(
-														"dark:bg-card dark:group-hover:bg-muted",
+														"dark:bg-surface-solid dark:group-hover:bg-muted",
 														isExhausted ? "bg-red-500/5 group-hover:bg-red-500/10" : "bg-transparent group-hover:bg-muted",
 														ACTIONS_COLUMN_CLASS,
 													)}
@@ -550,9 +552,7 @@ export default function CustomersTable({
 					<AlertDialogContent>
 						<AlertDialogHeader>
 							<AlertDialogTitle>{t("customers.deleteTitle")}</AlertDialogTitle>
-							<AlertDialogDescription>
-								{t("customers.deleteConfirm", { name: confirmDeleteCustomer?.name ?? "" })}
-							</AlertDialogDescription>
+							<AlertDialogDescription>{t("customers.deleteConfirm", { name: confirmDeleteCustomer?.name ?? "" })}</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel data-testid="customer-button-delete-cancel">{t("common.cancel")}</AlertDialogCancel>

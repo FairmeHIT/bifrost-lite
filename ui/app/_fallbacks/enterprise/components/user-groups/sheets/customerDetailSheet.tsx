@@ -99,7 +99,7 @@ export function CustomerDetailSheet({ customer, open, onOpenChange }: Props) {
 	return (
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent className="max-w-[700px] overflow-y-auto p-0 pt-4">
-				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 px-8 sticky -top-4 bg-card z-10">
+				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 px-8 sticky -top-4 bg-surface-solid z-10">
 					<div className="flex min-w-0 items-center gap-1">
 						<SheetTitle className="truncate text-lg">{customer?.name || t("enterprise.customerDetails")}</SheetTitle>
 						{customer?.id && <CopyableId id={customer.id} entityLabel="Customer" />}

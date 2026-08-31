@@ -40,11 +40,7 @@ export default function FeatureFlagsView() {
 			</div>
 
 			{isLoading && <p className="text-muted-foreground text-sm">{t("config.featureFlags.loading")}</p>}
-			{isError && (
-				<p className="text-sm text-red-500">
-					{t("config.featureFlags.loadError", { error: getErrorMessage(error) })}
-				</p>
-			)}
+			{isError && <p className="text-sm text-red-500">{t("config.featureFlags.loadError", { error: getErrorMessage(error) })}</p>}
 
 			{!isLoading && !isError && (
 				<div className="overflow-auto rounded-sm border">
@@ -99,9 +95,7 @@ function FeatureFlagRow({ flag, canUpdate, onToggle }: FeatureFlagRowProps) {
 						{!flag.registered && <UnregisteredBadge />}
 					</div>
 					{flag.description && <p className="text-muted-foreground text-sm">{flag.description}</p>}
-					{!flag.registered && (
-						<p className="text-muted-foreground text-xs">{t("config.featureFlags.unregisteredDescription")}</p>
-					)}
+					{!flag.registered && <p className="text-muted-foreground text-xs">{t("config.featureFlags.unregisteredDescription")}</p>}
 				</div>
 			</TableCell>
 			<TableCell className="w-px text-right align-top">

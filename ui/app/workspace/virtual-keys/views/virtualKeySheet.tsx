@@ -390,11 +390,11 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 					})),
 					rate_limit: config.rate_limit
 						? {
-							token_max_limit: config.rate_limit.token_max_limit ?? undefined,
-							token_reset_duration: config.rate_limit.token_reset_duration,
-							request_max_limit: config.rate_limit.request_max_limit ?? undefined,
-							request_reset_duration: config.rate_limit.request_reset_duration,
-						}
+								token_max_limit: config.rate_limit.token_max_limit ?? undefined,
+								token_reset_duration: config.rate_limit.token_reset_duration,
+								request_max_limit: config.rate_limit.request_max_limit ?? undefined,
+								request_reset_duration: config.rate_limit.request_reset_duration,
+							}
 						: undefined,
 					model_budgets: config.model_budgets?.map((mb) => ({
 						model_name: mb.model_name,
@@ -421,18 +421,18 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 			isActive: virtualKey?.is_active ?? true,
 			expiresAt: virtualKey?.expires_at
 				? (() => {
-					const d = new Date(virtualKey.expires_at);
-					return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-				})()
+						const d = new Date(virtualKey.expires_at);
+						return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+					})()
 				: null,
 			budgets:
 				virtualKey?.budgets && virtualKey.budgets.length > 0
 					? virtualKey.budgets.map((b) => ({
-						id: b.id,
-						max_limit: b.max_limit,
-						reset_duration: b.reset_duration ?? "1M",
-						reset_config: b.reset_config,
-					}))
+							id: b.id,
+							max_limit: b.max_limit,
+							reset_duration: b.reset_duration ?? "1M",
+							reset_config: b.reset_config,
+						}))
 					: [],
 			budgetCalendarAligned: virtualKey?.calendar_aligned ?? false,
 			tokenMaxLimit: virtualKey?.rate_limit?.token_max_limit ?? undefined,
@@ -573,7 +573,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	// Build a request rate-limit payload from the form's rate-limit fields. Returns the field
 	// values when a limit is set, {} to clear an existing rate limit (removal), or undefined.
 	const normalizeRateLimit = (
-		rl: { token_max_limit?: number; token_reset_duration?: string; request_max_limit?: number; request_reset_duration?: string } | undefined,
+		rl:
+			| { token_max_limit?: number; token_reset_duration?: string; request_max_limit?: number; request_reset_duration?: string }
+			| undefined,
 		hadExisting: boolean,
 	) => {
 		const hasToken = rl?.token_max_limit !== undefined;
@@ -745,7 +747,11 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 		for (const config of data.providerConfigs || []) {
 			const existingConfig = existingProviderConfigs.get(String(config.id ?? config.provider));
 			const providerLabel = ProviderLabels[config.provider as ProviderName] ?? config.provider;
-			const warning = findBudgetUsageWarning(config.budgets, existingConfig?.budgets, t("virtualKeys.providerScope", { provider: providerLabel }));
+			const warning = findBudgetUsageWarning(
+				config.budgets,
+				existingConfig?.budgets,
+				t("virtualKeys.providerScope", { provider: providerLabel }),
+			);
 			if (warning) {
 				return warning;
 			}
@@ -1020,15 +1026,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 				onInteractOutside={(e) => e.preventDefault()}
 				onEscapeKeyDown={() => handleClose()}
 			>
-				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10 px-8">
-					<SheetTitle className="flex items-center gap-2">
-						{isEditing ? virtualKey?.name : t("virtualKeys.createTitle")}
-					</SheetTitle>
-					<SheetDescription>
-						{isEditing
-							? t("virtualKeys.updateDescription")
-							: t("virtualKeys.createDescription")}
-					</SheetDescription>
+				<SheetHeader className="flex flex-col items-start px-0 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10 px-8">
+					<SheetTitle className="flex items-center gap-2">{isEditing ? virtualKey?.name : t("virtualKeys.createTitle")}</SheetTitle>
+					<SheetDescription>{isEditing ? t("virtualKeys.updateDescription") : t("virtualKeys.createDescription")}</SheetDescription>
 				</SheetHeader>
 
 				<Form {...form}>
@@ -1038,9 +1038,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<>
 									<Alert variant="info">
 										<Lock className="h-4 w-4" />
-										<AlertDescription>
-											{t("virtualKeys.managedByProfileAlert")}
-										</AlertDescription>
+										<AlertDescription>{t("virtualKeys.managedByProfileAlert")}</AlertDescription>
 									</Alert>
 									<ManagedVirtualKeyActions managingProfile={managingProfile} />
 								</>
@@ -1050,8 +1048,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								<Alert variant="info">
 									<Users className="h-4 w-4" />
 									<AlertDescription>
-										{t("virtualKeys.creatingUnderTeamPrefix")}{" "}
-										<span className="font-medium">{attachedTeam?.name ?? attachedTeamId}</span>
+										{t("virtualKeys.creatingUnderTeamPrefix")} <span className="font-medium">{attachedTeam?.name ?? attachedTeamId}</span>
 										{t("virtualKeys.creatingUnderTeamSuffix")}
 									</AlertDescription>
 								</Alert>
@@ -1080,7 +1077,12 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										<FormItem>
 											<FormLabel>{t("common.description")}</FormLabel>
 											<FormControl>
-												<Textarea placeholder={t("virtualKeys.descriptionPlaceholder")} data-testid="vk-description-input" {...field} rows={3} />
+												<Textarea
+													placeholder={t("virtualKeys.descriptionPlaceholder")}
+													data-testid="vk-description-input"
+													{...field}
+													rows={3}
+												/>
 											</FormControl>
 											<FormMessage />
 										</FormItem>
@@ -1099,7 +1101,12 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										name="isActive"
 										render={({ field }) => (
 											<FormItem>
-												<Toggle label={t("virtualKeys.isActiveLabel")} val={field.value} setVal={field.onChange} data-testid="vk-is-active-toggle" />
+												<Toggle
+													label={t("virtualKeys.isActiveLabel")}
+													val={field.value}
+													setVal={field.onChange}
+													data-testid="vk-is-active-toggle"
+												/>
 											</FormItem>
 										)}
 									/>
@@ -1121,9 +1128,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 													</span>
 												</TooltipTrigger>
 												<TooltipContent>
-													<p>
-														{t("virtualKeys.providerConfigTooltip")}
-													</p>
+													<p>{t("virtualKeys.providerConfigTooltip")}</p>
 												</TooltipContent>
 											</Tooltip>
 										</TooltipProvider>
@@ -1288,9 +1293,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										<div className="space-y-3 rounded-sm border p-4" data-testid="vk-budget-overrides-section">
 											<div>
 												<h4 className="text-sm font-medium">{t("governance.budgetOverrides")}</h4>
-												<p className="text-muted-foreground text-xs">
-													{t("governance.budgetOverridesHint")}
-												</p>
+												<p className="text-muted-foreground text-xs">{t("governance.budgetOverridesHint")}</p>
 											</div>
 											<div className="divide-y">
 												{persistedOverrideBudgets.map(({ budget, label }) => (
@@ -1332,9 +1335,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										<AlertDialogContent>
 											<AlertDialogHeader>
 												<AlertDialogTitle>{t("virtualKeys.reassignTitle")}</AlertDialogTitle>
-												<AlertDialogDescription>
-													{t("virtualKeys.reassignDescription")}
-												</AlertDialogDescription>
+												<AlertDialogDescription>{t("virtualKeys.reassignDescription")}</AlertDialogDescription>
 											</AlertDialogHeader>
 											<AlertDialogFooter>
 												<AlertDialogCancel data-testid="virtual-key-reassign-cancel" onClick={() => setPendingTeamId(null)}>
@@ -1550,9 +1551,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 															fallbackOption={
 																field.value
 																	? {
-																		value: field.value,
-																		label: field.value === virtualKey?.team_id ? (virtualKey?.team?.name ?? field.value) : field.value,
-																	}
+																			value: field.value,
+																			label: field.value === virtualKey?.team_id ? (virtualKey?.team?.name ?? field.value) : field.value,
+																		}
 																	: null
 															}
 															disabled={isTeamLocked}
@@ -1580,10 +1581,10 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 															fallbackOption={
 																field.value
 																	? {
-																		value: field.value,
-																		label:
-																			field.value === virtualKey?.customer_id ? (virtualKey?.customer?.name ?? field.value) : field.value,
-																	}
+																			value: field.value,
+																			label:
+																				field.value === virtualKey?.customer_id ? (virtualKey?.customer?.name ?? field.value) : field.value,
+																		}
 																	: null
 															}
 															triggerClassName="h-9"
@@ -1612,9 +1613,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 															fallbackOption={
 																field.value
 																	? {
-																		value: field.value,
-																		label: field.value === assignedUserId ? assignedUserLabel : field.value,
-																	}
+																			value: field.value,
+																			label: field.value === assignedUserId ? assignedUserLabel : field.value,
+																		}
 																	: null
 															}
 															triggerClassName="h-9"
@@ -1626,9 +1627,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										)}
 									</div>
 									{form.watch("entityType") === "user" && (
-										<p className="text-muted-foreground text-xs">
-											{t("virtualKeys.singleUserHint")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("virtualKeys.singleUserHint")}</p>
 									)}
 								</div>
 							</fieldset>
@@ -1637,9 +1636,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 							<AlertDialogContent>
 								<AlertDialogHeader>
 									<AlertDialogTitle>{t("virtualKeys.rotateTitle")}</AlertDialogTitle>
-									<AlertDialogDescription>
-										{t("virtualKeys.rotateDescription", { name: virtualKey?.name ?? "" })}
-									</AlertDialogDescription>
+									<AlertDialogDescription>{t("virtualKeys.rotateDescription", { name: virtualKey?.name ?? "" })}</AlertDialogDescription>
 								</AlertDialogHeader>
 								<AlertDialogFooter>
 									<AlertDialogCancel data-testid="vk-rotate-cancel-btn">{t("common.cancel")}</AlertDialogCancel>
@@ -1681,7 +1678,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 							</div>
 						)}
 						{/* Form Footer */}
-						<div className="border-border bg-card sticky bottom-0 z-10 border-t px-8 py-4">
+						<div className="border-border bg-surface-solid sticky bottom-0 z-10 border-t px-8 py-4">
 							<div className="flex items-center justify-between gap-2">
 								{isEditing ? (
 									<Button

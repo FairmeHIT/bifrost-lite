@@ -100,9 +100,7 @@ export function BudgetOverrideDialog({ budget, onSave, onRemove, disabled, calen
 				<form onSubmit={handleSubmit}>
 					<DialogHeader>
 						<DialogTitle>{active ? t("budgetOverride.editTitle") : t("budgetOverride.addTitle")}</DialogTitle>
-						<DialogDescription>
-							{t("budgetOverride.description", { amount: formatCurrency(budget.max_limit) })}
-						</DialogDescription>
+						<DialogDescription>{t("budgetOverride.description", { amount: formatCurrency(budget.max_limit) })}</DialogDescription>
 					</DialogHeader>
 
 					<div className="space-y-4 py-5">
@@ -168,7 +166,8 @@ export function BudgetOverrideDialog({ budget, onSave, onRemove, disabled, calen
 
 						{active ? (
 							<div className="bg-muted/50 rounded-sm px-3 py-2 text-xs">
-								{t("budgetOverride.currentEffectiveLimit")} <span className="font-medium">{formatCurrency(getEffectiveBudgetLimit(budget))}</span>
+								{t("budgetOverride.currentEffectiveLimit")}{" "}
+								<span className="font-medium">{formatCurrency(getEffectiveBudgetLimit(budget))}</span>
 							</div>
 						) : null}
 

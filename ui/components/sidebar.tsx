@@ -25,6 +25,7 @@ import {
 	Search,
 	Settings,
 	Settings2Icon,
+	ShieldAlert,
 	ShieldCheck,
 	SlidersHorizontal,
 	Telescope,
@@ -634,6 +635,13 @@ export default function AppSidebar() {
 						url: "/workspace/config/caching",
 						icon: DatabaseZap,
 						description: t("sidebar.descCaching"),
+						hasAccess: hasSettingsAccess,
+					},
+					{
+						title: t("sidebar.secretRedaction"),
+						url: "/workspace/config/secret-redaction",
+						icon: ShieldAlert,
+						description: t("sidebar.descSecretRedaction"),
 						hasAccess: hasSettingsAccess,
 					},
 					{

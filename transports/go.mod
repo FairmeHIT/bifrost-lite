@@ -19,6 +19,7 @@ require (
 	github.com/maximhq/bifrost/plugins/maxim v1.6.35
 	github.com/maximhq/bifrost/plugins/modelcatalogresolver v1.0.16
 	github.com/maximhq/bifrost/plugins/otel v1.4.7
+	github.com/maximhq/bifrost/plugins/secretredact v1.0.0
 	github.com/maximhq/bifrost/plugins/semanticcache v1.5.35
 	github.com/maximhq/bifrost/plugins/telemetry v1.5.35
 	github.com/pion/rtcp v1.2.16
@@ -219,3 +220,7 @@ require (
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/postgres v1.6.0 // indirect
 )
+
+// secretredact is a fork-local plugin, never published to a module proxy.
+// The filesystem replace lets it build offline with no go.sum entry.
+replace github.com/maximhq/bifrost/plugins/secretredact => ../plugins/secretredact

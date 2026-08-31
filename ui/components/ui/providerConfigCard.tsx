@@ -184,10 +184,7 @@ export function ProviderConfigCard({
 	// doesn't read as "No budget".
 	const modelBudgetCount = showModelBudgets ? modelBudgets.length : 0;
 	const headerSummary =
-		[
-			budgetLinesLabel(value.budgets, ""),
-			modelBudgetCount > 0 ? t("providerConfigCard.modelBudgetCount", { count: modelBudgetCount }) : "",
-		]
+		[budgetLinesLabel(value.budgets, ""), modelBudgetCount > 0 ? t("providerConfigCard.modelBudgetCount", { count: modelBudgetCount }) : ""]
 			.filter(Boolean)
 			.join(" · ") || t("providerConfigCard.noBudget");
 	const ws = globalProviderCap;
@@ -588,7 +585,7 @@ export function ProviderConfigCard({
 													multiValue: (multiValueProps: MultiValueProps<KeyOption>) => (
 														<div
 															{...multiValueProps.innerProps}
-															className="bg-accent dark:!bg-card flex cursor-pointer items-center gap-1 rounded-[3px] border px-1.5 py-0.5 text-sm"
+															className="bg-select-tag-bg text-foreground flex cursor-pointer items-center gap-1 rounded-[3px] border px-1.5 py-0.5 text-sm"
 														>
 															{multiValueProps.data.label}
 															<button
@@ -611,20 +608,26 @@ export function ProviderConfigCard({
 																{...optionProps}
 																className={cn(
 																	"flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm",
-																	optionProps.isFocused && "bg-accent dark:!bg-card",
-																	"hover:bg-accent",
-																	optionProps.isSelected && "bg-accent dark:!bg-card",
+																	optionProps.isFocused && "bg-select-option-active-bg",
+																	"hover:bg-select-option-active-bg",
+																	optionProps.isSelected && "bg-select-option-active-bg",
 																)}
 															>
-																<span className="text-content-primary grow truncate text-sm">{optionProps.data.label}</span>
+																<span className="text-foreground grow truncate text-sm">{optionProps.data.label}</span>
 																{optionProps.data.description && (
-																	<span className="text-content-tertiary max-w-[70%] text-sm">{optionProps.data.description}</span>
+																	<span className="text-muted-foreground max-w-[70%] text-sm">{optionProps.data.description}</span>
 																)}
 															</Option>
 														);
 													},
 												}}
-												placeholder={hasWildcard ? t("providerConfigCard.allKeysAllowed") : configKeyIds.length === 0 ? t("providerConfigCard.noKeysSelected") : t("providerConfigCard.selectKeys")}
+												placeholder={
+													hasWildcard
+														? t("providerConfigCard.allKeysAllowed")
+														: configKeyIds.length === 0
+															? t("providerConfigCard.noKeysSelected")
+															: t("providerConfigCard.selectKeys")
+												}
 												className="hover:bg-accent w-full"
 												menuClassName="z-[60] max-h-[300px] overflow-y-auto w-full cursor-pointer custom-scrollbar"
 											/>

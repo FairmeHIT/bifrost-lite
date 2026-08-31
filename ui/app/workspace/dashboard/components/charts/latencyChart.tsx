@@ -30,7 +30,7 @@ function CustomTooltip({ active, payload }: any) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
@@ -60,7 +60,7 @@ function CustomTooltip({ active, payload }: any) {
 					</span>
 					<span className="font-medium">{formatLatency(data.p99_latency)}</span>
 				</div>
-				<div className="flex items-center justify-between gap-4 border-t border-popover pt-1">
+				<div className="border-popover flex items-center justify-between gap-4 border-t pt-1">
 					<span className="text-muted-foreground">{t("dashboardCharts.requests")}</span>
 					<span className="font-medium">{data.total_requests.toLocaleString()}</span>
 				</div>

@@ -190,7 +190,9 @@ function MessageView({ message, index }: { message: ResponsesMessage; index: num
 				case "reasoning":
 					return t("logs.reasoning");
 				case "message":
-					return message.role ? t("logs.messageWithRole", { role: message.role.charAt(0).toUpperCase() + message.role.slice(1) }) : t("logs.message");
+					return message.role
+						? t("logs.messageWithRole", { role: message.role.charAt(0).toUpperCase() + message.role.slice(1) })
+						: t("logs.message");
 				case "function_call":
 					return t("logs.functionCall", { name: message.name || t("logs.unknown") });
 				case "function_call_output":
@@ -239,7 +241,12 @@ function MessageView({ message, index }: { message: ResponsesMessage; index: num
 					{message.summary.every((item) => item.type === "summary_text") ? (
 						// Display as readable text when all items are summary_text
 						message.summary.map((reasoningContent, idx) => (
-							<CollapsibleBox key={idx} title={t("logs.summaryNumber", { index: idx + 1 })} onCopy={() => reasoningContent.text || ""} collapsedHeight={100}>
+							<CollapsibleBox
+								key={idx}
+								title={t("logs.summaryNumber", { index: idx + 1 })}
+								onCopy={() => reasoningContent.text || ""}
+								collapsedHeight={100}
+							>
 								<div className="custom-scrollbar max-h-[400px] overflow-y-auto px-6 py-2 font-mono text-xs whitespace-pre-wrap">
 									{reasoningContent.text}
 								</div>

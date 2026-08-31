@@ -98,9 +98,7 @@ export default function CompatibilityView() {
 						<label htmlFor="compat-convert-chat-to-responses" className="text-sm font-medium">
 							{t("config.compatibility.convertChatToResponses")}
 						</label>
-						<p className="text-muted-foreground text-sm">
-							{t("config.compatibility.convertChatToResponsesDesc")}
-						</p>
+						<p className="text-muted-foreground text-sm">{t("config.compatibility.convertChatToResponsesDesc")}</p>
 					</div>
 					<Switch
 						id="compat-convert-chat-to-responses"

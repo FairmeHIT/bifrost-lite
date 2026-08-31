@@ -174,14 +174,20 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 			{/* Role header */}
 			<div className="flex items-center gap-2">
 				<span className="text-sm font-medium capitalize">{message.role}</span>
-				{message.tool_call_id && <span className="text-muted-foreground text-xs">{t("logs.toolCallId", { id: message.tool_call_id })}</span>}
+				{message.tool_call_id && (
+					<span className="text-muted-foreground text-xs">{t("logs.toolCallId", { id: message.tool_call_id })}</span>
+				)}
 			</div>
 
 			{/* Handle reasoning content */}
 			{message.reasoning && (
 				<>
 					{isJson(message.reasoning) ? (
-						<CollapsibleBox title={t("logs.reasoning")} onCopy={() => JSON.stringify(cleanJson(message.reasoning), null, 2)} collapsedHeight={100}>
+						<CollapsibleBox
+							title={t("logs.reasoning")}
+							onCopy={() => JSON.stringify(cleanJson(message.reasoning), null, 2)}
+							collapsedHeight={100}
+						>
 							<CodeEditor
 								className="z-0 w-full"
 								shouldAdjustInitialHeight={true}
@@ -207,7 +213,11 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 			{message.refusal && (
 				<>
 					{isJson(message.refusal) ? (
-						<CollapsibleBox title={t("logs.refusal")} onCopy={() => JSON.stringify(cleanJson(message.refusal), null, 2)} collapsedHeight={100}>
+						<CollapsibleBox
+							title={t("logs.refusal")}
+							onCopy={() => JSON.stringify(cleanJson(message.refusal), null, 2)}
+							collapsedHeight={100}
+						>
 							<CodeEditor
 								className="z-0 w-full"
 								shouldAdjustInitialHeight={true}
@@ -330,9 +340,10 @@ export default function LogChatMessageView({ message, audioFormat }: LogChatMess
 							<div className="text-muted-foreground text-xs">
 								{t("logs.idAndExpires", {
 									id: message.audio.id,
-									expires: message.audio.expires_at && Number.isFinite(message.audio.expires_at)
-										? new Date(message.audio.expires_at * 1000).toLocaleString()
-										: t("logs.na"),
+									expires:
+										message.audio.expires_at && Number.isFinite(message.audio.expires_at)
+											? new Date(message.audio.expires_at * 1000).toLocaleString()
+											: t("logs.na"),
 								})}
 							</div>
 						)}

@@ -16,11 +16,7 @@ export default function DocsPage() {
 			icon: Play,
 			url: "https://github.com/maximhq/bifrost/tree/main/docs/quickstart",
 			badge: t("docs.quickStart.badge"),
-			items: [
-				t("docs.quickStart.item1"),
-				t("docs.quickStart.item2"),
-				t("docs.quickStart.item3"),
-			],
+			items: [t("docs.quickStart.item1"), t("docs.quickStart.item2"), t("docs.quickStart.item3")],
 		},
 		{
 			slug: "architecture",
@@ -28,12 +24,7 @@ export default function DocsPage() {
 			description: t("docs.architecture.description"),
 			icon: GitBranch,
 			url: "https://github.com/maximhq/bifrost/tree/main/docs/architecture",
-			items: [
-				t("docs.architecture.item1"),
-				t("docs.architecture.item2"),
-				t("docs.architecture.item3"),
-				t("docs.architecture.item4"),
-			],
+			items: [t("docs.architecture.item1"), t("docs.architecture.item2"), t("docs.architecture.item3"), t("docs.architecture.item4")],
 		},
 		{
 			slug: "usage-guides",
@@ -42,12 +33,7 @@ export default function DocsPage() {
 			icon: BookOpen,
 			url: "https://github.com/maximhq/bifrost/tree/main/docs/usage",
 			badge: t("docs.usage.badge"),
-			items: [
-				t("docs.usage.item1"),
-				t("docs.usage.item2"),
-				t("docs.usage.item3"),
-				t("docs.usage.item4"),
-			],
+			items: [t("docs.usage.item1"), t("docs.usage.item2"), t("docs.usage.item3"), t("docs.usage.item4")],
 		},
 		{
 			slug: "contributing",
@@ -55,12 +41,7 @@ export default function DocsPage() {
 			description: t("docs.contributing.description"),
 			icon: Users,
 			url: "https://github.com/maximhq/bifrost/tree/main/docs/contributing",
-			items: [
-				t("docs.contributing.item1"),
-				t("docs.contributing.item2"),
-				t("docs.contributing.item3"),
-				t("docs.contributing.item4"),
-			],
+			items: [t("docs.contributing.item1"), t("docs.contributing.item2"), t("docs.contributing.item3"), t("docs.contributing.item4")],
 		},
 		{
 			slug: "integration-examples",
@@ -68,12 +49,7 @@ export default function DocsPage() {
 			description: t("docs.integration.description"),
 			icon: Code,
 			url: "https://github.com/maximhq/bifrost/tree/main/docs/usage/http-transport/integrations",
-			items: [
-				t("docs.integration.item1"),
-				t("docs.integration.item2"),
-				t("docs.integration.item3"),
-				t("docs.integration.item4"),
-			],
+			items: [t("docs.integration.item1"), t("docs.integration.item2"), t("docs.integration.item3"), t("docs.integration.item4")],
 		},
 		{
 			slug: "benchmarks",
@@ -81,12 +57,7 @@ export default function DocsPage() {
 			description: t("docs.benchmarks.description"),
 			icon: Zap,
 			url: "https://github.com/maximhq/bifrost/blob/main/docs/benchmarks.md",
-			items: [
-				t("docs.benchmarks.item1"),
-				t("docs.benchmarks.item2"),
-				t("docs.benchmarks.item3"),
-				t("docs.benchmarks.item4"),
-			],
+			items: [t("docs.benchmarks.item1"), t("docs.benchmarks.item2"), t("docs.benchmarks.item3"), t("docs.benchmarks.item4")],
 		},
 	];
 
@@ -218,12 +189,7 @@ export default function DocsPage() {
 								<CardContent>
 									<p className="text-muted-foreground mb-4 text-sm">{doc.content}</p>
 									<Button asChild className="w-full">
-										<a
-											href={doc.href}
-											target="_blank"
-											rel="noopener noreferrer"
-											data-testid={`docs-featured-${doc.slug}`}
-										>
+										<a href={doc.href} target="_blank" rel="noopener noreferrer" data-testid={`docs-featured-${doc.slug}`}>
 											<doc.icon className="mr-2 h-4 w-4" />
 											{doc.buttonText}
 										</a>

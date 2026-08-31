@@ -162,7 +162,7 @@ export default function AttributesTab({ hasAccess }: AttributesTabProps) {
 
 				<div className="mb-2 min-h-0 grow overflow-hidden rounded-sm border" data-testid="model-catalog-attributes-table">
 					<Table containerClassName="h-full overflow-y-auto overflow-x-hidden" className="table-fixed">
-						<TableHeader className="bg-muted sticky top-0 z-20">
+						<TableHeader className="bg-surface-solid-muted sticky top-0 z-20">
 							<TableRow className="hover:bg-transparent">
 								<TableHead className="w-[116px] font-medium">{t("modelCatalog.attributes.columnProvider")}</TableHead>
 								<TableHead className="font-medium">{t("modelCatalog.attributes.columnModel")}</TableHead>
@@ -244,12 +244,18 @@ export default function AttributesTab({ hasAccess }: AttributesTabProps) {
 													<div className="flex flex-wrap gap-1 pr-4">
 														{extraKeys.length > 0 && (
 															<Badge variant="secondary">
-																{extraKeys.length} {extraKeys.length === 1 ? t("modelCatalog.attributes.badgeAttribute") : t("modelCatalog.attributes.badgeAttributes")}
+																{extraKeys.length}{" "}
+																{extraKeys.length === 1
+																	? t("modelCatalog.attributes.badgeAttribute")
+																	: t("modelCatalog.attributes.badgeAttributes")}
 															</Badge>
 														)}
 														{overrideCount > 0 && (
 															<Badge variant="outline" data-testid={`model-catalog-override-badge-${testKey}`}>
-																{overrideCount} {overrideCount === 1 ? t("modelCatalog.attributes.badgeOverride") : t("modelCatalog.attributes.badgeOverrides")}
+																{overrideCount}{" "}
+																{overrideCount === 1
+																	? t("modelCatalog.attributes.badgeOverride")
+																	: t("modelCatalog.attributes.badgeOverrides")}
 															</Badge>
 														)}
 													</div>

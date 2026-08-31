@@ -62,7 +62,9 @@ export function BudgetDisplay({ budgets, calendarAligned }: BudgetDisplayProps) 
 								</p>
 							) : null}
 							{b.reset_duration ? (
-								<p className="text-primary-foreground/80 text-xs">{t("budget.resets")} {formatResetDuration(b.reset_duration, calendarAligned)}</p>
+								<p className="text-primary-foreground/80 text-xs">
+									{t("budget.resets")} {formatResetDuration(b.reset_duration, calendarAligned)}
+								</p>
 							) : null}
 						</TooltipContent>
 					</Tooltip>

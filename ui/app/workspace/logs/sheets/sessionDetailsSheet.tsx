@@ -84,7 +84,10 @@ export function SessionDetailsSheet({
 			{
 				label: t("sessionDetails.logs"),
 				value: (sessionSummary?.count || 0).toLocaleString(),
-				helper: sessionSummary && sessionLogs.length < sessionSummary.count ? t("sessionDetails.loadedCount", { count: sessionLogs.length.toLocaleString() }) : undefined,
+				helper:
+					sessionSummary && sessionLogs.length < sessionSummary.count
+						? t("sessionDetails.loadedCount", { count: sessionLogs.length.toLocaleString() })
+						: undefined,
 			},
 			{
 				label: t("sessionDetails.totalCost"),

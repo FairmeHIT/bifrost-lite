@@ -108,9 +108,7 @@ function TeamActionsMenu({
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle>{t("teams.deleteTitle")}</AlertDialogTitle>
-						<AlertDialogDescription>
-							{t("teams.deleteConfirm", { name: team.name })}
-						</AlertDialogDescription>
+						<AlertDialogDescription>{t("teams.deleteConfirm", { name: team.name })}</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
@@ -256,7 +254,7 @@ export default function TeamsTable({
 									<TableHead>{t("governance.budget")}</TableHead>
 									<TableHead>{t("governance.rateLimit")}</TableHead>
 									<TableHead>{t("sidebar.virtualKeys")}</TableHead>
-									<TableHead className={`bg-muted sticky right-0 z-10 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
+									<TableHead className={`bg-surface-solid-muted sticky right-0 z-10 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -392,7 +390,9 @@ export default function TeamsTable({
 																			{team.rate_limit.token_max_limit.toLocaleString()} tokens
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			{t("governance.resets", { duration: formatResetDuration(team.rate_limit.token_reset_duration || "1h") })}
+																			{t("governance.resets", {
+																				duration: formatResetDuration(team.rate_limit.token_reset_duration || "1h"),
+																			})}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -426,7 +426,9 @@ export default function TeamsTable({
 																			{team.rate_limit.request_max_limit.toLocaleString()} requests
 																		</p>
 																		<p className="text-primary-foreground/80 text-xs">
-																			{t("governance.resets", { duration: formatResetDuration(team.rate_limit.request_reset_duration || "1h") })}
+																			{t("governance.resets", {
+																				duration: formatResetDuration(team.rate_limit.request_reset_duration || "1h"),
+																			})}
 																		</p>
 																	</TooltipContent>
 																</Tooltip>
@@ -448,7 +450,7 @@ export default function TeamsTable({
 													)}
 												</TableCell>
 												<TableCell
-													className={`group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-10 bg-white text-right ${PIN_SHADOW_RIGHT}`}
+													className={`group-hover:bg-muted dark:bg-surface-solid dark:group-hover:bg-muted sticky right-0 z-10 bg-white text-right ${PIN_SHADOW_RIGHT}`}
 												>
 													<TeamActionsMenu
 														team={team}

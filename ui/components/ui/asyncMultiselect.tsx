@@ -434,18 +434,38 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 					// that and never gets it back, so force it here (same fix as the
 					// Sonner toaster override in globals.css).
 					menuPortal: (base) => ({ ...base, zIndex: 9999, pointerEvents: "auto" }),
-					control: (base) => ({ ...base, boxShadow: "none", minHeight: "32px" }),
+					// react-select applies the styles prop via emotion, which generates
+					// unlayered CSS classes. Tailwind v4 puts utilities in @layer utilities,
+					// and unlayered author styles take precedence over layered ones regardless
+					// of order. So whatever we set here wins over the `bg-select-*` classNames
+					// below — leaving these transparent renders the control / menu / options
+					// see-through and lets the page text behind bleed through. Use the opaque
+					// `--select-*` CSS vars directly so both light and dark themes get a solid
+					// surface and nothing overlaps.
+					menu: (base) => ({ ...base, backgroundColor: "var(--select-menu-bg)", color: "inherit" }),
+					control: (base) => ({
+						...base,
+						backgroundColor: "var(--select-control-bg)",
+						boxShadow: "none",
+						minHeight: "32px",
+					}),
+					option: (base, state) => ({
+						...base,
+						backgroundColor:
+							state.isFocused || state.isSelected ? "var(--select-option-active-bg)" : "transparent",
+						color: "inherit",
+					}),
+					input: (base) => ({ ...base, margin: 0, padding: 0, color: "inherit", backgroundColor: "transparent" }),
+					singleValue: (base) => ({ ...base, color: "inherit" }),
 					multiValue: () => ({}),
 					multiValueLabel: () => ({}),
 					multiValueRemove: () => ({}),
-					option: () => ({}),
 					indicatorSeparator: () => ({
 						visibility: "hidden",
 					}),
-					input: (base) => ({ ...base, margin: 0, padding: 0 }),
-					noOptionsMessage: () => ({}),
+					noOptionsMessage: (base) => ({ ...base, backgroundColor: "transparent", color: "inherit" }),
 					valueContainer: (base) => ({ ...base, padding: 6, gap: 8 }),
-					placeholder: (base) => ({ ...base, marginLeft: 0 }),
+					placeholder: (base) => ({ ...base, marginLeft: 0, color: "inherit" }),
 					indicatorsContainer: (base) => ({ ...base, height: "32px" }),
 				}}
 				value={props.value}
@@ -455,23 +475,23 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 					container: () => cn("min-h-8 border-none", props.className),
 					control: () =>
 						cn(
-							"border-border! multiselect-control dark:!bg-accent flex flex-wrap items-start justify-between rounded-md border bg-white",
+							"border-border! multiselect-control bg-select-control-bg flex flex-wrap items-start justify-between rounded-md border",
 							props.triggerClassName,
 						),
-					placeholder: () => "text-sm text-content-disabled truncate p-0 text-ellipsis",
+					placeholder: () => "text-sm text-muted-foreground/70 truncate p-0 text-ellipsis",
 					group: () => cn(props.groupClassName),
 					input: () => "text-sm m-0 border-none p-0 !text-secondary-foreground",
-					menu: () => cn("dark:!bg-accent p-0", props.menuClassName),
+					menu: () => cn("bg-select-menu-bg p-0", props.menuClassName),
 					menuList: () => cn("p-2", props.menuListClassName),
 					valueContainer: () => cn("flex h-full w-full", props.valueContainerClassName),
 					option: ({ isFocused }) =>
-						cn("multiselect-option flex w-full justify-between rounded-sm p-2 text-sm", isFocused && "bg-background-highlight-primary/60"),
-					singleValue: () => "text-sm text-content-primary",
-					multiValue: () => "bg-accent dark:!bg-card flex cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-sm",
-					multiValueLabel: () => "text-content-tertiary",
-					multiValueRemove: () => "text-content-tertiary h-inherit flex items-center opacity-60 hover:cursor-pointer hover:opacity-100",
+						cn("multiselect-option flex w-full justify-between rounded-sm p-2 text-sm", isFocused && "bg-select-option-active-bg"),
+					singleValue: () => "text-sm text-foreground",
+					multiValue: () => "bg-select-tag-bg flex cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-sm",
+					multiValueLabel: () => "text-foreground",
+					multiValueRemove: () => "text-muted-foreground h-inherit flex items-center opacity-60 hover:cursor-pointer hover:opacity-100",
 					loadingMessage: () => "text-sm",
-					noOptionsMessage: () => cn("text-content-disabled flex items-center justify-center text-sm", props.noOptionsMessageClassName),
+					noOptionsMessage: () => cn("text-muted-foreground/70 flex items-center justify-center text-sm", props.noOptionsMessageClassName),
 					indicatorsContainer: () => "h-8",
 				}}
 				minMenuHeight={160}
@@ -575,7 +595,7 @@ function CustomOption<T>(props: OptionProps<Option<T>> & { selectProps: CustomOp
 				{props.options.length > 1 && <Separator />}
 				<OptionWrapper {...props} className="flex w-full items-center justify-start gap-1">
 					{props.selectProps.hidePlusIcon !== true && <PlusIcon size={14} />}
-					<div className="text-content-primary">{props.selectProps.createOptionText}</div>
+					<div className="text-foreground">{props.selectProps.createOptionText}</div>
 				</OptionWrapper>
 			</div>
 		);
@@ -586,7 +606,7 @@ function CustomOption<T>(props: OptionProps<Option<T>> & { selectProps: CustomOp
 			{props.children}
 			<div className="flex items-center justify-between">
 				{props.selectProps.hideSelectedOptions !== true && props.isSelected && (
-					<CheckIcon size={14} className={cn("text-content-primary", props.selectProps.checkIconStyling)} />
+					<CheckIcon size={14} className={cn("text-foreground", props.selectProps.checkIconStyling)} />
 				)}
 			</div>
 		</OptionWrapper>
@@ -611,7 +631,7 @@ function CustomDropdownIndicator<T>(
 	if (props.selectProps.hideDropdownIndicator) {
 		return null;
 	}
-	return <ChevronDown className="text-content-primary m-2 mt-2.5 h-4 w-4 shrink-0 self-start opacity-50" />;
+	return <ChevronDown className="text-foreground m-2 mt-2.5 h-4 w-4 shrink-0 self-start opacity-50" />;
 }
 
 function CustomMultiValueRemove<T>(props: MultiValueRemoveProps<Option<T>> & { selectProps: CustomComponentsProps }) {
@@ -633,7 +653,7 @@ function CustomMultiValueLabel<T>(props: MultiValueGenericProps<Option<T>> & { s
 		return props.selectProps.multiValueLabelView(props);
 	}
 
-	return <Label className="text-content-tertiary text-sm font-normal">{props.children}</Label>;
+	return <Label className="text-muted-foreground text-sm font-normal">{props.children}</Label>;
 }
 
 function CustomMultiValue<T>(props: MultiValueProps<Option<T>> & { selectProps: CustomComponentsProps }) {
@@ -741,7 +761,7 @@ function CustomPlaceholder<T>(props: PlaceholderProps<Option<T>> & { selectProps
 	}
 
 	return (
-		<PlaceholderWrapper {...props} className="text-content-disabled flex flex-row items-center">
+		<PlaceholderWrapper {...props} className="text-muted-foreground/70 flex flex-row items-center">
 			{props.selectProps.hideSearchIcon !== true && <Icons.search className="mr-2 h-3.5 w-3.5" strokeWidth={1.5} />}{" "}
 			{props.selectProps.placeholder}
 		</PlaceholderWrapper>

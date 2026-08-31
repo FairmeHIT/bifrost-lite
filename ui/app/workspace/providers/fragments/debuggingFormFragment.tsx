@@ -96,9 +96,7 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 												</Tooltip>
 											</TooltipProvider>
 										</div>
-										<p className="text-muted-foreground text-xs">
-											{t("providers.debugging.sendBackRawRequestDesc")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("providers.debugging.sendBackRawRequestDesc")}</p>
 									</div>
 									<FormControl>
 										<Switch
@@ -139,9 +137,7 @@ export function DebuggingFormFragment({ provider }: DebuggingFormFragmentProps) 
 												</Tooltip>
 											</TooltipProvider>
 										</div>
-										<p className="text-muted-foreground text-xs">
-											{t("providers.debugging.sendBackRawResponseDesc")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("providers.debugging.sendBackRawResponseDesc")}</p>
 									</div>
 									<FormControl>
 										<Switch

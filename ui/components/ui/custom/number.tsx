@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../too
 import { cn } from "../utils";
 
 const inputVariants = cva(
-	"flex h-8 w-full rounded-md bg-background-primary px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-content-disabled focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+	"flex h-8 w-full rounded-md bg-background-primary px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-md file:font-medium placeholder:text-muted-foreground/70 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
 	{
 		variants: {
 			variant: {

@@ -32,7 +32,7 @@ export function DropdownGroup({
 				{label && (
 					<div className={cn("flex items-center gap-1", groupHeadingClassName)}>
 						{icon}
-						<p className="text-content-tertiary text-sm font-medium">{label}</p>
+						<p className="text-muted-foreground text-sm font-medium">{label}</p>
 					</div>
 				)}
 				<div className="flex flex-col">

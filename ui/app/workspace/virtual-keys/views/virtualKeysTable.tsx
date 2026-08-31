@@ -710,9 +710,7 @@ export default function VirtualKeysTable({
 									)}
 								>
 									<span className="font-medium">{t("virtualKeys.currentPage")}</span>
-									<span className="text-muted-foreground text-xs">
-										{t("governance.entries", { count: virtualKeys.length })}
-									</span>
+									<span className="text-muted-foreground text-xs">{t("governance.entries", { count: virtualKeys.length })}</span>
 								</button>
 								<button
 									type="button"
@@ -725,9 +723,7 @@ export default function VirtualKeysTable({
 									)}
 								>
 									<span className="font-medium">{t("virtualKeys.allEntries")}</span>
-									<span className="text-muted-foreground text-xs">
-										{t("virtualKeys.totalCount", { count: totalCount })}
-									</span>
+									<span className="text-muted-foreground text-xs">{t("virtualKeys.totalCount", { count: totalCount })}</span>
 								</button>
 							</div>
 						</div>
@@ -735,8 +731,7 @@ export default function VirtualKeysTable({
 						{exportScope === "all" && (
 							<div className="space-y-2">
 								<Label htmlFor="export-max-limit" className="text-sm">
-									{t("virtualKeys.maxEntries")}{" "}
-									<span className="text-muted-foreground font-normal">{t("governance.optional")}</span>
+									{t("virtualKeys.maxEntries")} <span className="text-muted-foreground font-normal">{t("governance.optional")}</span>
 								</Label>
 								<Input
 									id="export-max-limit"
@@ -872,9 +867,7 @@ export default function VirtualKeysTable({
 							data-testid="vk-customer-filter-clear-btn"
 						/>
 					</div>
-					{customerFilter && teamFilter && (
-						<span className="text-muted-foreground text-xs font-medium">{t("governance.or")}</span>
-					)}
+					{customerFilter && teamFilter && <span className="text-muted-foreground text-xs font-medium">{t("governance.or")}</span>}
 					<div className="flex items-center gap-1" data-testid="vk-team-filter">
 						<TeamSelector
 							value={teamFilter}
@@ -914,7 +907,7 @@ export default function VirtualKeysTable({
 
 				<div className="mb-2 min-h-0 grow overflow-hidden rounded-sm border">
 					<Table containerClassName="h-full overflow-auto" className="w-full min-w-[1528px] table-fixed" data-testid="vk-table">
-						<TableHeader className="bg-muted sticky top-0 z-20">
+						<TableHeader className="bg-surface-solid-muted sticky top-0 z-20">
 							<TableRow>
 								<TableHead className="w-[48px]">
 									<Checkbox
@@ -936,7 +929,7 @@ export default function VirtualKeysTable({
 								<TableHead className="w-[120px]">
 									<SortableHeader column="status" label={t("common.status")} />
 								</TableHead>
-								<TableHead className={`bg-muted sticky right-0 z-30 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
+								<TableHead className={`bg-surface-solid-muted sticky right-0 z-30 w-[56px] text-right ${PIN_SHADOW_RIGHT}`}></TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
@@ -1014,7 +1007,7 @@ export default function VirtualKeysTable({
 												)}
 											</TableCell>
 											<TableCell
-												className={`group-hover:bg-muted dark:bg-card dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
+												className={`group-hover:bg-muted dark:bg-surface-solid dark:group-hover:bg-muted sticky right-0 z-20 bg-white text-right ${PIN_SHADOW_RIGHT}`}
 												onClick={(e) => e.stopPropagation()}
 											>
 												<VKActionsMenu

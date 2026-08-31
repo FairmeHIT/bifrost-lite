@@ -73,9 +73,7 @@ export function OpenAIConfigFormFragment({ provider }: OpenAIConfigFormFragmentP
 								<div className="flex items-center justify-between space-x-2">
 									<div className="space-y-0.5">
 										<FormLabel>{t("providers.openaiConfig.disableStore")}</FormLabel>
-										<p className="text-muted-foreground text-xs">
-											{t("providers.openaiConfig.disableStoreDesc")}
-										</p>
+										<p className="text-muted-foreground text-xs">{t("providers.openaiConfig.disableStoreDesc")}</p>
 									</div>
 									<FormControl>
 										<Switch

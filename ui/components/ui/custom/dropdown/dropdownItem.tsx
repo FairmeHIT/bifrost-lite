@@ -29,8 +29,8 @@ export function DropdownItem<T extends DropdownOption>({ field, onSelectItem, is
 			tabIndex={0}
 			aria-selected={isSelected}
 			className={cn(
-				"text-content-primary text-body-medium flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1.5 font-normal outline-hidden select-none",
-				isSelected ? "bg-background-highlight-primary" : "",
+				"text-foreground text-body-medium flex cursor-pointer items-center gap-1 rounded-sm px-2 py-1.5 font-normal outline-hidden select-none",
+				isSelected ? "bg-select-option-active-bg" : "",
 			)}
 			onMouseDown={(e) => {
 				e.preventDefault();
@@ -58,7 +58,7 @@ export function DropdownItem<T extends DropdownOption>({ field, onSelectItem, is
 						{field.icon}
 						<span className="block truncate overscroll-auto">{field.label ?? field.value}</span>
 					</div>
-					{description && <span className="text-content-tertiary block truncate overscroll-auto text-xs">{description}</span>}
+					{description && <span className="text-muted-foreground block truncate overscroll-auto text-xs">{description}</span>}
 				</div>
 			)}
 		</div>

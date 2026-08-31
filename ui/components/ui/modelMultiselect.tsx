@@ -295,7 +295,13 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 			onInputChange={handleInputChange}
 			noResultsFoundPlaceholder={modelLoadError ? t("ui.modelMultiselect.couldNotLoad") : t("ui.modelMultiselect.noMatching")}
 			emptyResultPlaceholder={
-				modelLoadError ? t("ui.modelMultiselect.couldNotLoad") : provider ? t("ui.modelMultiselect.noModelsForProvider") : shouldLoadOnEmpty ? t("ui.modelMultiselect.noModelsAvailable") : t("ui.modelMultiselect.selectProviderFirst")
+				modelLoadError
+					? t("ui.modelMultiselect.couldNotLoad")
+					: provider
+						? t("ui.modelMultiselect.noModelsForProvider")
+						: shouldLoadOnEmpty
+							? t("ui.modelMultiselect.noModelsAvailable")
+							: t("ui.modelMultiselect.selectProviderFirst")
 			}
 			views={{
 				dropdownIndicator: isSingleSelect ? undefined : () => <></>,
@@ -310,7 +316,7 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 							return (
 								<div
 									{...multiValueProps.innerProps}
-									className="bg-accent dark:!bg-card flex cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-sm"
+									className="bg-select-tag-bg text-foreground flex cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-sm"
 								>
 									{multiValueProps.data.label}{" "}
 									<X
@@ -331,9 +337,9 @@ export function ModelMultiselect(props: ModelMultiselectProps) {
 							{...optionProps}
 							className={cn(
 								"flex w-full items-center gap-2 rounded-sm px-2 py-2 text-sm",
-								isDeprecated ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-accent",
-								!isDeprecated && optionProps.isFocused && "bg-accent dark:!bg-card",
-								!isDeprecated && optionProps.isSelected && "bg-accent dark:!bg-card",
+								isDeprecated ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-select-option-active-bg",
+								!isDeprecated && optionProps.isFocused && "bg-select-option-active-bg",
+								!isDeprecated && optionProps.isSelected && "bg-select-option-active-bg",
 							)}
 						>
 							<span className={cn("grow truncate text-sm", isDeprecated && "text-muted-foreground")}>{optionProps.data.label}</span>

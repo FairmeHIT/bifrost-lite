@@ -138,7 +138,7 @@ export function AddCustomProviderSheetContent({ show = true, onClose, onSave }: 
 
 	return (
 		<>
-			<SheetHeader className="flex shrink-0 flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-card z-10">
+			<SheetHeader className="flex shrink-0 flex-col items-start px-8 py-4" headerClassName="mb-0 sticky -top-4 bg-surface-solid z-10">
 				<SheetTitle>{t("providers.addCustomProvider.title")}</SheetTitle>
 				<SheetDescription>{t("providers.addCustomProvider.description")}</SheetDescription>
 			</SheetHeader>
@@ -270,7 +270,7 @@ export function AddCustomProviderSheetContent({ show = true, onClose, onSave }: 
 							disabled={!hasProviderCreateAccess}
 						/>
 					</div>
-					<div className="bg-card sticky bottom-0 ml-auto flex w-full flex-row gap-2 border-t px-8 py-4">
+					<div className="bg-surface-solid sticky bottom-0 ml-auto flex w-full flex-row gap-2 border-t px-8 py-4">
 						<Button type="button" variant="outline" onClick={onClose} className="ml-auto" data-testid="custom-provider-cancel-btn">
 							{t("common.cancel")}
 						</Button>

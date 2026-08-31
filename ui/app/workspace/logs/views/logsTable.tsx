@@ -234,8 +234,7 @@ export function LogsDataTable({
 									key={row.id}
 									className={cn(
 										"hover:bg-muted/50 group/table-row min-h-[40px] cursor-pointer",
-										(row.original as DisplayLogEntry).__chainChild &&
-										"bg-muted/30 border-l-2 border-l-primary/30 dark:border-l-primary/50",
+										(row.original as DisplayLogEntry).__chainChild && "bg-muted/30 border-l-2 border-l-primary/30 dark:border-l-primary/50",
 									)}
 								>
 									{row.getVisibleCells().map((cell) => {
@@ -311,7 +310,9 @@ export function LogsDataTable({
 						<div className="flex items-center gap-1">
 							<span>{t("logs.page")}</span>
 							<span>{currentPage}</span>
-							<span>{t("logs.ofPages")} {totalPages}</span>
+							<span>
+								{t("logs.ofPages")} {totalPages}
+							</span>
 						</div>
 
 						<Button

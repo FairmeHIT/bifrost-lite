@@ -78,14 +78,14 @@ function ExternalCacheTokenMeterChartImpl({ data }: ExternalCacheTokenMeterChart
 					<div>
 						<div className="flex shrink-0 flex-col items-center pt-1 leading-none">
 							<div className="text-muted-foreground text-3xl font-semibold tracking-tight">{percentage.toFixed(1)}%</div>
-							<div className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+							<div className="text-muted-foreground mt-1 flex items-center gap-1 text-[11px]">
 								<span>{t("dashboardCharts.ofInputTokensCachedByProvider")}</span>
 								<Tooltip>
 									<TooltipTrigger asChild>
 										<button
 											type="button"
 											data-testid="external-cache-meter-info-btn"
-											className="text-muted-foreground transition-colors hover:text-foreground"
+											className="text-muted-foreground hover:text-foreground transition-colors"
 											aria-label={t("dashboardCharts.externalCacheInfoAria")}
 										>
 											<Info className="h-3 w-3" />
@@ -102,7 +102,9 @@ function ExternalCacheTokenMeterChartImpl({ data }: ExternalCacheTokenMeterChart
 							</span>
 							<span className="flex items-center gap-1.5">
 								<span className="h-2 w-2 rounded-full" style={{ backgroundColor: METER_COLORS.input }} />
-								<span className="text-muted-foreground">{t("dashboardCharts.inputCount", { count: formatCompactNumber(totalPromptTokens) })}</span>
+								<span className="text-muted-foreground">
+									{t("dashboardCharts.inputCount", { count: formatCompactNumber(totalPromptTokens) })}
+								</span>
 							</span>
 						</div>
 					</div>

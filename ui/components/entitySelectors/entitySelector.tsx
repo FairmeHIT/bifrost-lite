@@ -332,7 +332,7 @@ export function EntitySelector(props: EntitySelectorProps) {
 									{...optionProps}
 									className={cn(
 										"flex w-full cursor-pointer flex-col gap-0.5 rounded-sm p-2 text-sm",
-										optionProps.isFocused && "bg-accent",
+										optionProps.isFocused && "bg-select-option-active-bg",
 										isLast && "mb-2",
 									)}
 								>

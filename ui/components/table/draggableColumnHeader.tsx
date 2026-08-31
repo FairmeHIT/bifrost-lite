@@ -47,7 +47,7 @@ export function DraggableColumnHeader<TData>({
 			style={{ width: size, minWidth: size, maxWidth: size, ...pinStyle }}
 			className={cn(
 				TH_CLASS,
-				pinned && (pinnedHeaderClassName ?? "bg-card"),
+				pinned && (pinnedHeaderClassName ?? "bg-surface-solid-muted"),
 				isDragging && "opacity-50",
 				isDropTarget && "ring-primary ring-inset ring-1",
 				isConfigurable && "cursor-grab active:cursor-grabbing",

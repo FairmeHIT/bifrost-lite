@@ -176,10 +176,7 @@ function AzureSection({ config, onChange, disabled }: ProviderSectionProps) {
 	const { t } = useI18n();
 	return (
 		<div className="space-y-4">
-			<SectionHeader
-				title={t("providers.deployments.azureSectionTitle")}
-				description={t("providers.deployments.azureSectionDesc")}
-			/>
+			<SectionHeader title={t("providers.deployments.azureSectionTitle")} description={t("providers.deployments.azureSectionDesc")} />
 			<FieldRow label={t("providers.deployments.apiVersion")} hint={t("providers.deployments.apiVersionHint")}>
 				<StringField
 					value={config.api_version}
@@ -212,10 +209,7 @@ function VertexSection({ config, onChange, disabled }: ProviderSectionProps) {
 	const { t } = useI18n();
 	return (
 		<div className="space-y-4">
-			<SectionHeader
-				title={t("providers.deployments.vertexSectionTitle")}
-				description={t("providers.deployments.vertexSectionDesc")}
-			/>
+			<SectionHeader title={t("providers.deployments.vertexSectionTitle")} description={t("providers.deployments.vertexSectionDesc")} />
 			<FieldRow label={t("providers.deployments.projectId")}>
 				<SecretVarField
 					value={config.project_id}
@@ -243,9 +237,7 @@ function VertexSection({ config, onChange, disabled }: ProviderSectionProps) {
 			<div className="flex items-start justify-between gap-4 rounded-md border p-3">
 				<div className="space-y-0.5">
 					<label className="text-sm font-medium">{t("providers.deployments.forceSingleRegion")}</label>
-					<p className="text-muted-foreground text-xs">
-						{t("providers.deployments.forceSingleRegionHint")}
-					</p>
+					<p className="text-muted-foreground text-xs">{t("providers.deployments.forceSingleRegionHint")}</p>
 				</div>
 				<Switch
 					checked={config.force_single_region ?? false}
@@ -261,10 +253,7 @@ function BedrockSection({ config, onChange, disabled }: ProviderSectionProps) {
 	const { t } = useI18n();
 	return (
 		<div className="space-y-4">
-			<SectionHeader
-				title={t("providers.deployments.bedrockSectionTitle")}
-				description={t("providers.deployments.bedrockSectionDesc")}
-			/>
+			<SectionHeader title={t("providers.deployments.bedrockSectionTitle")} description={t("providers.deployments.bedrockSectionDesc")} />
 			<FieldRow label={t("providers.deployments.region")}>
 				<SecretVarField
 					value={config.region}
@@ -281,10 +270,7 @@ function BedrockSection({ config, onChange, disabled }: ProviderSectionProps) {
 					disabled={disabled}
 				/>
 			</FieldRow>
-			<FieldRow
-				label={t("providers.deployments.projectId")}
-				hint={t("providers.deployments.bedrockProjectIdHint")}
-			>
+			<FieldRow label={t("providers.deployments.projectId")} hint={t("providers.deployments.bedrockProjectIdHint")}>
 				<SecretVarField
 					value={config.project_id}
 					onChange={(v) => onChange({ project_id: v })}
@@ -312,10 +298,7 @@ function BedrockMantleSection({ config, onChange, disabled }: ProviderSectionPro
 					disabled={disabled}
 				/>
 			</FieldRow>
-			<FieldRow
-				label={t("providers.deployments.projectId")}
-				hint={t("providers.deployments.bedrockMantleProjectIdHint")}
-			>
+			<FieldRow label={t("providers.deployments.projectId")} hint={t("providers.deployments.bedrockMantleProjectIdHint")}>
 				<SecretVarField
 					value={config.project_id}
 					onChange={(v) => onChange({ project_id: v })}
@@ -331,7 +314,10 @@ function ReplicateSection({ config, onChange, disabled }: ProviderSectionProps) 
 	const { t } = useI18n();
 	return (
 		<div className="space-y-4">
-			<SectionHeader title={t("providers.deployments.replicateSectionTitle")} description={t("providers.deployments.replicateSectionDesc")} />
+			<SectionHeader
+				title={t("providers.deployments.replicateSectionTitle")}
+				description={t("providers.deployments.replicateSectionDesc")}
+			/>
 			<TriStateOverrideRow
 				label={t("providers.deployments.useDeploymentsEndpoint")}
 				hint={t("providers.deployments.useDeploymentsEndpointHint")}
@@ -684,9 +670,7 @@ export function DeploymentsTable({ value, onChange, providerName, disabled = fal
 						</div>
 						{(draftRow.name.trim() !== "" || draftRow.config.model_id.trim() !== "") &&
 							!(draftRow.name.trim() && draftRow.config.model_id.trim()) && (
-								<p className="text-muted-foreground px-4 pb-2 text-xs">
-									{t("providers.deployments.draftHint")}
-								</p>
+								<p className="text-muted-foreground px-4 pb-2 text-xs">{t("providers.deployments.draftHint")}</p>
 							)}
 						<CollapsibleContent>
 							<ExpandedConfigPanel config={draftRow.config} onChange={patchDraftConfig} providerName={providerName} disabled={disabled} />

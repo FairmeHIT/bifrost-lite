@@ -154,9 +154,7 @@ export default function ModelProviderKeysTableView({ provider, className, header
 					<AlertDialogContent onClick={(e) => e.stopPropagation()}>
 						<AlertDialogHeader>
 							<AlertDialogTitle>{t("providers.keysTable.deleteEntity", { entityLabel: EntityLabel })}</AlertDialogTitle>
-							<AlertDialogDescription>
-								{t("providers.keysTable.deleteConfirmation", { entityLabel })}
-							</AlertDialogDescription>
+							<AlertDialogDescription>{t("providers.keysTable.deleteConfirmation", { entityLabel })}</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter className="pt-4">
 							<AlertDialogCancel onClick={() => setShowDeleteKeyDialog(undefined)} disabled={isMutatingProviderKey}>
@@ -214,9 +212,7 @@ export default function ModelProviderKeysTableView({ provider, className, header
 										{isRefreshingProvider ? t("providers.keysTable.refreshing") : t("providers.keysTable.refreshModelList")}
 									</Button>
 								</TooltipTrigger>
-								<TooltipContent className="max-w-xs">
-									{t("providers.keysTable.refreshTooltip")}
-								</TooltipContent>
+								<TooltipContent className="max-w-xs">{t("providers.keysTable.refreshTooltip")}</TooltipContent>
 							</Tooltip>
 						) : null}
 						{!isKeyless && hasUpdateProviderAccess ? (
@@ -250,7 +246,13 @@ export default function ModelProviderKeysTableView({ provider, className, header
 						</colgroup>
 						<TableHeader className="w-full">
 							<TableRow>
-								<TableHead>{isVLLM ? t("providers.keysTable.headerModel") : isOllamaOrSGL ? t("providers.keysTable.headerServer") : t("providers.keysTable.headerApiKey")}</TableHead>
+								<TableHead>
+									{isVLLM
+										? t("providers.keysTable.headerModel")
+										: isOllamaOrSGL
+											? t("providers.keysTable.headerServer")
+											: t("providers.keysTable.headerApiKey")}
+								</TableHead>
 								<TableHead>{t("providers.keysTable.weight")}</TableHead>
 								<TableHead>{t("common.enabled")}</TableHead>
 								<TableHead className="text-right"></TableHead>
@@ -270,7 +272,7 @@ export default function ModelProviderKeysTableView({ provider, className, header
 									<TableRow
 										key={key.id}
 										data-testid={`key-row-${key.name}`}
-										className="text-sm transition-colors hover:bg-muted"
+										className="hover:bg-muted text-sm transition-colors"
 										onClick={() => {}}
 									>
 										<TableCell className="overflow-hidden">

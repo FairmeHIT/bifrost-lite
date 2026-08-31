@@ -6,7 +6,7 @@ import { cn } from "../utils";
 import { CustomDropdown, DropdownOption } from "./dropdown";
 
 const textAreaVariants = cva(
-	"flex w-full h-full text-transparent caret-black rounded-md resize-none bg-transparent px-3 py-2 text-md placeholder:text-content-disabled disabled:cursor-not-allowed disabled:opacity-50 relative font-[inherit] focus-visible:outline-none whitespace-pre-wrap overflow-y-auto",
+	"flex w-full h-full text-transparent caret-black rounded-md resize-none bg-transparent px-3 py-2 text-md placeholder:text-muted-foreground/70 disabled:cursor-not-allowed disabled:opacity-50 relative font-[inherit] focus-visible:outline-none whitespace-pre-wrap overflow-y-auto",
 	{
 		variants: {
 			variant: {
@@ -596,7 +596,7 @@ const RichTextarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 													return (
 														<React.Fragment key={i}>
 															{"{{"}
-															<span className="text-content-secondary opacity-60">{inlineSuggestionText}</span>
+															<span className="text-secondary-foreground opacity-60">{inlineSuggestionText}</span>
 															{"}}"}
 														</React.Fragment>
 													);
@@ -662,7 +662,10 @@ const SuggestionDropdown = ({
 			<CustomDropdown
 				options={filteredSuggestions}
 				onChange={(opt) => handleSuggestionSelect(opt as DropdownOption)}
-				className={cn("custom-scrollbar max-h-full min-w-[200px] bg-white p-1 shadow-lg dark:bg-popover dark:border-popover", suggestionDropdownClassName)}
+				className={cn(
+					"custom-scrollbar max-h-full min-w-[200px] bg-white p-1 shadow-lg dark:bg-popover dark:border-popover",
+					suggestionDropdownClassName,
+				)}
 				selectFirstOptionByDefault
 				style={{
 					maxHeight:

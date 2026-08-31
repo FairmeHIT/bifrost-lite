@@ -70,7 +70,7 @@ export default function NumberFieldView(props: Props) {
 				/>
 			)}
 			{invalid && (
-				<div className="text-content-error -mt-2">
+				<div className="text-destructive -mt-2">
 					Please keep {field.label} between {field.range?.min} to {field.range?.max}.
 				</div>
 			)}

@@ -252,9 +252,7 @@ export function GovernanceFormFragment({ provider }: GovernanceFormFragmentProps
 							<Label className="text-sm" htmlFor="provider-calendar-aligned">
 								{t("governance.calendarAlign")}
 							</Label>
-							<p className="text-muted-foreground text-xs">
-								{t("governanceFormFragment.calendarAlignDescription")}
-							</p>
+							<p className="text-muted-foreground text-xs">{t("governanceFormFragment.calendarAlignDescription")}</p>
 						</div>
 						<Switch
 							id="provider-calendar-aligned"

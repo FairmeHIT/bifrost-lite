@@ -3,7 +3,14 @@ import type { LogsHistogramResponse } from "@/lib/types/logs";
 import { memo, useMemo } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { formatCompactNumber } from "@/lib/utils/numbers";
-import { CHART_COLORS, CHART_GRID_CLASS, CHART_TICK_CLASS, CHART_TOOLTIP_CLASS, formatFullTimestamp, formatTimestamp } from "../../utils/chartUtils";
+import {
+	CHART_COLORS,
+	CHART_GRID_CLASS,
+	CHART_TICK_CLASS,
+	CHART_TOOLTIP_CLASS,
+	formatFullTimestamp,
+	formatTimestamp,
+} from "../../utils/chartUtils";
 import { ChartErrorBoundary } from "./chartErrorBoundary";
 import type { ChartType } from "./chartTypeToggle";
 
@@ -38,7 +45,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 
 	return (
 		<div className={CHART_TOOLTIP_CLASS}>
-			<div className="mb-1 text-xs text-muted-foreground">{formatFullTimestamp(data.timestamp)}</div>
+			<div className="text-muted-foreground mb-1 text-xs">{formatFullTimestamp(data.timestamp)}</div>
 			<div className="space-y-1 text-sm">
 				<div className="flex items-center justify-between gap-4">
 					<span className="flex items-center gap-1.5">
@@ -59,7 +66,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
 						<span className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS.cancelled }} />
 						<span className="text-muted-foreground">{t("dashboardCharts.cancelled")}</span>
 					</span>
-					<span className="font-medium text-muted-foreground">{(data.cancelled ?? 0).toLocaleString()}</span>
+					<span className="text-muted-foreground font-medium">{(data.cancelled ?? 0).toLocaleString()}</span>
 				</div>
 			</div>
 		</div>
