@@ -5,6 +5,7 @@ import { DottedSeparator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useSheetNavigation } from "@/hooks/useSheetNavigation";
+import { copyToClipboard } from "@/lib/copyToClipboard";
 import { baseRoutingFields } from "@/lib/config/celFieldsRouting";
 import { getOperatorLabel } from "@/lib/config/celOperatorsRouting";
 import { ProviderIconType, RenderProviderIcon } from "@/lib/constants/icons";
@@ -72,7 +73,7 @@ function CopyButton({ value, label, testId }: { value: string; label?: string; t
 
 	const handleCopy = async () => {
 		try {
-			await navigator.clipboard.writeText(value);
+			await copyToClipboard(value);
 			setCopied(true);
 			setTimeout(() => setCopied(false), 1500);
 		} catch {

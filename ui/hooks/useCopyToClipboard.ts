@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
+import { copyToClipboard } from "@/lib/copyToClipboard";
 import { t } from "@/lib/i18n";
 
 interface UseCopyToClipboardOptions {
@@ -16,7 +17,7 @@ export function useCopyToClipboard(options: UseCopyToClipboardOptions = {}) {
 	const copy = useCallback(
 		async (text: string) => {
 			try {
-				await navigator.clipboard.writeText(text);
+				await copyToClipboard(text);
 				setCopied(true);
 				toast.success(successMessage);
 
