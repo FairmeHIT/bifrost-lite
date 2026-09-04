@@ -1,10 +1,10 @@
 module github.com/maximhq/bifrost/plugins/compat
 
-go 1.26.5
+go 1.27.0
 
 require (
-	github.com/bytedance/sonic v1.15.1
-	github.com/maximhq/bifrost/core v1.7.9
+	github.com/bytedance/sonic v1.15.3-0.20260730064818-2a36d6da63e2
+	github.com/maximhq/bifrost/core v1.8.4
 	github.com/maximhq/bifrost/framework v1.5.8
 )
 
@@ -50,7 +50,7 @@ require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.2.0 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
-	github.com/bytedance/sonic/loader v0.5.1 // indirect
+	github.com/bytedance/sonic/loader v0.5.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2 // indirect
@@ -100,7 +100,7 @@ require (
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.18.6 // indirect
+	github.com/klauspost/compress v1.18.7 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mailru/easyjson v0.9.1 // indirect
