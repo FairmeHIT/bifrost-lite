@@ -53,9 +53,10 @@ var ErrRefreshInProgress = errors.New("model refresh already in progress for thi
 // ModelPricingAttributesEntry is the wire shape for PUT /api/models/catalog.
 // (model, provider) is the natural key on governance_model_pricing.
 type ModelPricingAttributesEntry struct {
-	Model                string            `json:"model"`
-	Provider             string            `json:"provider"`
-	AdditionalAttributes map[string]string `json:"additional_attributes,omitempty"`
+	Model                string                     `json:"model"`
+	Provider             string                     `json:"provider"`
+	AdditionalAttributes map[string]string          `json:"additional_attributes,omitempty"`
+	DefaultParameters    *schemas.DefaultParameters `json:"default_parameters,omitempty"`
 }
 
 // ProviderHandler manages HTTP requests for provider operations
@@ -655,19 +656,20 @@ type ListModelsResponse struct {
 
 // ModelDetailsResponse represents a model with capability metadata.
 type ModelDetailsResponse struct {
-	Name                 string                `json:"name"`
-	Provider             string                `json:"provider"`
-	ContextLength        *int                  `json:"context_length,omitempty"`
-	MaxInputTokens       *int                  `json:"max_input_tokens,omitempty"`
-	MaxOutputTokens      *int                  `json:"max_output_tokens,omitempty"`
-	InputCostPerToken    *float64              `json:"input_cost_per_token,omitempty"`
-	OutputCostPerToken   *float64              `json:"output_cost_per_token,omitempty"`
-	CacheWriteCost       *float64              `json:"cache_creation_input_token_cost,omitempty"`
-	CacheReadCost        *float64              `json:"cache_read_input_token_cost,omitempty"`
-	Architecture         *schemas.Architecture `json:"architecture,omitempty"`
-	IsDeprecated         bool                  `json:"is_deprecated,omitempty"`
-	AdditionalAttributes map[string]string     `json:"additional_attributes,omitempty"`
-	AccessibleByKeys     []string              `json:"accessible_by_keys,omitempty"`
+	Name                 string                     `json:"name"`
+	Provider             string                     `json:"provider"`
+	ContextLength        *int                       `json:"context_length,omitempty"`
+	MaxInputTokens       *int                       `json:"max_input_tokens,omitempty"`
+	MaxOutputTokens      *int                       `json:"max_output_tokens,omitempty"`
+	InputCostPerToken    *float64                   `json:"input_cost_per_token,omitempty"`
+	OutputCostPerToken   *float64                   `json:"output_cost_per_token,omitempty"`
+	CacheWriteCost       *float64                   `json:"cache_creation_input_token_cost,omitempty"`
+	CacheReadCost        *float64                   `json:"cache_read_input_token_cost,omitempty"`
+	Architecture         *schemas.Architecture      `json:"architecture,omitempty"`
+	IsDeprecated         bool                       `json:"is_deprecated,omitempty"`
+	AdditionalAttributes map[string]string          `json:"additional_attributes,omitempty"`
+	DefaultParameters    *schemas.DefaultParameters `json:"default_parameters,omitempty"`
+	AccessibleByKeys     []string                   `json:"accessible_by_keys,omitempty"`
 
 	// OverriddenPricing carries the post-override value of each cost field the
 	// UI displays, and only for fields the applied override actually changes —
@@ -832,6 +834,7 @@ func (h *ProviderHandler) listModelDetails(ctx *fasthttp.RequestCtx) {
 			details.Architecture = capabilities.Architecture
 			details.IsDeprecated = capabilities.IsDeprecated
 			details.AdditionalAttributes = capabilities.AdditionalAttributes
+			details.DefaultParameters = capabilities.DefaultParameters
 		}
 
 		// Resolve overrides against the mode the displayed base row came from
@@ -1436,11 +1439,12 @@ func validateRetryBackoff(networkConfig *schemas.NetworkConfig) error {
 }
 
 // upsertModelCatalogEntries handles PUT /api/models/catalog — batch-upserts
-// the additional_attributes JSON on the pricing rows keyed by
-// (model, provider). Every requested (model, provider) must already exist in
-// governance_model_pricing; the whole batch is rejected atomically if any
-// entry is missing. An entry with an empty AdditionalAttributes map clears
-// the column for that (model, provider).
+// the additional_attributes and default_parameters JSON on the pricing rows
+// keyed by (model, provider). Every requested (model, provider) must already
+// exist in governance_model_pricing; the whole batch is rejected atomically if
+// any entry is missing. Each entry fully replaces both columns: an empty
+// AdditionalAttributes map clears additional_attributes, and an absent/null
+// DefaultParameters clears default_parameters.
 func (h *ProviderHandler) upsertModelCatalogEntries(ctx *fasthttp.RequestCtx) {
 	var payload []ModelPricingAttributesEntry
 	if err := sonic.Unmarshal(ctx.PostBody(), &payload); err != nil {

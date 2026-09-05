@@ -210,10 +210,64 @@ type PerRequestLimits struct {
 	CompletionTokens *int `json:"completion_tokens,omitempty"`
 }
 
+// DefaultParameters carries per-(provider, model) request-parameter defaults
+// configured through the model catalog. They are injected into a request only
+// when the caller did not already specify the value — explicit request values
+// always win. Unlike ModelReasoning (which mirrors what an upstream
+// list-models API advertises), DefaultParameters is user-configured and
+// persisted on the governance_model_pricing row.
 type DefaultParameters struct {
-	Temperature      *float64 `json:"temperature,omitempty"`
-	TopP             *float64 `json:"top_p,omitempty"`
-	FrequencyPenalty *float64 `json:"frequency_penalty,omitempty"`
+	Temperature        *float64 `json:"temperature,omitempty"`
+	TopP               *float64 `json:"top_p,omitempty"`
+	FrequencyPenalty   *float64 `json:"frequency_penalty,omitempty"`
+	MaxTokens          *int     `json:"max_tokens,omitempty"`
+	ReasoningEffort    *string  `json:"reasoning_effort,omitempty"`
+	ReasoningMaxTokens *int     `json:"reasoning_max_tokens,omitempty"`
+
+	// Custom carries arbitrary extra request parameters to merge into the
+	// request body when the caller did not specify them. Values are stored as
+	// strings; injection best-effort coerces each value via JSON parsing
+	// ("0.7" -> 0.7, "true" -> true, "high" -> "high") before merging into the
+	// request's extra params. Structured fields above take precedence over a
+	// Custom key with the same name.
+	Custom map[string]string `json:"custom,omitempty"`
+}
+
+// Clone returns a deep copy of dp: every pointer field is re-allocated and
+// Custom is copied key-by-key. A plain struct copy shares the pointers, so
+// handing DefaultParameters across an ownership boundary (catalog entry →
+// per-request model info → request params) without Clone lets a write through
+// one handle rewrite every other holder — including concurrent requests
+// reading the same catalog row. Returns nil for nil.
+func (dp *DefaultParameters) Clone() *DefaultParameters {
+	if dp == nil {
+		return nil
+	}
+	cp := &DefaultParameters{
+		Temperature:        derefClone(dp.Temperature),
+		TopP:               derefClone(dp.TopP),
+		FrequencyPenalty:   derefClone(dp.FrequencyPenalty),
+		MaxTokens:          derefClone(dp.MaxTokens),
+		ReasoningEffort:    derefClone(dp.ReasoningEffort),
+		ReasoningMaxTokens: derefClone(dp.ReasoningMaxTokens),
+	}
+	if dp.Custom != nil {
+		cp.Custom = make(map[string]string, len(dp.Custom))
+		for k, v := range dp.Custom {
+			cp.Custom[k] = v
+		}
+	}
+	return cp
+}
+
+// derefClone returns a fresh pointer holding the same value as v, or nil for
+// nil. Shared across scalar pointer clones in this package.
+func derefClone[T any](v *T) *T {
+	if v == nil {
+		return nil
+	}
+	c := *v
+	return &c
 }
 
 // ModelReasoning describes a model's reasoning capabilities as advertised by

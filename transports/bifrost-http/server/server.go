@@ -82,10 +82,10 @@ type ServerCallbacks interface {
 	ForceReloadPricing(ctx context.Context) error
 	UpsertPricingOverride(ctx context.Context, override *tables.TablePricingOverride) error
 	DeletePricingOverride(ctx context.Context, id string) error
-	// UpsertModelPricingAttributes writes the additional_attributes JSON on
-	// pricing rows. Enterprise wraps this so that after the local DB write
-	// succeeds it can broadcast a peer reload via the existing pricing
-	// EntityTypeModelCatalog/ActionReloadFromDB gossip path.
+	// UpsertModelPricingAttributes writes the additional_attributes and
+	// default_parameters JSON on pricing rows. Enterprise wraps this so that
+	// after the local DB write succeeds it can broadcast a peer reload via the
+	// existing pricing EntityTypeModelCatalog/ActionReloadFromDB gossip path.
 	UpsertModelPricingAttributes(ctx context.Context, entries []handlers.ModelPricingAttributesEntry) error
 	// Proxy related callbacks
 	ReloadProxyConfig(ctx context.Context, config *tables.GlobalProxyConfig) error
@@ -1414,8 +1414,9 @@ func (s *BifrostHTTPServer) DeletePricingOverride(ctx context.Context, id string
 	return nil
 }
 
-// UpsertModelPricingAttributes writes the additional_attributes JSON for the
-// pricing rows keyed by (model, provider) for every entry in the batch. The
+// UpsertModelPricingAttributes writes the additional_attributes and
+// default_parameters JSON for the pricing rows keyed by (model, provider) for
+// every entry in the batch — a full replace of both columns per entry. The
 // whole batch is wrapped in a single transaction so a missing pricing row
 // rolls back the lot. After a successful commit the in-memory pricing cache
 // is reloaded once. Enterprise overrides this method to broadcast a peer
@@ -1432,6 +1433,9 @@ func (s *BifrostHTTPServer) UpsertModelPricingAttributes(ctx context.Context, en
 		for _, e := range entries {
 			rows, err := s.Config.ConfigStore.UpsertModelPricingAttributes(ctx, e.Model, e.Provider, e.AdditionalAttributes, tx)
 			if err != nil {
+				return err
+			}
+			if _, err := s.Config.ConfigStore.UpsertModelPricingDefaultParameters(ctx, e.Model, e.Provider, e.DefaultParameters, tx); err != nil {
 				return err
 			}
 			if rows == 0 {

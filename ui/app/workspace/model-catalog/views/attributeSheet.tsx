@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DottedSeparator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,9 +10,11 @@ import { RenderProviderIcon } from "@/lib/constants/icons";
 import { ProviderLabels, ProviderName, RequestTypeLabels } from "@/lib/constants/logs";
 import {
 	getErrorMessage,
+	ModelDefaultParameters,
 	ModelDetails,
 	ModelPricingOverrideSummary,
 	useGetCoreConfigQuery,
+	useGetProviderQuery,
 	useUpsertModelCatalogEntriesMutation,
 } from "@/lib/store";
 import { KnownProvider } from "@/lib/types/config";
@@ -78,6 +81,110 @@ function isLinkableSource(url: string) {
 	return url.startsWith("http://") || url.startsWith("https://");
 }
 
+// Canonical reasoning-effort values offered when the provider does not declare
+// its accepted levels via custom_provider_config.reasoning_effort_levels.
+const DEFAULT_EFFORT_OPTIONS = ["none", "low", "medium", "high", "xhigh", "max"];
+
+// Custom default-parameter keys the gateway refuses (mirrors the Go
+// denylist): request-shape fields that must never be overridable, and the
+// structured defaults that have their own dedicated inputs above.
+const RESERVED_PARAM_KEYS = new Set([
+	"model",
+	"messages",
+	"stream",
+	"provider",
+	"fallbacks",
+	"tools",
+	"tool_choice",
+	"temperature",
+	"top_p",
+	"frequency_penalty",
+	"max_tokens",
+	"max_completion_tokens",
+	"reasoning",
+	"reasoning_effort",
+	"reasoning_max_tokens",
+]);
+
+// Numeric fields of the defaults form: string while editing ("" = unset),
+// parsed and validated at submit.
+interface DefaultsFormState {
+	temperature: string;
+	top_p: string;
+	frequency_penalty: string;
+	max_tokens: string;
+	reasoning_effort: string;
+	reasoning_max_tokens: string;
+}
+
+const EMPTY_DEFAULTS_FORM: DefaultsFormState = {
+	temperature: "",
+	top_p: "",
+	frequency_penalty: "",
+	max_tokens: "",
+	reasoning_effort: "",
+	reasoning_max_tokens: "",
+};
+
+function defaultsToForm(dp?: ModelDefaultParameters): DefaultsFormState {
+	if (!dp) return { ...EMPTY_DEFAULTS_FORM };
+	const num = (v?: number) => (v === undefined || v === null ? "" : String(v));
+	return {
+		temperature: num(dp.temperature),
+		top_p: num(dp.top_p),
+		frequency_penalty: num(dp.frequency_penalty),
+		max_tokens: num(dp.max_tokens),
+		reasoning_effort: dp.reasoning_effort ?? "",
+		reasoning_max_tokens: num(dp.reasoning_max_tokens),
+	};
+}
+
+// Builds the wire payload from the form. Returns undefined when nothing is
+// set — an omitted default_parameters clears the stored column.
+function formToDefaults(
+	form: DefaultsFormState,
+	customRows: AttributeRow[],
+): { defaults?: ModelDefaultParameters; error?: { key: string; params?: Record<string, string> } } {
+	const out: ModelDefaultParameters = {};
+	// Numeric default fields: edited as strings, assigned as numbers.
+	type NumericDefaultKey = "temperature" | "top_p" | "frequency_penalty" | "max_tokens" | "reasoning_max_tokens";
+	const numeric: Array<[keyof DefaultsFormState, NumericDefaultKey]> = [
+		["temperature", "temperature"],
+		["top_p", "top_p"],
+		["frequency_penalty", "frequency_penalty"],
+		["max_tokens", "max_tokens"],
+		["reasoning_max_tokens", "reasoning_max_tokens"],
+	];
+	for (const [formKey, wireKey] of numeric) {
+		const raw = form[formKey].trim();
+		if (raw === "") continue;
+		const parsed = Number(raw);
+		if (!Number.isFinite(parsed)) {
+			return { error: { key: "modelCatalog.attributes.validationInvalidNumber", params: { field: formKey } } };
+		}
+		out[wireKey] = parsed;
+	}
+	if (form.reasoning_effort !== "") {
+		out.reasoning_effort = form.reasoning_effort;
+	}
+
+	const cleaned = customRows.map((r) => ({ key: r.key.trim(), value: r.value })).filter((r) => r.key !== "" || r.value !== "");
+	const custom: Record<string, string> = {};
+	for (const r of cleaned) {
+		if (RESERVED_PARAM_KEYS.has(r.key)) {
+			return { error: { key: "modelCatalog.attributes.validationReservedParamKey", params: { key: r.key } } };
+		}
+		if (custom[r.key] !== undefined) {
+			return { error: { key: "modelCatalog.attributes.validationDuplicateKey", params: { key: r.key } } };
+		}
+		custom[r.key] = r.value;
+	}
+	if (Object.keys(custom).length > 0) out.custom = custom;
+
+	if (Object.keys(out).length === 0) return {};
+	return { defaults: out };
+}
+
 function getPricingSourceUrl(configuredUrl: string | undefined, modelName: string) {
 	if (configuredUrl) return configuredUrl;
 	const url = new URL(DEFAULT_PRICING_SOURCE_URL);
@@ -126,8 +233,35 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 	const [initialRowsKey] = useState(() => JSON.stringify(stripIds(initialRows)));
 	const [extraRows, setExtraRows] = useState<AttributeRow[]>(initialRows);
 
+	// Request-parameter defaults. Numeric fields are edited as strings (""
+	// = unset) and parsed at submit; custom rows reuse the AttributeRow shape.
+	const [defaultsForm, setDefaultsForm] = useState<DefaultsFormState>(() => defaultsToForm(model.default_parameters));
+	const initialCustomParamRows = useMemo(
+		() => Object.entries(model.default_parameters?.custom ?? {}).map(([key, value]) => ({ id: newRowId(), key, value })),
+		[model.default_parameters],
+	);
+	const [customParamRows, setCustomParamRows] = useState<AttributeRow[]>(initialCustomParamRows);
+	const [initialDefaultsKey] = useState(() =>
+		JSON.stringify(formToDefaults(defaultsToForm(model.default_parameters), initialCustomParamRows).defaults ?? null),
+	);
+
+	const handleDefaultsChange = (field: keyof DefaultsFormState, val: string) => setDefaultsForm((prev) => ({ ...prev, [field]: val }));
+	const handleAddParamRow = () => setCustomParamRows((prev) => [...prev, { id: newRowId(), key: "", value: "" }]);
+	const handleParamRowChange = (id: string, field: "key" | "value", val: string) =>
+		setCustomParamRows((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: val } : row)));
+	const handleRemoveParamRow = (id: string) => setCustomParamRows((prev) => prev.filter((row) => row.id !== id));
+
+	const defaultsDirty = JSON.stringify(formToDefaults(defaultsForm, customParamRows).defaults ?? null) !== initialDefaultsKey;
 	const rowsDirty = JSON.stringify(stripIds(extraRows)) !== initialRowsKey;
-	const isDirty = description !== initialDescription || rowsDirty;
+	const isDirty = description !== initialDescription || rowsDirty || defaultsDirty;
+
+	// Reasoning-effort options come from the provider's declared levels when
+	// it is a custom provider that clamps; otherwise offer the canonical set.
+	const { data: providerData } = useGetProviderQuery(model.provider);
+	const effortOptions = useMemo(() => {
+		const declared = providerData?.custom_provider_config?.reasoning_effort_levels;
+		return declared && declared.length > 0 ? declared : DEFAULT_EFFORT_OPTIONS;
+	}, [providerData]);
 	const pricingSourceUrl = getPricingSourceUrl(bifrostConfig?.framework_config?.pricing_url, model.name);
 	const canOpenPricingSource = isLinkableSource(pricingSourceUrl);
 
@@ -172,12 +306,21 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 		if (desc !== "") attributes.description = desc;
 		for (const r of cleaned) attributes[r.key] = r.value;
 
+		// Validate + build the request-parameter defaults. Errors surface as
+		// toasts, same as the attribute-row validation above.
+		const { defaults, error: defaultsError } = formToDefaults(defaultsForm, customParamRows);
+		if (defaultsError) {
+			toast.error(t(defaultsError.key, defaultsError.params));
+			return;
+		}
+
 		try {
 			await upsertEntries([
 				{
 					model: model.name,
 					provider: model.provider,
 					additional_attributes: Object.keys(attributes).length > 0 ? attributes : undefined,
+					default_parameters: defaults,
 				},
 			]).unwrap();
 			toast.success(t("modelCatalog.attributes.saved"));
@@ -368,6 +511,151 @@ export default function AttributeSheet({ model, overrides, onClose }: AttributeS
 								placeholder={t("modelCatalog.attributes.descriptionPlaceholder")}
 								data-testid="model-catalog-description-textarea"
 							/>
+						</div>
+
+						<DottedSeparator />
+
+						{/* Request parameter defaults */}
+						<div className="space-y-3">
+							<div>
+								<Label className="text-sm font-medium">{t("modelCatalog.attributes.defaultsLabel")}</Label>
+								<p className="text-muted-foreground mt-1 text-xs">{t("modelCatalog.attributes.defaultsDescription")}</p>
+							</div>
+							<div className="grid grid-cols-2 gap-4">
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs">{t("modelCatalog.attributes.defaultsReasoningEffort")}</Label>
+									<Select
+										value={defaultsForm.reasoning_effort || "__unset__"}
+										onValueChange={(v) => handleDefaultsChange("reasoning_effort", v === "__unset__" ? "" : v)}
+									>
+										<SelectTrigger className="w-full" data-testid="model-catalog-defaults-reasoning-effort">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="__unset__">{t("modelCatalog.attributes.defaultsUnset")}</SelectItem>
+											{effortOptions.map((level) => (
+												<SelectItem key={level} value={level}>
+													{level}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs" htmlFor="model-catalog-defaults-temperature">
+										{t("modelCatalog.attributes.defaultsTemperature")}
+									</Label>
+									<Input
+										id="model-catalog-defaults-temperature"
+										type="number"
+										step="0.1"
+										value={defaultsForm.temperature}
+										onChange={(e) => handleDefaultsChange("temperature", e.target.value)}
+										placeholder={t("modelCatalog.attributes.defaultsUnset")}
+										data-testid="model-catalog-defaults-temperature"
+									/>
+								</div>
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs" htmlFor="model-catalog-defaults-top-p">
+										{t("modelCatalog.attributes.defaultsTopP")}
+									</Label>
+									<Input
+										id="model-catalog-defaults-top-p"
+										type="number"
+										step="0.05"
+										value={defaultsForm.top_p}
+										onChange={(e) => handleDefaultsChange("top_p", e.target.value)}
+										placeholder={t("modelCatalog.attributes.defaultsUnset")}
+										data-testid="model-catalog-defaults-top-p"
+									/>
+								</div>
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs" htmlFor="model-catalog-defaults-frequency-penalty">
+										{t("modelCatalog.attributes.defaultsFrequencyPenalty")}
+									</Label>
+									<Input
+										id="model-catalog-defaults-frequency-penalty"
+										type="number"
+										step="0.1"
+										value={defaultsForm.frequency_penalty}
+										onChange={(e) => handleDefaultsChange("frequency_penalty", e.target.value)}
+										placeholder={t("modelCatalog.attributes.defaultsUnset")}
+										data-testid="model-catalog-defaults-frequency-penalty"
+									/>
+								</div>
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs" htmlFor="model-catalog-defaults-max-tokens">
+										{t("modelCatalog.attributes.defaultsMaxTokens")}
+									</Label>
+									<Input
+										id="model-catalog-defaults-max-tokens"
+										type="number"
+										step="1"
+										value={defaultsForm.max_tokens}
+										onChange={(e) => handleDefaultsChange("max_tokens", e.target.value)}
+										placeholder={t("modelCatalog.attributes.defaultsUnset")}
+										data-testid="model-catalog-defaults-max-tokens"
+									/>
+								</div>
+								<div className="space-y-1.5">
+									<Label className="text-muted-foreground text-xs" htmlFor="model-catalog-defaults-reasoning-max-tokens">
+										{t("modelCatalog.attributes.defaultsReasoningMaxTokens")}
+									</Label>
+									<Input
+										id="model-catalog-defaults-reasoning-max-tokens"
+										type="number"
+										step="1"
+										value={defaultsForm.reasoning_max_tokens}
+										onChange={(e) => handleDefaultsChange("reasoning_max_tokens", e.target.value)}
+										placeholder={t("modelCatalog.attributes.defaultsUnset")}
+										data-testid="model-catalog-defaults-reasoning-max-tokens"
+									/>
+								</div>
+							</div>
+
+							{/* Custom default parameters */}
+							<div className="space-y-2 pt-1">
+								<div className="flex items-center justify-between">
+									<Label className="text-sm font-medium">{t("modelCatalog.attributes.defaultsCustomLabel")}</Label>
+									<Button type="button" variant="outline" size="sm" onClick={handleAddParamRow} data-testid="model-catalog-add-param-row">
+										<Plus className="mr-1 h-3 w-3" />
+										{t("modelCatalog.attributes.addButton")}
+									</Button>
+								</div>
+								{customParamRows.length === 0 ? (
+									<p className="text-muted-foreground text-xs">{t("modelCatalog.attributes.defaultsCustomNoRows")}</p>
+								) : (
+									<div className="space-y-2">
+										{customParamRows.map((row, i) => (
+											<div key={row.id} className="flex items-start gap-2">
+												<Input
+													value={row.key}
+													onChange={(e) => handleParamRowChange(row.id, "key", e.target.value)}
+													placeholder={t("modelCatalog.attributes.keyPlaceholder")}
+													className="flex-1"
+													data-testid={`model-catalog-param-key-${i}`}
+												/>
+												<Input
+													value={row.value}
+													onChange={(e) => handleParamRowChange(row.id, "value", e.target.value)}
+													placeholder={t("modelCatalog.attributes.valuePlaceholder")}
+													className="flex-1"
+													data-testid={`model-catalog-param-value-${i}`}
+												/>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon"
+													onClick={() => handleRemoveParamRow(row.id)}
+													data-testid={`model-catalog-param-remove-${i}`}
+												>
+													<Trash2 className="h-4 w-4" />
+												</Button>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
 						</div>
 
 						<DottedSeparator />

@@ -415,6 +415,7 @@ var configstoreMigrationSteps = []migrationStep{
 	{IDs: []string{"add_mcp_per_user_header_flows_table"}, run: migrationAddPerUserHeadersFlowsTable},
 	{IDs: []string{"add_mcp_client_tls_config_json_column"}, run: migrationAddMCPClientTLSConfigColumn},
 	{IDs: []string{"add_additional_attributes_to_pricing"}, run: migrationAddAdditionalAttributesToPricing},
+	{IDs: []string{"add_default_parameters_to_pricing"}, run: migrationAddDefaultParametersToPricing},
 	{IDs: []string{"add_model_config_scope_columns"}, run: migrationAddModelConfigScopeColumns},
 	{IDs: []string{"migrate_provider_governance_to_model_configs"}, run: migrationMigrateProviderGovernanceToModelConfigs},
 	{IDs: []string{"add_budget_model_config_id_column"}, run: migrationAddBudgetModelConfigIDColumn},
@@ -10215,6 +10216,38 @@ func migrationAddAdditionalAttributesToPricing(ctx context.Context, db *gorm.DB,
 	}})
 	if err := m.Migrate(); err != nil {
 		return fmt.Errorf("error running add_additional_attributes_to_pricing migration: %s", err.Error())
+	}
+	return nil
+}
+
+// migrationAddDefaultParametersToPricing adds the default_parameters column
+// to governance_model_pricing. The column stores user-configured per-(provider,
+// model) request-parameter defaults as a JSON blob. As with
+// additional_attributes it is excluded from the pricing-sync upsert path so
+// the 24-hour datasheet sync never overwrites user-set defaults.
+func migrationAddDefaultParametersToPricing(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "add_default_parameters_to_pricing"
+	logger.Info("[configstore] starting migration %s", migrationName)
+	defer logger.Info("[configstore] finished migration %s", migrationName)
+	m := migrator.New(db, migrator.DefaultOptions, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := addColumnIfNotExists(tx, logger, &tables.TableModelPricing{}, "DefaultParametersJSON"); err != nil {
+				return fmt.Errorf("failed to add default_parameters column: %w", err)
+			}
+			return nil
+		},
+		Rollback: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			if err := dropColumnIfExists(tx, logger, &tables.TableModelPricing{}, "DefaultParametersJSON"); err != nil {
+				return fmt.Errorf("failed to drop default_parameters column: %w", err)
+			}
+			return nil
+		},
+	}})
+	if err := m.Migrate(); err != nil {
+		return fmt.Errorf("error running add_default_parameters_to_pricing migration: %s", err.Error())
 	}
 	return nil
 }

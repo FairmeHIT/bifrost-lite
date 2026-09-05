@@ -281,6 +281,66 @@ func TestApplyModelInfoClonesMutableEntryFields(t *testing.T) {
 	}
 }
 
+// DefaultParameters must survive the same boundary: the entry's pointers and
+// Custom map may not leak into the model, or a request-side write would
+// rewrite the catalog's stored defaults for every later request.
+func TestApplyModelInfoClonesDefaultParameters(t *testing.T) {
+	entry := &PricingEntry{
+		DefaultParameters: &schemas.DefaultParameters{
+			Temperature:        new(0.7),
+			ReasoningEffort:    new("xhigh"),
+			ReasoningMaxTokens: new(2048),
+			Custom:             map[string]string{"top_k": "8"},
+		},
+	}
+
+	model := &schemas.Model{ID: "deepseek-v4-flash"}
+	ApplyModelInfo(model, entry)
+
+	dp := model.DefaultParameters
+	if dp == nil {
+		t.Fatal("DefaultParameters = nil, want populated from entry")
+	}
+	if dp == entry.DefaultParameters {
+		t.Fatal("DefaultParameters struct is shared with the entry, want a clone")
+	}
+	if dp.Temperature == entry.DefaultParameters.Temperature ||
+		dp.ReasoningEffort == entry.DefaultParameters.ReasoningEffort ||
+		dp.ReasoningMaxTokens == entry.DefaultParameters.ReasoningMaxTokens {
+		t.Fatal("DefaultParameters pointer fields are shared with the entry, want fresh allocations")
+	}
+
+	*dp.Temperature = -1
+	*dp.ReasoningEffort = "mutated"
+	*dp.ReasoningMaxTokens = -1
+	dp.Custom["top_k"] = "mutated"
+
+	if *entry.DefaultParameters.Temperature != 0.7 ||
+		*entry.DefaultParameters.ReasoningEffort != "xhigh" ||
+		*entry.DefaultParameters.ReasoningMaxTokens != 2048 ||
+		entry.DefaultParameters.Custom["top_k"] != "8" {
+		t.Errorf("entry defaults mutated through model: %+v", entry.DefaultParameters)
+	}
+}
+
+// A model that already carries DefaultParameters (e.g. enriched by a
+// provider's list-models response) keeps them; the catalog never overrides.
+func TestApplyModelInfoPreservesExistingDefaultParameters(t *testing.T) {
+	entry := &PricingEntry{
+		DefaultParameters: &schemas.DefaultParameters{ReasoningEffort: new("low")},
+	}
+	model := &schemas.Model{
+		ID:                "m",
+		DefaultParameters: &schemas.DefaultParameters{ReasoningEffort: new("high")},
+	}
+
+	ApplyModelInfo(model, entry)
+
+	if *model.DefaultParameters.ReasoningEffort != "high" {
+		t.Errorf("DefaultParameters.ReasoningEffort = %q, want untouched high", *model.DefaultParameters.ReasoningEffort)
+	}
+}
+
 func TestApplyModelInfoNilSafe(t *testing.T) {
 	ApplyModelInfo(nil, nil)
 	ApplyModelInfo(&schemas.Model{}, nil)

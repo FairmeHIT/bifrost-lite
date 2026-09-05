@@ -398,6 +398,10 @@ export interface CustomProviderConfig {
 	is_key_less?: boolean;
 	allowed_requests?: AllowedRequests;
 	request_path_overrides?: Record<string, string>;
+	// Reasoning effort values this upstream accepts. Values in the list pass
+	// through unchanged; out-of-range canonical values are clamped by the
+	// gateway. Empty/omitted means passthrough with no clamping.
+	reasoning_effort_levels?: string[];
 }
 
 // OpenAIConfig holds OpenAI-specific provider configuration.

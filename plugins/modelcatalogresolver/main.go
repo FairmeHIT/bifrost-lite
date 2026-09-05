@@ -51,9 +51,11 @@ func (p *Plugin) GetName() string { return PluginName }
 // Cleanup implements schemas.BasePlugin.
 func (p *Plugin) Cleanup() error { return nil }
 
-// PreRequestHook fills in req.Provider from the model catalog when no provider was specified.
-// Skips passthrough requests and requests that already have a provider set (e.g., from a model
-// string like "openai/gpt-5", or from an earlier routing plugin — governance, LB).
+// PreRequestHook fills in req.Provider from the model catalog when no provider was specified,
+// then injects per-(provider, model) default request parameters configured on the catalog row.
+// Skips passthrough requests. Provider resolution is skipped when a provider is already set
+// (e.g. from a model string like "openai/gpt-5", or from an earlier routing plugin — governance,
+// LB); default-parameter injection runs regardless, on the final (provider, model) pair.
 //
 // When the catalog returns multiple providers for an unprefixed model, the resolver prefers the
 // integration's canonical provider (looked up from BifrostContextKeyIntegrationType set by the
@@ -66,62 +68,68 @@ func (p *Plugin) PreRequestHook(ctx *schemas.BifrostContext, req *schemas.Bifros
 		return nil
 	}
 	provider, model, existingFallbacks := req.GetRequestFields()
-	if provider != "" || model == "" {
-		return nil
-	}
-
-	selected, candidates := ResolveProviderFromCatalog(ctx, p.catalog, model)
-	if selected == "" {
-		// ResolveProviderFromCatalog already logged *why* it could not pick
-		// (empty catalog vs allowlist pruned everything). This records the
-		// consequence: no later plugin runs, so the request is now guaranteed to
-		// fail the empty-provider validation in handleRequest. Warn rather than
-		// Info because unlike every other branch here, this one ends in an error.
-		ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelWarn, fmt.Sprintf(
-			"No provider could be resolved for model %s; request will fail provider validation", model,
-		))
-		return nil
-	}
-	req.SetProvider(selected)
-
-	candidateStrs := make([]string, len(candidates))
-	for i, prov := range candidates {
-		candidateStrs[i] = string(prov)
-	}
-	ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelInfo, fmt.Sprintf(
-		"No provider specified for model %s, found %d options in model catalog: [%s], selected: %s",
-		model, len(candidates), strings.Join(candidateStrs, ", "), selected,
-	))
-
-	// Populate fallbacks from the remaining catalog candidates so the request gets
-	// cross-provider resilience automatically — matches the governance and load
-	// balancing plugins, which both promote unselected candidates to fallbacks
-	// when the caller didn't configure any. Only fires when the caller passed
-	// none; an explicit fallback list (even an empty one set deliberately) is
-	// always respected. Model refinement is not needed here: GetProvidersForModel
-	// only returns providers that already serve this exact model string.
-	if len(existingFallbacks) == 0 && len(candidates) > 1 {
-		fallbacks := make([]schemas.Fallback, 0, len(candidates)-1)
-		for _, prov := range candidates {
-			if prov == selected {
-				continue
-			}
-			fallbacks = append(fallbacks, schemas.Fallback{Provider: prov, Model: model})
-		}
-		if len(fallbacks) > 0 {
-			req.SetFallbacks(fallbacks)
-			fallbackStrs := make([]string, len(fallbacks))
-			for i, fb := range fallbacks {
-				fallbackStrs[i] = string(fb.Provider)
-			}
-			ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelInfo, fmt.Sprintf(
-				"Added %d catalog fallback provider(s) for model %s: [%s]",
-				len(fallbacks), model, strings.Join(fallbackStrs, ", "),
+	if provider == "" && model != "" {
+		selected, candidates := ResolveProviderFromCatalog(ctx, p.catalog, model)
+		if selected == "" {
+			// ResolveProviderFromCatalog already logged *why* it could not pick
+			// (empty catalog vs allowlist pruned everything). This records the
+			// consequence: no later plugin runs, so the request is now guaranteed to
+			// fail the empty-provider validation in handleRequest. Warn rather than
+			// Info because unlike every other branch here, this one ends in an error.
+			ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelWarn, fmt.Sprintf(
+				"No provider could be resolved for model %s; request will fail provider validation", model,
 			))
+			return nil
 		}
+		req.SetProvider(selected)
+		provider = selected
+
+		candidateStrs := make([]string, len(candidates))
+		for i, prov := range candidates {
+			candidateStrs[i] = string(prov)
+		}
+		ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelInfo, fmt.Sprintf(
+			"No provider specified for model %s, found %d options in model catalog: [%s], selected: %s",
+			model, len(candidates), strings.Join(candidateStrs, ", "), selected,
+		))
+
+		// Populate fallbacks from the remaining catalog candidates so the request gets
+		// cross-provider resilience automatically — matches the governance and load
+		// balancing plugins, which both promote unselected candidates to fallbacks
+		// when the caller didn't configure any. Only fires when the caller passed
+		// none; an explicit fallback list (even an empty one set deliberately) is
+		// always respected. Model refinement is not needed here: GetProvidersForModel
+		// only returns providers that already serve this exact model string.
+		if len(existingFallbacks) == 0 && len(candidates) > 1 {
+			fallbacks := make([]schemas.Fallback, 0, len(candidates)-1)
+			for _, prov := range candidates {
+				if prov == selected {
+					continue
+				}
+				fallbacks = append(fallbacks, schemas.Fallback{Provider: prov, Model: model})
+			}
+			if len(fallbacks) > 0 {
+				req.SetFallbacks(fallbacks)
+				fallbackStrs := make([]string, len(fallbacks))
+				for i, fb := range fallbacks {
+					fallbackStrs[i] = string(fb.Provider)
+				}
+				ctx.AppendRoutingEngineLog(schemas.RoutingEngineModelCatalog, schemas.LogLevelInfo, fmt.Sprintf(
+					"Added %d catalog fallback provider(s) for model %s: [%s]",
+					len(fallbacks), model, strings.Join(fallbackStrs, ", "),
+				))
+			}
+		}
+
+		schemas.AppendToContextList(ctx, schemas.BifrostContextKeyRoutingEnginesUsed, schemas.RoutingEngineModelCatalog)
 	}
 
-	schemas.AppendToContextList(ctx, schemas.BifrostContextKeyRoutingEnginesUsed, schemas.RoutingEngineModelCatalog)
+	// Inject per-(provider, model) default request parameters from the catalog
+	// row. Runs whether the provider came from a prefix, an earlier routing
+	// plugin, or the resolution above — it only fills values the caller did
+	// not already set. Requires a provider; an unresolved one fails provider
+	// validation anyway.
+	p.injectDefaultParameters(ctx, req, provider, model)
 	return nil
 }
 

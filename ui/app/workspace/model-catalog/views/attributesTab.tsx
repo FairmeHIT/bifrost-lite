@@ -188,6 +188,7 @@ export default function AttributesTab({ hasAccess }: AttributesTabProps) {
 								models.map((m) => {
 									const attrs = m.additional_attributes ?? {};
 									const extraKeys = Object.keys(attrs).filter((k) => k !== "description");
+									const defaultsCount = Object.keys(m.default_parameters ?? {}).length;
 									const testKey = `${toTestIdPart(m.name)}-${toTestIdPart(m.provider)}`;
 									const overrideName = m.applied_override_id ? overridesById[m.applied_override_id]?.name : undefined;
 									const overrideCount = m.pricing_override_ids?.length ?? 0;
@@ -238,10 +239,15 @@ export default function AttributesTab({ hasAccess }: AttributesTabProps) {
 												<DescriptionCell description={attrs.description} />
 											</TableCell>
 											<TableCell className="py-3">
-												{extraKeys.length === 0 && !overrideCount ? (
+												{extraKeys.length === 0 && !overrideCount && !defaultsCount ? (
 													<span className="text-muted-foreground text-sm">—</span>
 												) : (
 													<div className="flex flex-wrap gap-1 pr-4">
+														{defaultsCount > 0 && (
+															<Badge variant="secondary" data-testid={`model-catalog-defaults-badge-${testKey}`}>
+																{t("modelCatalog.attributes.badgeDefaults")}
+															</Badge>
+														)}
 														{extraKeys.length > 0 && (
 															<Badge variant="secondary">
 																{extraKeys.length}{" "}

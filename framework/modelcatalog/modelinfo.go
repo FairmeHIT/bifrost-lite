@@ -73,6 +73,14 @@ func ApplyModelInfo(model *schemas.Model, entry *PricingEntry) {
 		// are immutable, so there is nothing further down to alias.
 		model.AdditionalAttributes = maps.Clone(entry.AdditionalAttributes)
 	}
+	if entry.DefaultParameters != nil && model.DefaultParameters == nil {
+		// Deep-clone: DefaultParameters holds pointers and a map, all of which
+		// alias the datasheet's shared pricing row. Handing them straight through
+		// would let a caller (via ctx.GetModelInfo) mutate catalog state for every
+		// later request — including through the pointer fields a struct copy
+		// silently shares.
+		model.DefaultParameters = entry.DefaultParameters.Clone()
+	}
 
 	// ContextLength falls back to MaxInputTokens: some datasheet rows carry only
 	// the input limit, and callers treat context length as the headline number.

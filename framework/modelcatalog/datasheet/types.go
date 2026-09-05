@@ -53,6 +53,14 @@ type Entry struct {
 	// this field via json.Unmarshal.
 	AdditionalAttributes map[string]string `json:"-"`
 
+	// DefaultParameters carries user-configured per-(provider, model) request
+	// defaults stored on the pricing row. Populated from the DB read path
+	// only; the json:"-" tag prevents URL datasheet payloads from ever feeding
+	// into this field via json.Unmarshal. Surfaced on schemas.Model via
+	// ApplyModelInfo and injected into requests by the model-default-params
+	// plugin.
+	DefaultParameters *schemas.DefaultParameters `json:"-"`
+
 	Options
 }
 
@@ -789,6 +797,7 @@ func convertTablePricingToEntry(pricing *configstoreTables.TableModelPricing) *E
 		Architecture:         pricing.Architecture,
 		IsDeprecated:         pricing.IsDeprecated,
 		AdditionalAttributes: pricing.AdditionalAttributes,
+		DefaultParameters:    pricing.DefaultParameters,
 		Options:              options,
 	}
 }

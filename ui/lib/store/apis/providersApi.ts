@@ -33,6 +33,19 @@ export interface ListModelsResponse {
 	total: number;
 }
 
+// ModelDefaultParameters mirrors schemas.DefaultParameters — per-(model,
+// provider) request-parameter defaults stored on the pricing row. Every field
+// is optional; injection only fills values the request itself did not set.
+export interface ModelDefaultParameters {
+	temperature?: number;
+	top_p?: number;
+	frequency_penalty?: number;
+	max_tokens?: number;
+	reasoning_effort?: string;
+	reasoning_max_tokens?: number;
+	custom?: Record<string, string>;
+}
+
 // ModelDetails is the shape returned by /api/models/details — used by the
 // model-catalog Models tab to list (model, provider) entries with their
 // additional_attributes.
@@ -48,6 +61,7 @@ export interface ModelDetails {
 	cache_read_input_token_cost?: number;
 	architecture?: unknown;
 	additional_attributes?: Record<string, string>;
+	default_parameters?: ModelDefaultParameters;
 	accessible_by_keys?: string[];
 	// Post-override value of each displayed cost, present only for the fields
 	// the applied override actually changes — render those struck through.
@@ -93,11 +107,13 @@ export interface ListModelDetailsResponse {
 
 // ModelPricingAttributesEntry is the body element for PUT /api/models/catalog.
 // (model, provider) is the natural key on governance_model_pricing. An empty
-// or omitted additional_attributes clears the column for that row.
+// or omitted additional_attributes clears that column for the row; likewise
+// an omitted default_parameters clears the request-defaults column.
 export interface ModelPricingAttributesEntry {
 	model: string;
 	provider: string;
 	additional_attributes?: Record<string, string>;
+	default_parameters?: ModelDefaultParameters;
 }
 
 export interface GetModelsRequest {

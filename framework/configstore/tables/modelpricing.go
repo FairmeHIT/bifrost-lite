@@ -125,40 +125,90 @@ type TableModelPricing struct {
 	// datasheet sync never overwrites user-set values.
 	AdditionalAttributesJSON string            `gorm:"type:text;column:additional_attributes" json:"-"`
 	AdditionalAttributes     map[string]string `gorm:"-" json:"additional_attributes,omitempty"`
+
+	// DefaultParameters holds user-configured per-(provider, model) request-
+	// parameter defaults. Persisted as a JSON string in the
+	// default_parameters column and surfaced as a typed struct via
+	// BeforeSave/AfterFind. As with additional_attributes, this column is
+	// excluded from the pricing-sync upsert path so the 24-hour datasheet sync
+	// never overwrites user-set defaults. Surfaced on schemas.Model and
+	// injected into requests by the model-default-params plugin.
+	DefaultParametersJSON string                     `gorm:"type:text;column:default_parameters" json:"-"`
+	DefaultParameters     *schemas.DefaultParameters `gorm:"-" json:"default_parameters,omitempty"`
 }
 
 // TableName sets the table name for each model
 func (TableModelPricing) TableName() string { return "governance_model_pricing" }
 
-// BeforeSave marshals AdditionalAttributes → AdditionalAttributesJSON. A nil
-// or empty map serializes to "{}" so the column always holds a valid JSON
-// object; reads round-trip back to a nil map via AfterFind. Mirrors the
-// convention used by TableMCPClient.HeadersJSON.
+// BeforeSave marshals AdditionalAttributes → AdditionalAttributesJSON and
+// DefaultParameters → DefaultParametersJSON. A nil/empty map or nil struct
+// serializes to "{}" so the columns always hold a valid JSON object; reads
+// round-trip back to nil via AfterFind. Mirrors the convention used by
+// TableMCPClient.HeadersJSON.
 func (p *TableModelPricing) BeforeSave(tx *gorm.DB) error {
 	if len(p.AdditionalAttributes) == 0 {
 		p.AdditionalAttributesJSON = "{}"
-		return nil
+	} else {
+		data, err := json.Marshal(p.AdditionalAttributes)
+		if err != nil {
+			return err
+		}
+		p.AdditionalAttributesJSON = string(data)
 	}
-	data, err := json.Marshal(p.AdditionalAttributes)
-	if err != nil {
-		return err
+
+	if p.DefaultParameters == nil {
+		p.DefaultParametersJSON = "{}"
+	} else {
+		data, err := json.Marshal(p.DefaultParameters)
+		if err != nil {
+			return err
+		}
+		p.DefaultParametersJSON = string(data)
 	}
-	p.AdditionalAttributesJSON = string(data)
 	return nil
 }
 
-// AfterFind unmarshals AdditionalAttributesJSON → AdditionalAttributes.
-// Empty/missing JSON resolves to a nil map so callers can use len() and
-// idiomatic nil checks.
+// AfterFind unmarshals AdditionalAttributesJSON → AdditionalAttributes and
+// DefaultParametersJSON → DefaultParameters. Empty/missing JSON resolves to
+// nil so callers can use len()/idiomatic nil checks.
 func (p *TableModelPricing) AfterFind(tx *gorm.DB) error {
 	if p.AdditionalAttributesJSON == "" || p.AdditionalAttributesJSON == "{}" {
 		p.AdditionalAttributes = nil
-		return nil
+	} else {
+		var attrs map[string]string
+		if err := json.Unmarshal([]byte(p.AdditionalAttributesJSON), &attrs); err != nil {
+			return err
+		}
+		p.AdditionalAttributes = attrs
 	}
-	var attrs map[string]string
-	if err := json.Unmarshal([]byte(p.AdditionalAttributesJSON), &attrs); err != nil {
-		return err
+
+	if p.DefaultParametersJSON == "" || p.DefaultParametersJSON == "{}" {
+		p.DefaultParameters = nil
+	} else {
+		var dp schemas.DefaultParameters
+		if err := json.Unmarshal([]byte(p.DefaultParametersJSON), &dp); err != nil {
+			return err
+		}
+		// An all-zero struct (e.g. "{}" with no fields) unmarshals to a non-nil
+		// zero value; treat that as nil so "no defaults configured" is nil-clean.
+		if isZeroDefaultParameters(&dp) {
+			p.DefaultParameters = nil
+		} else {
+			p.DefaultParameters = &dp
+		}
 	}
-	p.AdditionalAttributes = attrs
 	return nil
+}
+
+// isZeroDefaultParameters reports whether dp carries no configured value. Used
+// by AfterFind to keep "empty" persisted rows nil-clean rather than a non-nil
+// zero struct that callers would have to special-case.
+func isZeroDefaultParameters(dp *schemas.DefaultParameters) bool {
+	return dp.Temperature == nil &&
+		dp.TopP == nil &&
+		dp.FrequencyPenalty == nil &&
+		dp.MaxTokens == nil &&
+		dp.ReasoningEffort == nil &&
+		dp.ReasoningMaxTokens == nil &&
+		len(dp.Custom) == 0
 }

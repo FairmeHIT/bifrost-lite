@@ -458,6 +458,12 @@ type ConfigStore interface {
 	// rows updated; 0 means no such pricing row exists.
 	UpsertModelPricingAttributes(ctx context.Context, model, provider string, attrs map[string]string, tx ...*gorm.DB) (int64, error)
 
+	// UpsertModelPricingDefaultParameters writes only the default_parameters
+	// column on the pricing row keyed by (model, provider). Returns the number
+	// of rows updated; 0 means no such pricing row exists. Excluded from the
+	// pricing sync so user-set defaults survive the 24-hour datasheet sync.
+	UpsertModelPricingDefaultParameters(ctx context.Context, model, provider string, defaults *schemas.DefaultParameters, tx ...*gorm.DB) (int64, error)
+
 	// Governance pricing overrides CRUD
 	GetPricingOverrides(ctx context.Context, filters PricingOverrideFilters) ([]tables.TablePricingOverride, error)
 	GetPricingOverridesPaginated(ctx context.Context, params PricingOverridesQueryParams) ([]tables.TablePricingOverride, int64, error)

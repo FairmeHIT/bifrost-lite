@@ -2704,9 +2704,10 @@ func (s *RDBConfigStore) GetModelPrices(ctx context.Context) ([]tables.TableMode
 
 // pricingSyncUpdateColumns is the explicit set of governance_model_pricing
 // columns the pricing sync is allowed to overwrite via ON CONFLICT. Mirrors
-// every column on TableModelPricing except `id` (the primary key) and
-// `additional_attributes` (editorial metadata that must survive sync).
-// Keep this list in lockstep with the table definition in
+// every column on TableModelPricing except `id` (the primary key),
+// `additional_attributes` (editorial metadata that must survive sync) and
+// `default_parameters` (user-configured request defaults that must survive
+// sync). Keep this list in lockstep with the table definition in
 // framework/configstore/tables/modelpricing.go.
 var pricingSyncUpdateColumns = []string{
 	"model",
@@ -2912,6 +2913,41 @@ func (s *RDBConfigStore) UpsertModelPricingAttributes(ctx context.Context, model
 	res := db.Model(&tables.TableModelPricing{}).
 		Where("model = ? AND provider = ?", model, provider).
 		Update("additional_attributes", value)
+	if res.Error != nil {
+		return 0, s.parseGormError(res.Error)
+	}
+	return res.RowsAffected, nil
+}
+
+// UpsertModelPricingDefaultParameters writes only the default_parameters
+// column for the pricing row keyed by (model, provider). The row must already
+// exist — callers may not seed pricing rows through this path; the management
+// API enforces that. A nil defaults struct clears the column to an empty JSON
+// object. As with additional_attributes, this column is excluded from
+// pricingSyncUpdateColumns so the 24-hour datasheet sync never overwrites it.
+func (s *RDBConfigStore) UpsertModelPricingDefaultParameters(ctx context.Context, model, provider string, defaults *schemas.DefaultParameters, tx ...*gorm.DB) (int64, error) {
+	var txDB *gorm.DB
+	if len(tx) > 0 {
+		txDB = tx[0]
+	} else {
+		txDB = s.DB()
+	}
+	db := txDB.WithContext(ctx)
+
+	var value string
+	if defaults == nil {
+		value = "{}"
+	} else {
+		encoded, err := json.Marshal(defaults)
+		if err != nil {
+			return 0, fmt.Errorf("marshal default_parameters: %w", err)
+		}
+		value = string(encoded)
+	}
+
+	res := db.Model(&tables.TableModelPricing{}).
+		Where("model = ? AND provider = ?", model, provider).
+		Update("default_parameters", value)
 	if res.Error != nil {
 		return 0, s.parseGormError(res.Error)
 	}
