@@ -1270,6 +1270,10 @@ func (m *MockConfigStore) UpsertModelPricingDefaultParameters(ctx context.Contex
 	return 0, nil
 }
 
+func (m *MockConfigStore) EnsureModelPricingRow(ctx context.Context, model, provider, mode string, tx ...*gorm.DB) error {
+	return nil
+}
+
 func (m *MockConfigStore) GetPricingOverrides(ctx context.Context, filter configstore.PricingOverrideFilters) ([]tables.TablePricingOverride, error) {
 	return []tables.TablePricingOverride{}, nil
 }

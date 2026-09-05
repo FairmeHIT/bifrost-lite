@@ -1416,9 +1416,11 @@ func (s *BifrostHTTPServer) DeletePricingOverride(ctx context.Context, id string
 
 // UpsertModelPricingAttributes writes the additional_attributes and
 // default_parameters JSON for the pricing rows keyed by (model, provider) for
-// every entry in the batch — a full replace of both columns per entry. The
-// whole batch is wrapped in a single transaction so a missing pricing row
-// rolls back the lot. After a successful commit the in-memory pricing cache
+// every entry in the batch — a full replace of both columns per entry. When
+// a (model, provider) has no pricing row yet (custom provider models that live
+// only in the live-models pool), a minimal chat-mode row is created first so
+// the columns can be configured for them too. The whole batch is wrapped in a
+// single transaction. After a successful commit the in-memory pricing cache
 // is reloaded once. Enterprise overrides this method to broadcast a peer
 // reload after commit.
 func (s *BifrostHTTPServer) UpsertModelPricingAttributes(ctx context.Context, entries []handlers.ModelPricingAttributesEntry) error {
@@ -1428,22 +1430,24 @@ func (s *BifrostHTTPServer) UpsertModelPricingAttributes(ctx context.Context, en
 	if s.Config.ConfigStore == nil {
 		return fmt.Errorf("model catalog requires a config store")
 	}
-	var missing []string
 	err := s.Config.ConfigStore.ExecuteTransaction(ctx, func(tx *gorm.DB) error {
 		for _, e := range entries {
-			rows, err := s.Config.ConfigStore.UpsertModelPricingAttributes(ctx, e.Model, e.Provider, e.AdditionalAttributes, tx)
-			if err != nil {
+			// Guarantee the pricing row exists before updating its columns.
+			// Custom provider models (e.g. my-free-llm-hub/jt/dsv4) carry no
+			// datasheet pricing row, so without this the first configuration
+			// would fail with "no pricing row" — exactly the models users most
+			// want to set defaults on. Mode is "chat" (mirrors
+			// handlers.defaultCatalogPricingMode); default-parameter injection
+			// only targets chat completions, so a chat row is the right host.
+			if err := s.Config.ConfigStore.EnsureModelPricingRow(ctx, e.Model, e.Provider, "chat", tx); err != nil {
+				return err
+			}
+			if _, err := s.Config.ConfigStore.UpsertModelPricingAttributes(ctx, e.Model, e.Provider, e.AdditionalAttributes, tx); err != nil {
 				return err
 			}
 			if _, err := s.Config.ConfigStore.UpsertModelPricingDefaultParameters(ctx, e.Model, e.Provider, e.DefaultParameters, tx); err != nil {
 				return err
 			}
-			if rows == 0 {
-				missing = append(missing, fmt.Sprintf("%s/%s", e.Provider, e.Model))
-			}
-		}
-		if len(missing) > 0 {
-			return fmt.Errorf("no pricing row for one or more (model, provider) entries: %s", strings.Join(missing, ", "))
 		}
 		return nil
 	})

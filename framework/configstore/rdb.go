@@ -2954,6 +2954,52 @@ func (s *RDBConfigStore) UpsertModelPricingDefaultParameters(ctx context.Context
 	return res.RowsAffected, nil
 }
 
+// EnsureModelPricingRow guarantees a governance_model_pricing row exists for
+// (model, provider, mode), creating a minimal one when it does not. Custom
+// provider models that live only in the live-models pool (never in the URL
+// datasheet) have no pricing row, so per-(model, provider) defaults and
+// attributes — both keyed off that row — could not be configured for them
+// until this creates the row. The created row carries no cost/capability
+// data (all NULL/defaults); it only hosts the additional_attributes and
+// default_parameters columns. Idempotent: ON CONFLICT DO NOTHING means a
+// concurrent insert (or a pre-existing row) is not an error.
+func (s *RDBConfigStore) EnsureModelPricingRow(ctx context.Context, model, provider, mode string, tx ...*gorm.DB) error {
+	if model == "" || provider == "" || mode == "" {
+		return fmt.Errorf("model, provider and mode are required")
+	}
+	var txDB *gorm.DB
+	if len(tx) > 0 {
+		txDB = tx[0]
+	} else {
+		txDB = s.DB()
+	}
+	row := tables.TableModelPricing{
+		Model:    model,
+		Provider: provider,
+		Mode:     mode,
+	}
+	// BeforeSave serializes the (empty) AdditionalAttributes/DefaultParameters
+	// to "{}" so the columns are valid JSON, never NULL.
+	if err := row.BeforeSave(txDB); err != nil {
+		return err
+	}
+	// INSERT … ON CONFLICT (model, provider, mode) DO NOTHING. The unique index
+	// idx_model_provider_mode backs the conflict target. A no-op (pre-existing
+	// row or a concurrent insert that won the race) is success — the row now
+	// exists either way.
+	return txDB.WithContext(ctx).
+		Clauses(clause.OnConflict{
+			Columns: []clause.Column{
+				{Name: "model"},
+				{Name: "provider"},
+				{Name: "mode"},
+			},
+			DoNothing: true,
+		}).
+		Create(&row).
+		Error
+}
+
 // DeleteModelPrices deletes all model pricing records from the database.
 func (s *RDBConfigStore) DeleteModelPrices(ctx context.Context, tx ...*gorm.DB) error {
 	var txDB *gorm.DB

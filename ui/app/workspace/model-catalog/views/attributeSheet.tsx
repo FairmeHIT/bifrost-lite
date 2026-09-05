@@ -147,7 +147,13 @@ function formToDefaults(
 ): { defaults?: ModelDefaultParameters; error?: { key: string; params?: Record<string, string> } } {
 	const out: ModelDefaultParameters = {};
 	// Numeric default fields: edited as strings, assigned as numbers.
+	// Integer fields (token caps) reject fractions up front rather than
+	// surfacing a backend unmarshal error after the round-trip.
 	type NumericDefaultKey = "temperature" | "top_p" | "frequency_penalty" | "max_tokens" | "reasoning_max_tokens";
+	const integerFields: Partial<Record<NumericDefaultKey, boolean>> = {
+		max_tokens: true,
+		reasoning_max_tokens: true,
+	};
 	const numeric: Array<[keyof DefaultsFormState, NumericDefaultKey]> = [
 		["temperature", "temperature"],
 		["top_p", "top_p"],
@@ -160,6 +166,9 @@ function formToDefaults(
 		if (raw === "") continue;
 		const parsed = Number(raw);
 		if (!Number.isFinite(parsed)) {
+			return { error: { key: "modelCatalog.attributes.validationInvalidNumber", params: { field: formKey } } };
+		}
+		if (integerFields[wireKey] && !Number.isInteger(parsed)) {
 			return { error: { key: "modelCatalog.attributes.validationInvalidNumber", params: { field: formKey } } };
 		}
 		out[wireKey] = parsed;

@@ -464,6 +464,12 @@ type ConfigStore interface {
 	// pricing sync so user-set defaults survive the 24-hour datasheet sync.
 	UpsertModelPricingDefaultParameters(ctx context.Context, model, provider string, defaults *schemas.DefaultParameters, tx ...*gorm.DB) (int64, error)
 
+	// EnsureModelPricingRow guarantees a governance_model_pricing row exists
+	// for (model, provider, mode), creating a minimal one when it does not.
+	// Lets per-(model, provider) attributes/defaults be configured for custom
+	// provider models that live only in the live-models pool. Idempotent.
+	EnsureModelPricingRow(ctx context.Context, model, provider, mode string, tx ...*gorm.DB) error
+
 	// Governance pricing overrides CRUD
 	GetPricingOverrides(ctx context.Context, filters PricingOverrideFilters) ([]tables.TablePricingOverride, error)
 	GetPricingOverridesPaginated(ctx context.Context, params PricingOverridesQueryParams) ([]tables.TablePricingOverride, int64, error)

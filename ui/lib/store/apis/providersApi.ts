@@ -520,10 +520,12 @@ export const providersApi = baseApi.injectEndpoints({
 			providesTags: ["Models"],
 		}),
 
-		// Batch upsert additional_attributes on existing pricing rows. The
-		// pricing row must already exist for each (model, provider); a missing
-		// row surfaces as a 400. An entry with an empty additional_attributes
-		// map clears the column for that row.
+		// Batch upsert additional_attributes + default_parameters on pricing
+		// rows. A pricing row is auto-created (minimal chat-mode row) for any
+		// (model, provider) that doesn't have one yet — custom provider models
+		// that live only in the live-models pool. An entry with an empty
+		// additional_attributes map or absent default_parameters clears that
+		// column for the row (full replace per entry).
 		upsertModelCatalogEntries: builder.mutation<void, ModelPricingAttributesEntry[]>({
 			query: (entries) => ({
 				url: "/models/catalog",
