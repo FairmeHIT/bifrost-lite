@@ -451,8 +451,7 @@ export function AsyncMultiSelect<T>(props: AsyncMultiSelectProps<T>) {
 					}),
 					option: (base, state) => ({
 						...base,
-						backgroundColor:
-							state.isFocused || state.isSelected ? "var(--select-option-active-bg)" : "transparent",
+						backgroundColor: state.isFocused || state.isSelected ? "var(--select-option-active-bg)" : "transparent",
 						color: "inherit",
 					}),
 					input: (base) => ({ ...base, margin: 0, padding: 0, color: "inherit", backgroundColor: "transparent" }),
