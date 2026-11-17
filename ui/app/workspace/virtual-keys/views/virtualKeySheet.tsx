@@ -523,7 +523,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const watchedRequestResetDuration = form.watch("requestResetDuration");
 	const watchedBudgetCalendarAligned = form.watch("budgetCalendarAligned");
 	const watchedModelProbeEnabled = form.watch("modelProbeEnabled");
-	const probeAvailableCount = virtualKey?.model_probe_available_models?.length ?? 0;
+	const probeAvailableModels = virtualKey?.model_probe_available_models ?? [];
 	const probeUnavailableModels = virtualKey?.model_probe_unavailable_models ?? [];
 
 	// Calendar alignment is VK-wide and applies to both budgets and rate limits: show the
@@ -1340,7 +1340,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												{virtualKey.model_probe_checked_at ? (
 													<span>
 														{t("virtualKeys.modelProbeSummary", {
-															available: probeAvailableCount,
+															available: probeAvailableModels.length,
 															unavailable: probeUnavailableModels.length,
 														})}
 													</span>
@@ -1352,8 +1352,22 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 												</p>
 											) : null}
 											{probeError ? <p className="text-destructive text-xs">{probeError}</p> : null}
+											{probeAvailableModels.length > 0 ? (
+												<details className="text-xs" data-testid="vk-model-probe-available">
+													<summary className="text-muted-foreground cursor-pointer">
+														{t("virtualKeys.modelProbeAvailableHeading")} ({probeAvailableModels.length})
+													</summary>
+													<ul className="mt-1 max-h-40 overflow-y-auto font-mono text-xs">
+														{probeAvailableModels.map((model) => (
+															<li key={model} className="truncate py-0.5">
+																{model}
+															</li>
+														))}
+													</ul>
+												</details>
+											) : null}
 											{probeUnavailableModels.length > 0 ? (
-												<details className="text-xs">
+												<details className="text-xs" data-testid="vk-model-probe-unavailable">
 													<summary className="text-muted-foreground cursor-pointer">
 														{t("virtualKeys.modelProbeUnavailableHeading")} ({probeUnavailableModels.length})
 													</summary>

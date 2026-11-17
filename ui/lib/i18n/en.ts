@@ -966,6 +966,7 @@ export const en: Dict = {
 		modelProbeSaveFirst: "Save this virtual key before running a probe.",
 		modelProbeSuccess: "Probe finished: {available} available, {unavailable} unavailable",
 		modelProbeSummary: "{available} available · {unavailable} unavailable",
+		modelProbeAvailableHeading: "Available models",
 		modelProbeUnavailableHeading: "Unavailable models",
 		modelTitle: "Model: {model}",
 		namePlaceholder: "e.g., Production API Key",

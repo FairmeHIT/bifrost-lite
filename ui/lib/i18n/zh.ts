@@ -954,6 +954,7 @@ export const zh: Dict = {
 		modelProbeSaveFirst: "请先保存虚拟密钥，再执行探测。",
 		modelProbeSuccess: "探测完成：{available} 个可用，{unavailable} 个不可用",
 		modelProbeSummary: "{available} 个可用 · {unavailable} 个不可用",
+		modelProbeAvailableHeading: "可用模型",
 		modelProbeUnavailableHeading: "不可用模型",
 		modelTitle: "模型：{model}",
 		namePlaceholder: "例如：生产 API 密钥",
