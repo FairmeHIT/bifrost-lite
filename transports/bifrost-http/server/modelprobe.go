@@ -44,9 +44,9 @@ func stripProbeProviderPrefix(provider schemas.ModelProvider, model string) stri
 
 // ProbeVirtualKeyModels checks every model the virtual key can reach by making
 // a real, short chat completion through the gateway as that virtual key. A
-// model is available when the provider answers and the reply contains "OK".
-// Results are persisted on the virtual key and enforced by the governance
-// plugin for subsequent /v1/models and inference requests.
+// model is available when the provider answers with any 2xx response; transient
+// and non-chat errors leave it unprobed. Results are persisted on the virtual
+// key and enforced by the governance plugin for /v1/models and inference.
 func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID string) (*handlers.ModelProbeResult, error) {
 	if s.Config == nil || s.Config.ConfigStore == nil || s.Client == nil {
 		return nil, errors.New("server is not ready for model probing")
