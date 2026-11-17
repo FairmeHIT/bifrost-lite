@@ -157,6 +157,17 @@ func (p *GovernancePlugin) filterModelsForVirtualKey(
 	filteredModels := make([]schemas.Model, 0, len(models))
 	for _, model := range models {
 		provider, modelName := schemas.ParseModelString(model.ID, "")
+		// Parse custom provider prefixes using this virtual key's configuration.
+		if provider == "" {
+			if prefix, name, ok := splitProbeEntry(model.ID); ok {
+				for _, pc := range vk.ProviderConfigs {
+					if strings.EqualFold(pc.Provider, string(prefix)) {
+						provider, modelName = schemas.ModelProvider(pc.Provider), name
+						break
+					}
+				}
+			}
+		}
 
 		// Pre-pass: if any matching config blacklists the model, block it entirely.
 		isBlocked := false

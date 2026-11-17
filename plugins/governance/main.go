@@ -534,7 +534,7 @@ func (p *GovernancePlugin) loadBalanceProvider(ctx *schemas.BifrostContext, req 
 
 		if isProviderAllowed {
 			if modelProbeAppliesToRequestType(req.RequestType) && !modelProbeGatingSkipped(ctx) && modelProbeUnavailable(virtualKey, schemas.ModelProvider(config.Provider), modelStr) {
-				ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("Provider %s excluded: model %s is marked unavailable by the model probe", config.Provider, modelStr))
+				ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("Provider %s excluded: model %s is not in the model probe available list", config.Provider, modelStr))
 				probeExcludedConfigs = append(probeExcludedConfigs, config)
 				continue
 			}
@@ -562,7 +562,7 @@ func (p *GovernancePlugin) loadBalanceProvider(ctx *schemas.BifrostContext, req 
 
 	if len(allowedProviderConfigs) == 0 {
 		if len(probeExcludedConfigs) > 0 {
-			// Every otherwise-eligible provider failed the availability probe. Keep
+			// Every otherwise-eligible provider is absent from the availability whitelist. Keep
 			// them selectable so the request can be rejected with a specific
 			// model_unavailable error by EvaluateGovernanceRequest instead of
 			// falling through to a generic "no provider" failure.
@@ -1011,9 +1011,7 @@ func (p *GovernancePlugin) EvaluateGovernanceRequest(ctx *schemas.BifrostContext
 		result = p.resolver.EvaluateVirtualKeyRequest(ctx, evaluationRequest.VirtualKey, evaluationRequest.Provider, evaluationRequest.Model, requestType, skipVKBudgetLimit)
 	}
 
-	// Step 1b: reject models that the latest availability probe marked
-	// unavailable for this virtual key. Only models that were actually probed
-	// are blocked; never-probed models stay allowed (fail-open).
+	// Step 1b: enforce the latest probe availability whitelist for model inference.
 	if result.Decision == DecisionAllow && hierarchyVK != nil && modelProbeAppliesToRequestType(requestType) &&
 		!modelProbeGatingSkipped(ctx) && modelProbeUnavailable(hierarchyVK, evaluationRequest.Provider, evaluationRequest.Model) {
 		checkedAt := "never"

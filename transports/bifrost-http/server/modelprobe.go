@@ -21,11 +21,12 @@ const (
 	// catalog inside the run budget even when every call hits its deadline.
 	modelProbeConcurrency = 16
 	// Each model gets its own short deadline. Slow or reasoning-heavy models
-	// that exceed it are left unprobed (fail open) rather than blocked.
-	modelProbeCallTimeout = 10 * time.Second
-	modelProbeRunTimeout  = 45 * time.Minute
-	modelProbeMaxModels   = 2000
-	modelProbeDailyHour   = 1
+	// that exceed it are marked unavailable and can be retried in the next run.
+	modelProbeCallTimeout    = 10 * time.Second
+	modelProbeRunTimeout     = 45 * time.Minute
+	modelProbePersistTimeout = 10 * time.Second
+	modelProbeMaxModels      = 2000
+	modelProbeDailyHour      = 1
 )
 
 type modelProbeCandidate struct {
@@ -48,8 +49,8 @@ func stripProbeProviderPrefix(provider schemas.ModelProvider, model string) stri
 
 // ProbeVirtualKeyModels checks every model the virtual key can reach by making
 // a real, short chat completion through the gateway as that virtual key. A
-// model is available when the provider answers with any 2xx response; transient
-// and non-chat errors leave it unprobed. Results are persisted on the virtual
+// model is available only when its response text contains OK, ignoring case.
+// Failed calls are unavailable and retried on subsequent runs. Results are persisted on the virtual
 // key and enforced by the governance plugin for /v1/models and inference.
 func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID string) (*handlers.ModelProbeResult, error) {
 	if s.Config == nil || s.Config.ConfigStore == nil || s.Client == nil {
@@ -88,50 +89,54 @@ func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID stri
 		if len(listErrors) > 0 {
 			message = fmt.Sprintf("%s: %s", message, summarizeProbeErrors(listErrors))
 		}
-		s.persistModelProbeResult(ctx, vk, nil, nil, nil, message)
+		unavailable := append(append([]string{}, vk.ModelProbeUnavailableModels...), vk.ModelProbeAvailableModels...)
+		checkedAt := time.Now().UTC()
+		persistCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), modelProbePersistTimeout)
+		defer cancel()
+		if err := s.persistModelProbeResult(persistCtx, vk, []string{}, unavailable, &checkedAt, message); err != nil {
+			return nil, err
+		}
 		return &handlers.ModelProbeResult{
 			VirtualKeyID:      vk.ID,
-			CheckedAt:         time.Now().UTC(),
-			AvailableModels:   append([]string{}, vk.ModelProbeAvailableModels...),
-			UnavailableModels: append([]string{}, vk.ModelProbeUnavailableModels...),
+			CheckedAt:         checkedAt,
+			AvailableModels:   []string{},
+			UnavailableModels: unavailable,
 			Errors:            listErrors,
 			Total:             0,
 			DurationMS:        time.Since(started).Milliseconds(),
 		}, nil
 	}
+	var truncated []modelProbeCandidate
 	if len(candidates) > modelProbeMaxModels {
+		truncated = candidates[modelProbeMaxModels:]
 		candidates = candidates[:modelProbeMaxModels]
 	}
 
 	available, unavailable, probeErrors := s.runModelProbeCalls(probeCtx, candidates)
+	for _, candidate := range truncated {
+		unavailable = append(unavailable, candidate.id)
+	}
 	if err := probeCtx.Err(); err != nil {
-		// The run budget expired while some models were still being probed.
-		// Persisting the partial outcome would hide every unprobed model, so
-		// keep the previous result and surface the failure instead.
-		logger.Warn("model probe for virtual key %s was cancelled before completion; keeping previous result", vk.ID)
+		// An incomplete run cannot validate any previous success.
+		all := append(append([]string{}, vk.ModelProbeUnavailableModels...), vk.ModelProbeAvailableModels...)
+		for _, candidate := range candidates {
+			all = append(all, candidate.id)
+		}
+		now := time.Now().UTC()
+		persistCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), modelProbePersistTimeout)
+		defer cancel()
+		if persistErr := s.persistModelProbeResult(persistCtx, vk, []string{}, all, &now, err.Error()); persistErr != nil {
+			return nil, errors.Join(fmt.Errorf("model probe was cancelled before completion: %w", err), persistErr)
+		}
 		return nil, fmt.Errorf("model probe was cancelled before completion: %w", err)
 	}
 	checkedAt := time.Now().UTC()
 	errorMessage := ""
 	if len(available) == 0 {
-		// An all-failed run is far more likely to be a systemic problem (bad
-		// credentials, provider outage, non-chat models) than proof that every
-		// model is down. Persisting it would turn a transient failure into a
-		// VK-wide lockout, so keep the previous outcome and fail open.
 		errorMessage = "no model responded successfully"
 		if len(probeErrors) > 0 {
 			errorMessage = fmt.Sprintf("no model responded successfully (%d checked): %s", len(probeErrors), summarizeProbeErrors(probeErrors))
 		}
-		s.persistModelProbeResult(ctx, vk, nil, nil, &checkedAt, errorMessage)
-		return &handlers.ModelProbeResult{
-			VirtualKeyID:      vk.ID,
-			CheckedAt:         checkedAt,
-			AvailableModels:   append([]string{}, vk.ModelProbeAvailableModels...),
-			UnavailableModels: append([]string{}, vk.ModelProbeUnavailableModels...),
-			Errors:            probeErrors,
-			Total:             len(candidates),
-			DurationMS:        time.Since(started).Milliseconds(),
-		}, nil
 	}
 	if len(listErrors) > 0 {
 		// Some providers could not be listed, but other models were probed
@@ -139,8 +144,26 @@ func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID stri
 		// should not surface as a probe error when the provider status badges
 		// already report it, and the manual result still carries the details.
 		logger.Warn("model probe for virtual key %s could not list some providers: %s", vk.ID, summarizeProbeErrors(listErrors))
+		for _, entry := range vk.ModelProbeAvailableModels {
+			if i := strings.Index(entry, "/"); i > 0 {
+				if _, failed := listErrors[entry[:i]]; failed {
+					found := false
+					for _, id := range available {
+						if id == entry {
+							found = true
+							break
+						}
+					}
+					if !found {
+						unavailable = append(unavailable, entry)
+					}
+				}
+			}
+		}
 	}
-	s.persistModelProbeResult(ctx, vk, available, unavailable, &checkedAt, errorMessage)
+	if err := s.persistModelProbeResult(ctx, vk, available, unavailable, &checkedAt, errorMessage); err != nil {
+		return nil, err
+	}
 
 	result := &handlers.ModelProbeResult{
 		VirtualKeyID:      vk.ID,
@@ -248,7 +271,7 @@ func (s *BifrostHTTPServer) collectModelProbeCandidates(ctx *schemas.BifrostCont
 	}
 
 	// Re-probe models that failed last time even though /v1/models hides them.
-	for _, entry := range vk.ModelProbeUnavailableModels {
+	for _, entry := range append(append([]string{}, vk.ModelProbeUnavailableModels...), vk.ModelProbeAvailableModels...) {
 		entry = strings.TrimSpace(entry)
 		idx := strings.Index(entry, "/")
 		if idx <= 0 || idx == len(entry)-1 {
@@ -275,7 +298,6 @@ type modelProbeOutcome int
 const (
 	modelProbeAvailable modelProbeOutcome = iota
 	modelProbeUnavailable
-	modelProbeSkipped
 )
 
 func (s *BifrostHTTPServer) runModelProbeCalls(ctx *schemas.BifrostContext, candidates []modelProbeCandidate) ([]string, []string, map[string]string) {
@@ -331,58 +353,32 @@ func (s *BifrostHTTPServer) probeModel(ctx *schemas.BifrostContext, candidate mo
 			MaxCompletionTokens: bifrost.Ptr(64),
 		},
 	}
-	_, bifrostErr := s.Client.ChatCompletionRequest(callCtx, request)
-	if bifrostErr == nil {
-		// A successful provider response is the availability signal. Requiring a
-		// literal "OK" reply would falsely fail reasoning models, models that
-		// answer conversationally, and any model that ignores the prompt.
+	response, bifrostErr := s.Client.ChatCompletionRequest(callCtx, request)
+	if bifrostErr != nil {
+		return modelProbeUnavailable, probeErrorMessage(bifrostErr)
+	}
+	if modelProbeResponseContainsOK(response) {
 		return modelProbeAvailable, ""
 	}
-	message := probeErrorMessage(bifrostErr)
-	if modelProbeErrorIsSkippable(bifrostErr) {
-		// Transient or non-chat failures say nothing about whether the model is
-		// usable; leave it unprobed (fail open) instead of blocking it.
-		return modelProbeSkipped, message
-	}
-	return modelProbeUnavailable, message
+	return modelProbeUnavailable, "response text did not contain OK"
 }
 
-// modelProbeErrorIsSkippable reports whether a probe error should leave the
-// model unprobed rather than mark it unavailable. Rate limits, server errors,
-// timeouts, and "this model cannot chat" errors are not evidence that the model
-// is permanently unavailable; treating them as such would block valid models for
-// up to a day.
-func modelProbeErrorIsSkippable(bifrostErr *schemas.BifrostError) bool {
-	if bifrostErr == nil {
+func modelProbeResponseContainsOK(response *schemas.BifrostChatResponse) bool {
+	if response == nil {
 		return false
 	}
-	message := strings.ToLower(probeErrorMessage(bifrostErr))
-	for _, hint := range []string{"deadline exceeded", "timeout", "timed out", "context canceled", "connection refused", "connection reset"} {
-		if strings.Contains(message, hint) {
+	for _, choice := range response.Choices {
+		if choice.ChatNonStreamResponseChoice == nil || choice.Message == nil || choice.Message.Content == nil {
+			continue
+		}
+		content := choice.Message.Content
+		if content.ContentStr != nil && strings.Contains(strings.ToLower(*content.ContentStr), "ok") {
 			return true
 		}
-	}
-	if bifrostErr.StatusCode == nil {
-		return false
-	}
-	code := *bifrostErr.StatusCode
-	if code == 408 || code == 425 || code == 429 || code >= 500 {
-		return true
-	}
-	if code == 400 || code == 404 || code == 405 || code == 422 {
-		// These errors usually describe a limitation of the probe (a non-chat
-		// model, an unsupported operation, a route the provider does not expose)
-		// rather than a broken model.
-		for _, hint := range []string{"not a chat", "unsupported", "not supported", "does not support", "not available in this", "method not allowed"} {
-			if strings.Contains(message, hint) {
+		for _, block := range content.ContentBlocks {
+			if block.Text != nil && strings.Contains(strings.ToLower(*block.Text), "ok") {
 				return true
 			}
-		}
-		// A 404 that does not mention a model is a route/endpoint problem.
-		// A 404/400 that names the model is a real "this model does not exist"
-		// answer and should be marked unavailable.
-		if code == 404 && !strings.Contains(message, "model") {
-			return true
 		}
 	}
 	return false
@@ -424,22 +420,24 @@ func summarizeProbeErrors(errorsByModel map[string]string) string {
 	return strings.Join(parts, "; ")
 }
 
-func (s *BifrostHTTPServer) persistModelProbeResult(ctx context.Context, vk *configstoreTables.TableVirtualKey, available, unavailable []string, checkedAt *time.Time, errorMessage string) {
+func (s *BifrostHTTPServer) persistModelProbeResult(ctx context.Context, vk *configstoreTables.TableVirtualKey, available, unavailable []string, checkedAt *time.Time, errorMessage string) error {
 	if vk == nil {
-		return
+		return errors.New("cannot persist model probe result for nil virtual key")
 	}
 	// Re-read the key before writing: a probe can run for minutes, and
 	// UpdateVirtualKey writes the whole selected row, so using the snapshot
 	// loaded at the start of the probe could overwrite concurrent edits.
 	fresh, err := s.Config.ConfigStore.GetVirtualKey(ctx, vk.ID)
-	if err != nil || fresh == nil {
-		logger.Warn("model probe: virtual key %s disappeared before its result could be saved", vk.ID)
-		return
+	if err != nil {
+		return fmt.Errorf("model probe: read virtual key %s: %w", vk.ID, err)
+	}
+	if fresh == nil {
+		return fmt.Errorf("model probe: virtual key %s not found: %w", vk.ID, configstore.ErrNotFound)
 	}
 	if !fresh.ModelProbeEnabled {
 		// The feature was switched off while the probe was running; discard the
 		// result instead of resurrecting state the user just cleared.
-		return
+		return handlers.ErrModelProbeDisabled
 	}
 	vk = fresh
 	if checkedAt != nil {
@@ -451,12 +449,12 @@ func (s *BifrostHTTPServer) persistModelProbeResult(ctx context.Context, vk *con
 	}
 	vk.ModelProbeError = errorMessage
 	if err := s.Config.ConfigStore.UpdateVirtualKey(ctx, vk); err != nil {
-		logger.Error("failed to persist model probe result for virtual key %s: %v", vk.ID, err)
-		return
+		return fmt.Errorf("failed to persist model probe result for virtual key %s: %w", vk.ID, err)
 	}
 	if _, err := s.ReloadVirtualKey(ctx, vk.ID); err != nil {
-		logger.Error("failed to reload virtual key %s after model probe: %v", vk.ID, err)
+		return fmt.Errorf("failed to reload virtual key %s after model probe: %w", vk.ID, err)
 	}
+	return nil
 }
 
 // startModelProbeScheduler starts the daily probe loop. It is safe to call more

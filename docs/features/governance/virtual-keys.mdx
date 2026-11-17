@@ -831,9 +831,9 @@ curl -X PUT http://localhost:8080/api/config \
 
 A virtual key can check whether the models it exposes are actually reachable. When **Model availability probe** is enabled, Bifrost probes every model the key can access once a day at **01:00 local time**, using the virtual key itself:
 
-1. `GET /v1/models` as the virtual key collects the candidate models (plus models that failed the previous run, so they can recover).
-2. For each model, Bifrost sends a short `POST /v1/chat/completions` (`Hello! Reply with OK.`, `max_tokens: 32`).
-3. A model is **available** when the provider answers successfully (any 2xx response). Rate limits, server errors, timeouts, and “this model cannot chat” responses leave the model unprobed (fail-open) instead of marking it unavailable; other errors mark it unavailable.
+1. Bifrost collects candidate models through its core model-listing path as the virtual key, including previously failed models so they can recover. This does not issue an HTTP request to the public gateway endpoint.
+2. For each model, Bifrost sends a chat request as the virtual key asking `Hello! Reply with OK.`.
+3. A model is **available** only when the request succeeds and its response text contains `OK` (case-insensitive). Errors, timeouts, empty responses and responses without `OK` do not qualify.
 
 Results are stored on the virtual key (`model_probe_available_models`, `model_probe_unavailable_models`, `model_probe_checked_at`, `model_probe_error`) and refreshed immediately.
 
@@ -877,12 +877,7 @@ The endpoint returns `409` when a probe for the same key is already running, and
 </Tab>
 </Tabs>
 
-**Enforcement.** Models that a probe marked unavailable are:
-
-- removed from `GET /v1/models` for that virtual key, and
-- rejected on inference with `403` and error type `model_unavailable`.
-
-Models that have never been probed are allowed (fail-open), so a failed probe run cannot lock a virtual key out. If a run finds no available model at all, the previous outcome is kept and only `model_probe_error` is updated; this prevents a transient outage (bad credentials, provider 5xx) from turning into a key-wide 24-hour lockout. If only some providers could not be listed, the successfully probed outcome is kept, the affected providers are returned in the manual result's `errors` map, and `model_probe_error` is left empty — the provider key status already reports the outage. Disabling the feature clears the stored outcome and restores the full model list.
+**Enforcement.** When enabled, the probe uses a strict allowlist: models that have not passed the probe are hidden from `GET /v1/models` and rejected for model inference requests with `403` and error type `model_unavailable`. This includes untested models and transient failures such as 503 or timeout. The chat probe also gates non-chat inference, such as embeddings and image generation, which may not support chat and therefore may be blocked. Run the probe again after recovery to restore access. Enabling the feature before a successful probe can block all inference. On upgrade, results produced by the former 2xx-only criterion are cleared and must be probed again. Disabling the feature clears the stored outcome and restores the normal governance rules.
 
 > **Tip:** The probe calls the gateway's core routing path as the virtual key, but does not consume the key's budgets, rate limits, or usage tracking. Probes run up to 16 in parallel, time out per model after 10 seconds, and probe at most 2,000 models per run.
 

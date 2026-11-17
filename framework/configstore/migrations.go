@@ -470,6 +470,7 @@ var configstoreMigrationSteps = []migrationStep{
 	{IDs: []string{"add_bedrock_endpoints_columns"}, run: migrationAddBedrockEndpointsColumns},
 	{IDs: []string{"add_cost_per_request_pricing_column"}, run: migrationAddCostPerRequestPricingColumn},
 	{IDs: []string{"add_vk_model_probe_columns"}, run: migrationAddVKModelProbeColumns},
+	{IDs: []string{"reset_legacy_vk_model_probe_results"}, run: migrationResetLegacyVKModelProbeResults},
 }
 
 // quoteSQLiteIdentifier quotes a SQLite identifier, escaping any double quotes.
@@ -10963,6 +10964,26 @@ func migrationAddVirtualKeyExpiresAtColumn(ctx context.Context, db *gorm.DB, log
 	}})
 	if err := m.Migrate(); err != nil {
 		return fmt.Errorf("error running %s migration: %w", migrationName, err)
+	}
+	return nil
+}
+
+// migrationResetLegacyVKModelProbeResults invalidates results produced by the old
+// permissive probe while retaining each virtual key's opt-in setting.
+func migrationResetLegacyVKModelProbeResults(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "reset_legacy_vk_model_probe_results"
+	logger.Info("[configstore] starting migration %s", migrationName)
+	defer logger.Info("[configstore] finished migration %s", migrationName)
+	m := migrator.New(db, migrator.DefaultOptions, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			return tx.WithContext(ctx).Exec(`UPDATE governance_virtual_keys SET
+				model_probe_available_models = NULL, model_probe_unavailable_models = NULL,
+				model_probe_checked_at = NULL, model_probe_error = ''`).Error
+		},
+	}})
+	if err := m.Migrate(); err != nil {
+		return fmt.Errorf("error while running db migration: %w", err)
 	}
 	return nil
 }

@@ -19,15 +19,20 @@ func modelProbeGatingSkipped(ctx context.Context) bool {
 	return skip
 }
 
-// modelProbeAppliesToRequestType limits probe-based blocking to model types the
-// probe can actually exercise (chat-style completions). Embeddings, speech,
-// images and other non-chat operations are left alone: a model that cannot chat
-// must not become unavailable for them.
+// modelProbeAppliesToRequestType restricts the whitelist to model inference,
+// leaving metadata and resource-management requests unaffected.
 func modelProbeAppliesToRequestType(requestType schemas.RequestType) bool {
 	switch requestType {
 	case schemas.TextCompletionRequest, schemas.TextCompletionStreamRequest,
 		schemas.ChatCompletionRequest, schemas.ChatCompletionStreamRequest,
-		schemas.ResponsesRequest, schemas.ResponsesStreamRequest:
+		schemas.ResponsesRequest, schemas.ResponsesStreamRequest,
+		schemas.EmbeddingRequest, schemas.SpeechRequest, schemas.SpeechStreamRequest,
+		schemas.TranscriptionRequest, schemas.TranscriptionStreamRequest,
+		schemas.ImageGenerationRequest, schemas.ImageGenerationStreamRequest,
+		schemas.ImageEditRequest, schemas.ImageEditStreamRequest, schemas.ImageVariationRequest,
+		schemas.VideoGenerationRequest, schemas.VideoRemixRequest,
+		schemas.RerankRequest, schemas.OCRRequest, schemas.CountTokensRequest,
+		schemas.CompactionRequest, schemas.WebSocketResponsesRequest, schemas.RealtimeRequest:
 		return true
 	default:
 		return false
@@ -77,58 +82,51 @@ func modelProbeEntryMatches(entry string, provider schemas.ModelProvider, model 
 		strings.EqualFold(entryModel, requestModel)
 }
 
-// modelProbeUnavailable reports whether the latest probe marked this exact
-// provider/model pair unavailable. Models that were never probed are allowed
-// (fail-open) so a failed probe run cannot lock a virtual key out.
+// modelProbeUnavailable enforces the latest available provider/model whitelist.
 func modelProbeUnavailable(vk *configstoreTables.TableVirtualKey, provider schemas.ModelProvider, model string) bool {
-	if vk == nil || !vk.ModelProbeEnabled || model == "" {
+	if vk == nil || !vk.ModelProbeEnabled {
 		return false
 	}
-	for _, entry := range vk.ModelProbeUnavailableModels {
-		if modelProbeEntryMatches(entry, provider, model) {
+	if strings.TrimSpace(model) == "" {
+		return true
+	}
+	if provider == "" {
+		var ok bool
+		provider, model, ok = splitProbeEntry(model)
+		if !ok {
 			return true
 		}
 	}
-	// Requests routed by model alone can still carry a provider-qualified model
-	// name (for example "shangtang/deepseek-v4-flash"). Match that pair too so
-	// the request is rejected before provider selection, rather than only being
-	// excluded later by load balancing.
-	if provider == "" {
-		if entryProvider, entryModel, ok := splitProbeEntry(model); ok {
-			for _, entry := range vk.ModelProbeUnavailableModels {
-				if modelProbeEntryMatches(entry, entryProvider, entryModel) {
-					return true
-				}
-			}
-		}
-	}
-	return false
-}
-
-// modelProbeUnavailableInList filters a model returned by /v1/models. List
-// responses may omit the provider, so a bare model name is hidden only when
-// the probe found no provider serving it and at least one provider failed it.
-func modelProbeUnavailableInList(vk *configstoreTables.TableVirtualKey, modelID string) bool {
-	if vk == nil || !vk.ModelProbeEnabled || modelID == "" {
-		return false
-	}
-	modelID = strings.TrimSpace(modelID)
-
-	if provider, modelName, ok := splitProbeEntry(modelID); ok && modelProbeUnavailable(vk, provider, modelName) {
-		return true
-	}
-
-	// List responses may return a bare model name even though probe entries are
-	// provider-qualified, so compare against the model half of every entry too.
 	for _, entry := range vk.ModelProbeAvailableModels {
-		if _, availableModel, ok := splitProbeEntry(entry); ok && strings.EqualFold(availableModel, modelID) {
+		if modelProbeEntryMatches(entry, provider, model) {
 			return false
 		}
 	}
-	for _, entry := range vk.ModelProbeUnavailableModels {
-		if _, unavailableModel, ok := splitProbeEntry(entry); ok && strings.EqualFold(unavailableModel, modelID) {
-			return true
+	return true
+}
+
+// modelProbeUnavailableInList handles IDs with or without a provider prefix.
+// Configured provider prefixes are authoritative, including custom providers.
+func modelProbeUnavailableInList(vk *configstoreTables.TableVirtualKey, modelID string) bool {
+	if vk == nil || !vk.ModelProbeEnabled {
+		return false
+	}
+	modelID = strings.TrimSpace(modelID)
+	if provider, model, ok := splitProbeEntry(modelID); ok {
+		for _, pc := range vk.ProviderConfigs {
+			if strings.EqualFold(pc.Provider, string(provider)) {
+				return modelProbeUnavailable(vk, provider, model)
+			}
+		}
+		if schemas.IsKnownProvider(string(provider)) {
+			return modelProbeUnavailable(vk, provider, model)
 		}
 	}
-	return false
+	for _, entry := range vk.ModelProbeAvailableModels {
+		provider, model, ok := splitProbeEntry(entry)
+		if ok && (strings.EqualFold(model, modelID) || modelProbeEntryMatches(entry, provider, modelID)) {
+			return false
+		}
+	}
+	return true
 }

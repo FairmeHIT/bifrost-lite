@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/maximhq/bifrost/core/schemas"
+	"github.com/maximhq/bifrost/framework/configstore"
 	configstoreTables "github.com/maximhq/bifrost/framework/configstore/tables"
+	"github.com/stretchr/testify/require"
 )
 
 func TestModelProbeEntryKeyNormalizesProviderPrefix(t *testing.T) {
@@ -44,8 +46,11 @@ func TestModelProbeUnavailable(t *testing.T) {
 	if modelProbeUnavailable(vk, schemas.ModelProvider("shangtang"), "deepseek-v4-flash") {
 		t.Fatal("expected deepseek-v4-flash to be available")
 	}
-	if modelProbeUnavailable(vk, schemas.OpenAI, "kimi-k2") {
-		t.Fatal("a different provider must not inherit the result")
+	if !modelProbeUnavailable(vk, schemas.OpenAI, "deepseek-v4-flash") {
+		t.Fatal("a different provider must not inherit an available result")
+	}
+	if !modelProbeUnavailable(vk, schemas.ModelProvider("shangtang"), "never-probed") {
+		t.Fatal("never-probed models must be blocked")
 	}
 	if !modelProbeUnavailable(vk, "", "shangtang/kimi-k2") {
 		t.Fatal("expected a provider-qualified model to be unavailable when the request has no provider yet")
@@ -83,9 +88,56 @@ func TestModelProbeUnavailableInList(t *testing.T) {
 	if modelProbeUnavailableInList(vk, "deepseek-v4-flash") {
 		t.Fatal("expected bare available model to stay listed")
 	}
-	if modelProbeUnavailableInList(vk, "another-model") {
-		t.Fatal("never-probed models must remain listed")
+	if !modelProbeUnavailableInList(vk, "another-model") {
+		t.Fatal("never-probed models must be hidden")
 	}
+	if !modelProbeUnavailableInList(vk, "openai/deepseek-v4-flash") {
+		t.Fatal("a different provider must not inherit availability")
+	}
+	vk.ModelProbeAvailableModels = nil
+	if !modelProbeUnavailableInList(vk, "shangtang/deepseek-v4-flash") || !modelProbeUnavailable(vk, "shangtang", "deepseek-v4-flash") {
+		t.Fatal("an empty available list must deny models")
+	}
+}
+
+func TestModelProbeGovernanceIntegration(t *testing.T) {
+	logger := NewMockLogger()
+	vk := buildVirtualKey("vk1", "sk-bf-test", "Test VK", true)
+	vk.ProviderConfigs = []configstoreTables.TableVirtualKeyProviderConfig{buildProviderConfig("openai", []string{"*"}), buildProviderConfig("anthropic", []string{"*"})}
+	vk.ModelProbeEnabled = true
+	vk.ModelProbeAvailableModels = schemas.WhiteList{"openai/allowed"}
+	store, err := NewLocalGovernanceStore(context.Background(), logger, nil, &configstore.GovernanceConfig{VirtualKeys: []configstoreTables.TableVirtualKey{*vk}}, nil)
+	require.NoError(t, err)
+	plugin := &GovernancePlugin{store: store, resolver: NewBudgetResolver(store, nil, logger, nil), logger: logger}
+	cases := []struct {
+		name        string
+		provider    schemas.ModelProvider
+		model       string
+		requestType schemas.RequestType
+		skip        bool
+		want        Decision
+	}{
+		{"allowed", schemas.OpenAI, "allowed", schemas.ChatCompletionRequest, false, DecisionAllow},
+		{"unknown", schemas.OpenAI, "unknown", schemas.ChatCompletionRequest, false, DecisionModelUnavailable},
+		{"other provider", schemas.Anthropic, "allowed", schemas.ChatCompletionRequest, false, DecisionModelUnavailable},
+		{"non chat", schemas.OpenAI, "unknown", schemas.EmbeddingRequest, false, DecisionModelUnavailable},
+		{"probe", schemas.OpenAI, "unknown", schemas.ChatCompletionRequest, true, DecisionAllow},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctx := schemas.NewBifrostContext(context.Background(), time.Now().Add(time.Minute))
+			if tc.skip {
+				ctx.SetValue(schemas.BifrostContextKeySkipModelProbeGating, true)
+			}
+			result, _ := plugin.EvaluateGovernanceRequest(ctx, &EvaluationRequest{VirtualKey: "sk-bf-test", Provider: tc.provider, Model: tc.model}, tc.requestType)
+			require.Equal(t, tc.want, result.Decision)
+		})
+	}
+	ctx := schemas.NewBifrostContext(context.Background(), time.Now().Add(time.Minute))
+	models := []schemas.Model{{ID: "openai/allowed"}, {ID: "openai/unknown"}, {ID: "anthropic/allowed"}}
+	require.Equal(t, []schemas.Model{{ID: "openai/allowed"}}, plugin.filterModelsForVirtualKey(ctx, models, "sk-bf-test"))
+	ctx.SetValue(schemas.BifrostContextKeySkipModelProbeGating, true)
+	require.Equal(t, models, plugin.filterModelsForVirtualKey(ctx, models, "sk-bf-test"))
 }
 
 func TestModelProbeGatingSkipped(t *testing.T) {
@@ -107,10 +159,10 @@ func TestModelProbeAppliesToRequestType(t *testing.T) {
 		schemas.ResponsesStreamRequest:      true,
 		schemas.TextCompletionRequest:       true,
 		schemas.TextCompletionStreamRequest: true,
-		schemas.EmbeddingRequest:            false,
-		schemas.SpeechRequest:               false,
-		schemas.ImageGenerationRequest:      false,
-		schemas.TranscriptionRequest:        false,
+		schemas.EmbeddingRequest:            true,
+		schemas.SpeechRequest:               true,
+		schemas.ImageGenerationRequest:      true,
+		schemas.TranscriptionRequest:        true,
 		schemas.ListModelsRequest:           false,
 	}
 	for requestType, want := range cases {

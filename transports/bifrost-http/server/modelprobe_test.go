@@ -1,11 +1,19 @@
 package server
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/maximhq/bifrost/core/schemas"
 )
+
+func TestPersistModelProbeResultRejectsNilVirtualKey(t *testing.T) {
+	server := &BifrostHTTPServer{}
+	if err := server.persistModelProbeResult(context.Background(), nil, nil, nil, nil, ""); err == nil {
+		t.Fatal("expected error for nil virtual key")
+	}
+}
 
 func TestNextModelProbeTime(t *testing.T) {
 	loc := time.FixedZone("test", 8*60*60)
@@ -39,35 +47,26 @@ func TestNextModelProbeTime(t *testing.T) {
 	}
 }
 
-func TestModelProbeErrorIsSkippable(t *testing.T) {
-	status := func(code int, message string) *schemas.BifrostError {
-		return &schemas.BifrostError{StatusCode: &code, Error: &schemas.ErrorField{Message: message}}
+func TestModelProbeResponseContainsOK(t *testing.T) {
+	text := func(s string) *string { return &s }
+	response := func(content *schemas.ChatMessageContent) *schemas.BifrostChatResponse {
+		return &schemas.BifrostChatResponse{Choices: []schemas.BifrostResponseChoice{{ChatNonStreamResponseChoice: &schemas.ChatNonStreamResponseChoice{Message: &schemas.ChatMessage{Content: content}}}}}
 	}
 	tests := []struct {
-		name string
-		err  *schemas.BifrostError
-		want bool
+		name     string
+		response *schemas.BifrostChatResponse
+		want     bool
 	}{
-		{name: "nil", err: nil, want: false},
-		{name: "server error", err: status(500, "internal error"), want: true},
-		{name: "bad gateway", err: status(502, "bad gateway"), want: true},
-		{name: "rate limited", err: status(429, "too many requests"), want: true},
-		{name: "request timeout", err: status(408, "timeout"), want: true},
-		{name: "not a chat model", err: status(400, "this model is not a chat model"), want: true},
-		{name: "unsupported operation", err: status(400, "unsupported operation"), want: true},
-		{name: "unknown model", err: status(404, "model not found"), want: false},
-		{name: "model does not exist", err: status(404, "model does not exist"), want: false},
-		{name: "unknown route", err: status(404, "404 page not found"), want: true},
-		{name: "invalid model", err: status(400, "invalid model"), want: false},
-		{name: "plain bad request", err: status(400, "messages must not be empty"), want: false},
-		{name: "unauthorized", err: status(401, "invalid api key"), want: false},
-		{name: "deadline without status", err: &schemas.BifrostError{Error: &schemas.ErrorField{Message: "context deadline exceeded"}}, want: true},
-		{name: "connection refused without status", err: &schemas.BifrostError{Error: &schemas.ErrorField{Message: "connection refused"}}, want: true},
+		{"nil", nil, false}, {"empty", &schemas.BifrostChatResponse{}, false},
+		{"missing content", response(nil), false}, {"no OK", response(&schemas.ChatMessageContent{ContentStr: text("hello")}), false},
+		{"uppercase", response(&schemas.ChatMessageContent{ContentStr: text("OK")}), true},
+		{"mixed case substring", response(&schemas.ChatMessageContent{ContentStr: text("looks oKay")}), true},
+		{"text block", response(&schemas.ChatMessageContent{ContentBlocks: []schemas.ChatContentBlock{{Text: text("ok!")}}}), true},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := modelProbeErrorIsSkippable(tc.err); got != tc.want {
-				t.Fatalf("modelProbeErrorIsSkippable() = %v, want %v", got, tc.want)
+			if got := modelProbeResponseContainsOK(tc.response); got != tc.want {
+				t.Fatalf("got %v, want %v", got, tc.want)
 			}
 		})
 	}

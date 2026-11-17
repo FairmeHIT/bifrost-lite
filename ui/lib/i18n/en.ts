@@ -957,7 +957,8 @@ export const en: Dict = {
 		modelBudgets: "Model Budgets",
 		modelNameRequired: "Model name is required",
 		modelProbe: "Model availability probe",
-		modelProbeDescription: "Probes every model this key can reach daily at 01:00; models that answer successfully stay available.",
+		modelProbeDescription:
+			"Probes models daily at 01:00; only models replying with OK are allowed. Untested, failed, and timed-out models are blocked.",
 		modelProbeError: "Last probe error",
 		modelProbeLastChecked: "Last checked {time}",
 		modelProbeNeverRun: "Not probed yet",

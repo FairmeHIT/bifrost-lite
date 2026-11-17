@@ -945,7 +945,7 @@ export const zh: Dict = {
 		modelBudgets: "模型预算",
 		modelNameRequired: "模型名称为必填项",
 		modelProbe: "模型探活",
-		modelProbeDescription: "每天 01:00 自动探测此密钥可访问的所有模型；成功响应的模型保持可用。",
+		modelProbeDescription: "每天 01:00 自动探测；仅回复包含 OK 的模型可用。未探测、失败或超时的模型不会放行。",
 		modelProbeError: "上次探测错误",
 		modelProbeLastChecked: "上次探测：{time}",
 		modelProbeNeverRun: "尚未探测",
