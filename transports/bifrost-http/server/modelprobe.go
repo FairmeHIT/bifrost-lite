@@ -113,9 +113,6 @@ func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID stri
 	}
 	checkedAt := time.Now().UTC()
 	errorMessage := ""
-	if len(listErrors) > 0 {
-		errorMessage = fmt.Sprintf("some providers could not be listed: %s", summarizeProbeErrors(listErrors))
-	}
 	if len(available) == 0 {
 		// An all-failed run is far more likely to be a systemic problem (bad
 		// credentials, provider outage, non-chat models) than proof that every
@@ -135,6 +132,13 @@ func (s *BifrostHTTPServer) ProbeVirtualKeyModels(ctx context.Context, vkID stri
 			Total:             len(candidates),
 			DurationMS:        time.Since(started).Milliseconds(),
 		}, nil
+	}
+	if len(listErrors) > 0 {
+		// Some providers could not be listed, but other models were probed
+		// successfully. Keep the successful outcome: a partial provider outage
+		// should not surface as a probe error when the provider status badges
+		// already report it, and the manual result still carries the details.
+		logger.Warn("model probe for virtual key %s could not list some providers: %s", vk.ID, summarizeProbeErrors(listErrors))
 	}
 	s.persistModelProbeResult(ctx, vk, available, unavailable, &checkedAt, errorMessage)
 
