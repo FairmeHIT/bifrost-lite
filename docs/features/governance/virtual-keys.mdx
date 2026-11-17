@@ -884,7 +884,7 @@ The endpoint returns `409` when a probe for the same key is already running, and
 
 Models that have never been probed are allowed (fail-open), so a failed probe run cannot lock a virtual key out. If a run finds no available model at all, the previous outcome is kept and only `model_probe_error` is updated; this prevents a transient outage (bad credentials, provider 5xx) from turning into a key-wide 24-hour lockout. Disabling the feature clears the stored outcome and restores the full model list.
 
-> **Tip:** The probe calls the gateway's core routing path as the virtual key, but does not consume the key's budgets, rate limits, or usage tracking. Probes time out per model after 90 seconds and at most 2,000 models are probed per run.
+> **Tip:** The probe calls the gateway's core routing path as the virtual key, but does not consume the key's budgets, rate limits, or usage tracking. Probes run up to 16 in parallel, time out per model after 10 seconds, and probe at most 2,000 models per run.
 
 ### Error Responses
 

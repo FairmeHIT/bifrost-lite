@@ -17,8 +17,12 @@ import (
 )
 
 const (
-	modelProbeConcurrency = 4
-	modelProbeCallTimeout = 90 * time.Second
+	// Probes are independent, so run them wide: 16 in flight keeps a large
+	// catalog inside the run budget even when every call hits its deadline.
+	modelProbeConcurrency = 16
+	// Each model gets its own short deadline. Slow or reasoning-heavy models
+	// that exceed it are left unprobed (fail open) rather than blocked.
+	modelProbeCallTimeout = 10 * time.Second
 	modelProbeRunTimeout  = 45 * time.Minute
 	modelProbeMaxModels   = 2000
 	modelProbeDailyHour   = 1
