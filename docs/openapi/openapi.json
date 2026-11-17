@@ -46323,6 +46323,84 @@
         }
       }
     },
+    "/api/governance/virtual-keys/{vk_id}/model-probe": {
+      "post": {
+        "operationId": "probeVirtualKeyModels",
+        "summary": "Run a virtual-key model availability probe",
+        "description": "Probes every model the virtual key can access by making a short chat completion through the gateway as that virtual key. A model is available when the provider replies successfully with a standalone \"OK\". Results are persisted on the virtual key and enforced by the governance plugin until the next run. Models are re-probed so a previously unavailable model can recover.",
+        "tags": [
+          "Governance"
+        ],
+        "security": [
+          {
+            "ManagementBearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vk_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Virtual key ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Probe completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelProbeResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Model probe is disabled for this virtual key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BifrostError"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Virtual key not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BifrostError"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "A probe is already running for this virtual key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BifrostError"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BifrostError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/governance/virtual-keys/{vk_id}/budgets/{budget_id}/override": {
       "put": {
         "operationId": "updateVirtualKeyBudgetOverride",
@@ -93958,6 +94036,36 @@
           "calendar_aligned": {
             "type": "boolean"
           },
+          "model_probe_enabled": {
+            "type": "boolean",
+            "description": "When true, the gateway probes every model this virtual key can reach daily at 01:00 and enforces the result."
+          },
+          "model_probe_available_models": {
+            "type": "array",
+            "description": "Provider-qualified models that answered OK during the last probe.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "model_probe_unavailable_models": {
+            "type": "array",
+            "description": "Provider-qualified models that failed or did not answer OK during the last probe. They are hidden from GET /v1/models and rejected on inference.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "model_probe_checked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "Time of the last completed probe run."
+          },
+          "model_probe_error": {
+            "type": "string",
+            "description": "Human-readable error summary from the last probe run, when any model or provider failed."
+          },
           "team": {
             "$ref": "#/components/schemas/Team"
           },
@@ -93988,6 +94096,52 @@
           "updated_at": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ModelProbeResult": {
+        "type": "object",
+        "description": "Outcome of one virtual-key model availability probe run",
+        "required": [
+          "virtual_key_id",
+          "checked_at",
+          "available_models",
+          "unavailable_models",
+          "total",
+          "duration_ms"
+        ],
+        "properties": {
+          "virtual_key_id": {
+            "type": "string"
+          },
+          "checked_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "available_models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "unavailable_models": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -94388,6 +94542,10 @@
             "type": "boolean",
             "default": false
           },
+          "model_probe_enabled": {
+            "type": "boolean",
+            "description": "Enable daily model availability probing for this virtual key."
+          },
           "expires_at": {
             "type": "string",
             "format": "date-time",
@@ -94495,6 +94653,10 @@
           },
           "calendar_aligned": {
             "type": "boolean"
+          },
+          "model_probe_enabled": {
+            "type": "boolean",
+            "description": "Enable or disable daily model availability probing for this virtual key. Disabling clears the stored probe result."
           },
           "reset_budget_usage": {
             "type": "boolean",

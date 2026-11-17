@@ -238,13 +238,14 @@ type CreateVirtualKeyRequest struct {
 		MCPClientName  string            `json:"mcp_client_name" validate:"required"`
 		ToolsToExecute schemas.WhiteList `json:"tools_to_execute,omitempty"`
 	} `json:"mcp_configs,omitempty"` // Empty means no MCP clients allowed (deny-by-default)
-	TeamID          *string                 `json:"team_id,omitempty"`     // Mutually exclusive with CustomerID
-	CustomerID      *string                 `json:"customer_id,omitempty"` // Mutually exclusive with TeamID
-	Budgets         []CreateBudgetRequest   `json:"budgets,omitempty"`     // Multi-budget: each must have a unique reset_duration
-	RateLimit       *CreateRateLimitRequest `json:"rate_limit,omitempty"`
-	IsActive        *bool                   `json:"is_active,omitempty"`
-	CalendarAligned bool                    `json:"calendar_aligned,omitempty"` // When true, all budgets reset at clean calendar boundaries
-	ExpiresAt       *time.Time              `json:"expires_at,omitempty"`       // Optional expiry; nil means never expires
+	TeamID            *string                 `json:"team_id,omitempty"`     // Mutually exclusive with CustomerID
+	CustomerID        *string                 `json:"customer_id,omitempty"` // Mutually exclusive with TeamID
+	Budgets           []CreateBudgetRequest   `json:"budgets,omitempty"`     // Multi-budget: each must have a unique reset_duration
+	RateLimit         *CreateRateLimitRequest `json:"rate_limit,omitempty"`
+	IsActive          *bool                   `json:"is_active,omitempty"`
+	CalendarAligned   bool                    `json:"calendar_aligned,omitempty"`    // When true, all budgets reset at clean calendar boundaries
+	ModelProbeEnabled *bool                   `json:"model_probe_enabled,omitempty"` // Enable daily model availability probing for this virtual key
+	ExpiresAt         *time.Time              `json:"expires_at,omitempty"`          // Optional expiry; nil means never expires
 }
 
 // vkModelBudgetRequest is one per-model budget/rate-limit group under a provider config
@@ -283,14 +284,15 @@ type UpdateVirtualKeyRequest struct {
 		MCPClientName  string            `json:"mcp_client_name" validate:"required"`
 		ToolsToExecute schemas.WhiteList `json:"tools_to_execute,omitempty"`
 	} `json:"mcp_configs,omitempty"`
-	TeamID           schemas.OptionalJSON[string] `json:"team_id,omitempty"`
-	CustomerID       schemas.OptionalJSON[string] `json:"customer_id,omitempty"`
-	Budgets          []CreateBudgetRequest        `json:"budgets,omitempty"` // Multi-budget: replaces all VK-level budgets
-	RateLimit        *UpdateRateLimitRequest      `json:"rate_limit,omitempty"`
-	IsActive         *bool                        `json:"is_active,omitempty"`
-	CalendarAligned  *bool                        `json:"calendar_aligned,omitempty"` // When true, all budgets reset at clean calendar boundaries
-	ResetBudgetUsage *bool                        `json:"reset_budget_usage,omitempty"`
-	ExpiresAt        *string                      `json:"expires_at,omitempty"` // RFC3339 timestamp sets a new expiry, "" clears it, omitted leaves it unchanged
+	TeamID            schemas.OptionalJSON[string] `json:"team_id,omitempty"`
+	CustomerID        schemas.OptionalJSON[string] `json:"customer_id,omitempty"`
+	Budgets           []CreateBudgetRequest        `json:"budgets,omitempty"` // Multi-budget: replaces all VK-level budgets
+	RateLimit         *UpdateRateLimitRequest      `json:"rate_limit,omitempty"`
+	IsActive          *bool                        `json:"is_active,omitempty"`
+	CalendarAligned   *bool                        `json:"calendar_aligned,omitempty"`    // When true, all budgets reset at clean calendar boundaries
+	ModelProbeEnabled *bool                        `json:"model_probe_enabled,omitempty"` // Enable or disable daily model availability probing
+	ResetBudgetUsage  *bool                        `json:"reset_budget_usage,omitempty"`
+	ExpiresAt         *string                      `json:"expires_at,omitempty"` // RFC3339 timestamp sets a new expiry, "" clears it, omitted leaves it unchanged
 }
 
 var errVirtualKeyDualAssociation = errors.New("VirtualKey cannot be attached to both Team and Customer")
@@ -1388,6 +1390,7 @@ func (h *GovernanceHandler) RegisterRoutesWithOverrides(r *router.Router, overri
 	r.GET("/api/governance/virtual-keys/{vk_id}", lib.ChainMiddlewares(h.getVirtualKey, middlewares...))
 	r.PUT("/api/governance/virtual-keys/{vk_id}", lib.ChainMiddlewares(h.updateVirtualKey, middlewares...))
 	r.POST("/api/governance/virtual-keys/{vk_id}/rotate", lib.ChainMiddlewares(h.rotateVirtualKey, middlewares...))
+	r.POST("/api/governance/virtual-keys/{vk_id}/model-probe", lib.ChainMiddlewares(h.probeVirtualKeyModels, middlewares...))
 	r.PUT("/api/governance/virtual-keys/{vk_id}/budgets/{budget_id}/override", lib.ChainMiddlewares(h.updateVirtualKeyBudgetOverride, middlewares...))
 	r.DELETE("/api/governance/virtual-keys/{vk_id}/budgets/{budget_id}/override", lib.ChainMiddlewares(h.deleteVirtualKeyBudgetOverride, middlewares...))
 	r.DELETE("/api/governance/virtual-keys/{vk_id}", lib.ChainMiddlewares(h.deleteVirtualKey, middlewares...))
@@ -1766,15 +1769,16 @@ func (h *GovernanceHandler) createVirtualKey(ctx *fasthttp.RequestCtx) {
 	var vk configstoreTables.TableVirtualKey
 	if err := h.configStore.ExecuteTransaction(ctx, func(tx *gorm.DB) error {
 		vk = configstoreTables.TableVirtualKey{
-			ID:              uuid.NewString(),
-			Name:            req.Name,
-			Value:           *schemas.NewSecretVar(governance.GenerateVirtualKey()),
-			Description:     req.Description,
-			TeamID:          req.TeamID,
-			CustomerID:      req.CustomerID,
-			IsActive:        isActive,
-			CalendarAligned: req.CalendarAligned,
-			ExpiresAt:       req.ExpiresAt,
+			ID:                uuid.NewString(),
+			Name:              req.Name,
+			Value:             *schemas.NewSecretVar(governance.GenerateVirtualKey()),
+			Description:       req.Description,
+			TeamID:            req.TeamID,
+			CustomerID:        req.CustomerID,
+			IsActive:          isActive,
+			CalendarAligned:   req.CalendarAligned,
+			ModelProbeEnabled: req.ModelProbeEnabled != nil && *req.ModelProbeEnabled,
+			ExpiresAt:         req.ExpiresAt,
 		}
 		if err := h.configStore.CreateVirtualKey(ctx, &vk, tx); err != nil {
 			return err
@@ -2159,6 +2163,17 @@ func (h *GovernanceHandler) updateVirtualKey(ctx *fasthttp.RequestCtx) {
 		if req.CalendarAligned != nil {
 			alignmentSwitchedOn = !vk.CalendarAligned && *req.CalendarAligned
 			vk.CalendarAligned = *req.CalendarAligned
+		}
+		if req.ModelProbeEnabled != nil {
+			vk.ModelProbeEnabled = *req.ModelProbeEnabled
+			if !*req.ModelProbeEnabled {
+				// Turning the feature off clears the previous probe outcome so a
+				// later re-enable starts from a clean fail-open state.
+				vk.ModelProbeAvailableModels = nil
+				vk.ModelProbeUnavailableModels = nil
+				vk.ModelProbeCheckedAt = nil
+				vk.ModelProbeError = ""
+			}
 		}
 		// VK top-level and per-provider budgets/rate-limits are stored in VK-scoped model
 		// configs (the single source of truth), written by syncVKGovernanceToModelConfigs

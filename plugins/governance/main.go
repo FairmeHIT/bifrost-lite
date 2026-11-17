@@ -506,6 +506,7 @@ func (p *GovernancePlugin) loadBalanceProvider(ctx *schemas.BifrostContext, req 
 	}
 
 	allowedProviderConfigs := make([]configstoreTables.TableVirtualKeyProviderConfig, 0)
+	probeExcludedConfigs := make([]configstoreTables.TableVirtualKeyProviderConfig, 0)
 	for _, config := range providerConfigs {
 		// Blacklist check wins over allowlist (same as provider-key enforcement)
 		if blacklistedProviders[config.Provider] {
@@ -532,6 +533,11 @@ func (p *GovernancePlugin) loadBalanceProvider(ctx *schemas.BifrostContext, req 
 		}
 
 		if isProviderAllowed {
+			if modelProbeAppliesToRequestType(req.RequestType) && !modelProbeGatingSkipped(ctx) && modelProbeUnavailable(virtualKey, schemas.ModelProvider(config.Provider), modelStr) {
+				ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("Provider %s excluded: model %s is marked unavailable by the model probe", config.Provider, modelStr))
+				probeExcludedConfigs = append(probeExcludedConfigs, config)
+				continue
+			}
 			// Check if the provider's budget or rate limits are violated using resolver helper methods
 			if p.resolver.isProviderBudgetViolated(ctx, virtualKey, config) {
 				ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("Provider %s excluded: budget limit violated", config.Provider))
@@ -555,10 +561,18 @@ func (p *GovernancePlugin) loadBalanceProvider(ctx *schemas.BifrostContext, req 
 	ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("Allowed providers after filtering: %v", allowedProviders))
 
 	if len(allowedProviderConfigs) == 0 {
-		ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("No eligible providers remaining after filtering for model %s, skipping load balancing", modelStr))
-		// TODO: Send proper error if (overall VK budget/rate limit) or (all provider budgets/rate limits) are violated
-		// No allowed provider configs, continue without modification
-		return nil
+		if len(probeExcludedConfigs) > 0 {
+			// Every otherwise-eligible provider failed the availability probe. Keep
+			// them selectable so the request can be rejected with a specific
+			// model_unavailable error by EvaluateGovernanceRequest instead of
+			// falling through to a generic "no provider" failure.
+			allowedProviderConfigs = append(allowedProviderConfigs, probeExcludedConfigs...)
+		} else {
+			ctx.AppendRoutingEngineLog(schemas.RoutingEngineGovernance, schemas.LogLevelInfo, fmt.Sprintf("No eligible providers remaining after filtering for model %s, skipping load balancing", modelStr))
+			// TODO: Send proper error if (overall VK budget/rate limit) or (all provider budgets/rate limits) are violated
+			// No allowed provider configs, continue without modification
+			return nil
+		}
 	}
 
 	weightedConfigs := make([]configstoreTables.TableVirtualKeyProviderConfig, 0, len(allowedProviderConfigs))
@@ -997,6 +1011,22 @@ func (p *GovernancePlugin) EvaluateGovernanceRequest(ctx *schemas.BifrostContext
 		result = p.resolver.EvaluateVirtualKeyRequest(ctx, evaluationRequest.VirtualKey, evaluationRequest.Provider, evaluationRequest.Model, requestType, skipVKBudgetLimit)
 	}
 
+	// Step 1b: reject models that the latest availability probe marked
+	// unavailable for this virtual key. Only models that were actually probed
+	// are blocked; never-probed models stay allowed (fail-open).
+	if result.Decision == DecisionAllow && hierarchyVK != nil && modelProbeAppliesToRequestType(requestType) &&
+		!modelProbeGatingSkipped(ctx) && modelProbeUnavailable(hierarchyVK, evaluationRequest.Provider, evaluationRequest.Model) {
+		checkedAt := "never"
+		if hierarchyVK.ModelProbeCheckedAt != nil {
+			checkedAt = hierarchyVK.ModelProbeCheckedAt.UTC().Format(time.RFC3339)
+		}
+		result = &EvaluationResult{
+			Decision:   DecisionModelUnavailable,
+			Reason:     fmt.Sprintf("model %s is currently unavailable for this virtual key (last availability check: %s)", evaluationRequest.Model, checkedAt),
+			VirtualKey: hierarchyVK,
+		}
+	}
+
 	// Step 2: Customer-level budget (customer attached directly to VK, or via the VK's team).
 	// Fall back to the loaded relation IDs so VKs populated via joins without FK
 	// pointer columns still participate in customer-level enforcement.
@@ -1094,7 +1124,7 @@ func (p *GovernancePlugin) EvaluateGovernanceRequest(ctx *schemas.BifrostContext
 		}
 		return result, nil
 
-	case DecisionVirtualKeyNotFound, DecisionVirtualKeyBlocked, DecisionModelBlocked, DecisionProviderBlocked:
+	case DecisionVirtualKeyNotFound, DecisionVirtualKeyBlocked, DecisionModelBlocked, DecisionModelUnavailable, DecisionProviderBlocked:
 		return result, &schemas.BifrostError{
 			Type:       new(string(result.Decision)),
 			StatusCode: new(403),

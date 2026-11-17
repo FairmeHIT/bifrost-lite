@@ -3816,7 +3816,7 @@ func (s *RDBConfigStore) UpdateVirtualKey(ctx context.Context, virtualKey *table
 	} else {
 		virtualKey.ID = existing.ID
 		if err := txDB.WithContext(ctx).
-			Select("name", "description", "value", "is_active", "expires_at", "team_id", "customer_id", "rate_limit_id", "calendar_aligned", "config_hash", "updated_at", "encryption_status", "value_hash").
+			Select("name", "description", "value", "is_active", "expires_at", "team_id", "customer_id", "rate_limit_id", "calendar_aligned", "config_hash", "updated_at", "encryption_status", "value_hash", "model_probe_enabled", "model_probe_available_models", "model_probe_unavailable_models", "model_probe_checked_at", "model_probe_error").
 			Updates(virtualKey).Error; err != nil {
 			return s.parseGormError(err)
 		}

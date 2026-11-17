@@ -827,6 +827,65 @@ curl -X PUT http://localhost:8080/api/config \
 </Tab>
 </Tabs>
 
+### Model availability probe (模型探活)
+
+A virtual key can check whether the models it exposes are actually reachable. When **Model availability probe** is enabled, Bifrost probes every model the key can access once a day at **01:00 local time**, using the virtual key itself:
+
+1. `GET /v1/models` as the virtual key collects the candidate models (plus models that failed the previous run, so they can recover).
+2. For each model, Bifrost sends a short `POST /v1/chat/completions` (`Hello! Reply with OK.`, `max_tokens: 32`).
+3. A model is **available** when the provider answers successfully (any 2xx response). Rate limits, server errors, timeouts, and “this model cannot chat” responses leave the model unprobed (fail-open) instead of marking it unavailable; other errors mark it unavailable.
+
+Results are stored on the virtual key (`model_probe_available_models`, `model_probe_unavailable_models`, `model_probe_checked_at`, `model_probe_error`) and refreshed immediately.
+
+<Tabs group="config-method">
+<Tab title="Web UI">
+
+1. Go to **Governance** → **Virtual Keys** and open a virtual key.
+2. Turn on **Model availability probe** and save the key.
+3. Reopen the key and click **Probe now** to run a check immediately; the section shows the last check time and the available/unavailable counts.
+4. Unavailable models are listed for troubleshooting. The daily probe runs automatically from then on.
+
+</Tab>
+<Tab title="API">
+
+```bash
+# Enable the probe on a virtual key
+curl -X PUT http://localhost:8080/api/governance/virtual-keys/<VK_ID> \
+  -H "Content-Type: application/json" \
+  -d '{"model_probe_enabled": true}'
+
+# Run a probe now
+curl -X POST http://localhost:8080/api/governance/virtual-keys/<VK_ID>/model-probe
+```
+
+A probe run returns the available and unavailable model IDs plus the per-model errors:
+
+```json
+{
+  "virtual_key_id": "vk-123",
+  "checked_at": "2026-11-17T06:00:12Z",
+  "available_models": ["shangtang/deepseek-v4-flash"],
+  "unavailable_models": ["shangtang/kimi-k2"],
+  "errors": {"shangtang/kimi-k2": "provider request failed"},
+  "total": 2,
+  "duration_ms": 1840
+}
+```
+
+The endpoint returns `409` when a probe for the same key is already running, and `400` when the probe is disabled or the key is inactive/expired.
+
+</Tab>
+</Tabs>
+
+**Enforcement.** Models that a probe marked unavailable are:
+
+- removed from `GET /v1/models` for that virtual key, and
+- rejected on inference with `403` and error type `model_unavailable`.
+
+Models that have never been probed are allowed (fail-open), so a failed probe run cannot lock a virtual key out. If a run finds no available model at all, the previous outcome is kept and only `model_probe_error` is updated; this prevents a transient outage (bad credentials, provider 5xx) from turning into a key-wide 24-hour lockout. Disabling the feature clears the stored outcome and restores the full model list.
+
+> **Tip:** The probe calls the gateway's core routing path as the virtual key, but does not consume the key's budgets, rate limits, or usage tracking. Probes time out per model after 90 seconds and at most 2,000 models are probed per run.
+
 ### Error Responses
 
 - Virtual Key Not Found (400)

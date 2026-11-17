@@ -106,6 +106,13 @@ export interface VirtualKey {
 	is_active: boolean;
 	expires_at?: string | null; // ISO 8601 UTC timestamp; null or absent means never expires
 	calendar_aligned?: boolean;
+	// Model availability probe (模型探活). When enabled, the gateway probes every
+	// reachable model daily at 01:00 and records the outcome here.
+	model_probe_enabled?: boolean;
+	model_probe_available_models?: string[];
+	model_probe_unavailable_models?: string[];
+	model_probe_checked_at?: string | null;
+	model_probe_error?: string;
 	created_at: string;
 	updated_at: string;
 	// Populated relationships
@@ -206,6 +213,16 @@ export interface VirtualKeyProviderConfigUpdateRequest {
 }
 
 // Request types for API calls
+export interface ModelProbeResult {
+	virtual_key_id: string;
+	checked_at: string;
+	available_models: string[];
+	unavailable_models: string[];
+	errors?: Record<string, string>;
+	total: number;
+	duration_ms: number;
+}
+
 export interface CreateVirtualKeyRequest {
 	name: string;
 	description?: string;
@@ -217,6 +234,7 @@ export interface CreateVirtualKeyRequest {
 	rate_limit?: CreateRateLimitRequest;
 	is_active?: boolean;
 	calendar_aligned?: boolean;
+	model_probe_enabled?: boolean;
 	expires_at?: string; // RFC3339 UTC timestamp; omit for a key that never expires
 }
 
@@ -231,6 +249,7 @@ export interface UpdateVirtualKeyRequest {
 	rate_limit?: UpdateRateLimitRequest;
 	is_active?: boolean;
 	calendar_aligned?: boolean;
+	model_probe_enabled?: boolean;
 	reset_budget_usage?: boolean;
 	expires_at?: string; // RFC3339 UTC timestamp sets a new expiry, "" clears it, omit to leave unchanged
 }

@@ -43,6 +43,7 @@ import {
 	useGetAllKeysQuery,
 	useGetProvidersQuery,
 	useGetTeamQuery,
+	useProbeVirtualKeyModelsMutation,
 	useRemoveVirtualKeyBudgetOverrideMutation,
 	useRotateVirtualKeyMutation,
 	useSetVirtualKeyBudgetOverrideMutation,
@@ -158,6 +159,7 @@ const buildFormSchema = (t: TFunc) => {
 			// separate /virtual-keys/{id}/users endpoint rather than the VK payload.
 			userId: z.string().optional(),
 			isActive: z.boolean(),
+			modelProbeEnabled: z.boolean(),
 			expiresAt: z.string().nullable().optional(), // ISO 8601 datetime-local string, or null to clear
 			// Budget
 			budgetCalendarAligned: z.boolean(),
@@ -336,6 +338,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const [createVirtualKey, { isLoading: isCreating }] = useCreateVirtualKeyMutation();
 	const [updateVirtualKey, { isLoading: isUpdating }] = useUpdateVirtualKeyMutation();
 	const [rotateVirtualKey, { isLoading: isRotating }] = useRotateVirtualKeyMutation();
+	const [probeVirtualKeyModels, { isLoading: isProbing }] = useProbeVirtualKeyModelsMutation();
 	const [attachVirtualKeyUsers, { isLoading: isAttachingUser }] = useAttachVirtualKeyUsersMutation();
 	const [detachVirtualKeyUser, { isLoading: isDetachingUser }] = useDetachVirtualKeyUserMutation();
 	const [setBudgetOverride] = useSetVirtualKeyBudgetOverrideMutation();
@@ -360,6 +363,24 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const clearBudgetOverride = async (budgetId: string) => {
 		if (!virtualKey) throw new Error("Virtual key is required");
 		await removeBudgetOverride({ vkId: virtualKey.id, budgetId }).unwrap();
+	};
+
+	const runModelProbe = async () => {
+		if (!virtualKey) return;
+		setProbeError(null);
+		try {
+			const result = await probeVirtualKeyModels(virtualKey.id).unwrap();
+			toast.success(
+				t("virtualKeys.modelProbeSuccess", {
+					available: (result.available_models ?? []).length,
+					unavailable: (result.unavailable_models ?? []).length,
+				}),
+			);
+		} catch (error) {
+			const message = getErrorMessage(error);
+			setProbeError(message);
+			toast.error(message);
+		}
 	};
 
 	const availableKeys = keysData || [];
@@ -419,6 +440,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 			// The attached user arrives from a separate request; synced in below once it loads.
 			userId: "",
 			isActive: virtualKey?.is_active ?? true,
+			modelProbeEnabled: virtualKey?.model_probe_enabled ?? false,
 			expiresAt: virtualKey?.expires_at
 				? (() => {
 						const d = new Date(virtualKey.expires_at);
@@ -500,6 +522,9 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	const watchedTokenResetDuration = form.watch("tokenResetDuration");
 	const watchedRequestResetDuration = form.watch("requestResetDuration");
 	const watchedBudgetCalendarAligned = form.watch("budgetCalendarAligned");
+	const watchedModelProbeEnabled = form.watch("modelProbeEnabled");
+	const probeAvailableCount = virtualKey?.model_probe_available_models?.length ?? 0;
+	const probeUnavailableModels = virtualKey?.model_probe_unavailable_models ?? [];
 
 	// Calendar alignment is VK-wide and applies to both budgets and rate limits: show the
 	// toggle when any configured budget or rate-limit uses a calendar-alignable duration.
@@ -542,6 +567,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 	};
 
 	const [showCalendarAlignWarning, setShowCalendarAlignWarning] = useState(false);
+	const [probeError, setProbeError] = useState<string | null>(null);
 	const [showReassignTeamWarning, setShowReassignTeamWarning] = useState(false);
 	const [pendingTeamId, setPendingTeamId] = useState<string | null>(null);
 	const [showRotateWarning, setShowRotateWarning] = useState(false);
@@ -880,6 +906,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 								: undefined,
 					is_active: data.isActive,
 					calendar_aligned: data.budgetCalendarAligned,
+					model_probe_enabled: data.modelProbeEnabled,
 					reset_budget_usage: resetBudgetUsage,
 					...expiryPayload,
 				};
@@ -942,6 +969,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 					is_active: data.isActive,
 					// VK-level setting that governs both budget and rate-limit calendar alignment.
 					calendar_aligned: data.budgetCalendarAligned,
+					model_probe_enabled: data.modelProbeEnabled,
 					// Optional expiry: send as UTC ISO string, or omit for no expiry
 					...(data.expiresAt ? { expires_at: new Date(data.expiresAt).toISOString() } : {}),
 				};
@@ -1275,6 +1303,85 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 										<div className="text-destructive text-sm">{form.formState.errors.providerConfigs.message}</div>
 									)}
 								</div>
+
+								{/* Model availability probe — daily 01:00, probes every reachable model as this VK */}
+								<div className="space-y-3 rounded-md border p-3" data-testid="vk-model-probe-section">
+									<div className="flex items-start justify-between gap-4">
+										<div className="space-y-0.5">
+											<Label htmlFor="vk-model-probe-toggle" className="text-sm font-medium">
+												{t("virtualKeys.modelProbe")}
+											</Label>
+											<p id="vk-model-probe-description" className="text-muted-foreground text-xs">
+												{t("virtualKeys.modelProbeDescription")}
+											</p>
+										</div>
+										<Switch
+											id="vk-model-probe-toggle"
+											aria-describedby="vk-model-probe-description"
+											checked={watchedModelProbeEnabled}
+											onCheckedChange={(checked) =>
+												form.setValue("modelProbeEnabled", checked, {
+													shouldDirty: true,
+												})
+											}
+											data-testid="vk-model-probe-toggle"
+										/>
+									</div>
+									{isEditing && virtualKey?.model_probe_enabled ? (
+										<div className="space-y-2 border-t pt-3">
+											<div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+												<span>
+													{virtualKey.model_probe_checked_at
+														? t("virtualKeys.modelProbeLastChecked", {
+																time: new Date(virtualKey.model_probe_checked_at).toLocaleString(),
+															})
+														: t("virtualKeys.modelProbeNeverRun")}
+												</span>
+												{virtualKey.model_probe_checked_at ? (
+													<span>
+														{t("virtualKeys.modelProbeSummary", {
+															available: probeAvailableCount,
+															unavailable: probeUnavailableModels.length,
+														})}
+													</span>
+												) : null}
+											</div>
+											{virtualKey.model_probe_error ? (
+												<p className="text-destructive text-xs">
+													{t("virtualKeys.modelProbeError")}: {virtualKey.model_probe_error}
+												</p>
+											) : null}
+											{probeError ? <p className="text-destructive text-xs">{probeError}</p> : null}
+											{probeUnavailableModels.length > 0 ? (
+												<details className="text-xs">
+													<summary className="text-muted-foreground cursor-pointer">
+														{t("virtualKeys.modelProbeUnavailableHeading")} ({probeUnavailableModels.length})
+													</summary>
+													<ul className="mt-1 max-h-40 overflow-y-auto font-mono text-xs">
+														{probeUnavailableModels.map((model) => (
+															<li key={model} className="truncate py-0.5">
+																{model}
+															</li>
+														))}
+													</ul>
+												</details>
+											) : null}
+											<Button
+												type="button"
+												size="sm"
+												variant="outline"
+												onClick={runModelProbe}
+												disabled={isProbing}
+												data-testid="vk-model-probe-run"
+											>
+												{isProbing ? t("virtualKeys.modelProbeRunning") : t("virtualKeys.modelProbeRunNow")}
+											</Button>
+										</div>
+									) : isEditing && watchedModelProbeEnabled ? (
+										<p className="text-muted-foreground border-t pt-3 text-xs">{t("virtualKeys.modelProbeSaveFirst")}</p>
+									) : null}
+								</div>
+
 								<DottedSeparator className="mt-6 mb-5" />
 								{/* Budget Configuration */}
 								<div className="space-y-4">

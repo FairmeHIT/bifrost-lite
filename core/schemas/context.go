@@ -29,6 +29,7 @@ var reservedKeys = []any{
 	BifrostContextKeyDeferTraceCompletion,
 	BifrostContextKeyAttemptTrail,
 	BifrostContextKeyStreamGated,
+	BifrostContextKeySkipModelProbeGating,
 	BifrostContextKeyMCPHealthCheckRequest,
 	BifrostContextKeyUpstreamLatency,
 	BifrostContextKeyRoutingInfo,

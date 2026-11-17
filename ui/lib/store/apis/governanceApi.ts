@@ -27,6 +27,7 @@ import {
 	GetVirtualKeysResponse,
 	HealthCheckResponse,
 	ModelConfig,
+	ModelProbeResult,
 	ProviderGovernance,
 	PricingOverride,
 	RateLimit,
@@ -115,6 +116,14 @@ export const governanceApi = baseApi.injectEndpoints({
 				method: "POST",
 			}),
 			invalidatesTags: ["VirtualKeys"],
+		}),
+
+		probeVirtualKeyModels: builder.mutation<ModelProbeResult, string>({
+			query: (vkId) => ({
+				url: `/governance/virtual-keys/${vkId}/model-probe`,
+				method: "POST",
+			}),
+			invalidatesTags: (result, error, vkId) => [{ type: "VirtualKeys", id: vkId }, "VirtualKeys"],
 		}),
 
 		bulkRotateVirtualKeys: builder.mutation<BulkRotateVirtualKeysResponse, BulkRotateVirtualKeysRequest>({
@@ -887,6 +896,7 @@ export const {
 	useGetVirtualKeyQuery,
 	useCreateVirtualKeyMutation,
 	useUpdateVirtualKeyMutation,
+	useProbeVirtualKeyModelsMutation,
 	useRotateVirtualKeyMutation,
 	useBulkRotateVirtualKeysMutation,
 	useDeleteVirtualKeyMutation,

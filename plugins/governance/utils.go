@@ -193,6 +193,10 @@ func (p *GovernancePlugin) filterModelsForVirtualKey(
 			}
 		}
 
+		if isAllowed && !modelProbeGatingSkipped(ctx) && modelProbeUnavailableInList(vk, model.ID) {
+			continue
+		}
+
 		if isAllowed {
 			filteredModels = append(filteredModels, model)
 		}

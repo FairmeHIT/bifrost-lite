@@ -23,6 +23,7 @@ const (
 	DecisionTokenLimited       Decision = "token_limited"
 	DecisionRequestLimited     Decision = "request_limited"
 	DecisionModelBlocked       Decision = "model_blocked"
+	DecisionModelUnavailable   Decision = "model_unavailable"
 	DecisionProviderBlocked    Decision = "provider_blocked"
 	DecisionMCPToolBlocked     Decision = "mcp_tool_blocked"
 )

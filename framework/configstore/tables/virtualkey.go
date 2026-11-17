@@ -245,6 +245,20 @@ type TableVirtualKey struct {
 
 	CalendarAligned bool `gorm:"default:false" json:"calendar_aligned"`
 
+	// ModelProbeEnabled turns on daily model availability probing for this virtual
+	// key. When enabled, the gateway periodically calls each model this key can
+	// reach and records which ones answered; known-unavailable models are hidden
+	// from /v1/models and rejected at inference time.
+	ModelProbeEnabled bool `gorm:"default:false" json:"model_probe_enabled"`
+	// ModelProbeAvailableModels and ModelProbeUnavailableModels are the latest
+	// probe outcome. Model IDs are stored provider-qualified ("provider/model")
+	// so a model that is down on one provider does not block the same model on
+	// another provider.
+	ModelProbeAvailableModels   schemas.WhiteList `gorm:"type:text;serializer:json" json:"model_probe_available_models,omitempty"`
+	ModelProbeUnavailableModels schemas.WhiteList `gorm:"type:text;serializer:json" json:"model_probe_unavailable_models,omitempty"`
+	ModelProbeCheckedAt         *time.Time        `gorm:"type:timestamp;null" json:"model_probe_checked_at,omitempty"`
+	ModelProbeError             string            `gorm:"type:text" json:"model_probe_error,omitempty"`
+
 	// Relationships
 	Team      *TableTeam      `gorm:"foreignKey:TeamID" json:"team,omitempty"`
 	Customer  *TableCustomer  `gorm:"foreignKey:CustomerID" json:"customer,omitempty"`

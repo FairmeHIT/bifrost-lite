@@ -2937,6 +2937,14 @@ func mergeGovernanceConfig(ctx context.Context, config *Config, configData *Conf
 					// Resolve MCP client names to IDs for config file mcp_configs
 					configData.Governance.VirtualKeys[i].MCPConfigs = resolveMCPConfigClientIDs(
 						ctx, config.ConfigStore, configData.Governance.VirtualKeys[i].MCPConfigs, newVirtualKey.ID)
+					// Probe results are runtime state produced by the gateway, not
+					// part of the config file. Carry them across a file sync so a
+					// restart does not silently clear the latest probe outcome.
+					configData.Governance.VirtualKeys[i].ModelProbeEnabled = existingVirtualKey.ModelProbeEnabled
+					configData.Governance.VirtualKeys[i].ModelProbeAvailableModels = existingVirtualKey.ModelProbeAvailableModels
+					configData.Governance.VirtualKeys[i].ModelProbeUnavailableModels = existingVirtualKey.ModelProbeUnavailableModels
+					configData.Governance.VirtualKeys[i].ModelProbeCheckedAt = existingVirtualKey.ModelProbeCheckedAt
+					configData.Governance.VirtualKeys[i].ModelProbeError = existingVirtualKey.ModelProbeError
 					virtualKeysToUpdate = append(virtualKeysToUpdate, configData.Governance.VirtualKeys[i])
 					governanceConfig.VirtualKeys[j] = configData.Governance.VirtualKeys[i]
 				} else {

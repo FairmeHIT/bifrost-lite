@@ -196,6 +196,12 @@ type BifrostHTTPServer struct {
 	liveModelRefresherMu   sync.Mutex
 	liveModelRefresherStop func()
 
+	// Background virtual-key model probe. Runs once a day at 01:00 local time.
+	modelProbeSchedulerMu   sync.Mutex
+	modelProbeSchedulerStop func()
+	modelProbeInFlightMu    sync.Mutex
+	modelProbeInFlight      map[string]struct{}
+
 	// refreshInFlight coordinates on-demand model refreshes. Distinct keys for
 	// the same provider may refresh concurrently, while an all-keys refresh is
 	// exclusive with every key refresh for that provider.
@@ -2196,6 +2202,7 @@ func (s *BifrostHTTPServer) Bootstrap(ctx context.Context) error {
 	// upstream starts serving mid-uptime stays invisible until a restart or a
 	// key edit, since nothing else re-fetches list-models.
 	s.RestartLiveModelRefresher(s.Ctx)
+	s.startModelProbeScheduler(s.Ctx)
 	return nil
 }
 
@@ -2284,6 +2291,8 @@ func (s *BifrostHTTPServer) Start() error {
 			}
 			logger.Info("stopping live model refresher...")
 			s.stopLiveModelRefresher()
+			logger.Info("stopping model probe scheduler...")
+			s.stopModelProbeScheduler()
 			if s.SidekiqRunner != nil {
 				logger.Info("stopping sidekiq runner...")
 				s.SidekiqRunner.Shutdown()
