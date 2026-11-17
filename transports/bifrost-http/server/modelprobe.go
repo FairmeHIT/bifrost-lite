@@ -362,10 +362,19 @@ func modelProbeErrorIsSkippable(bifrostErr *schemas.BifrostError) bool {
 		return true
 	}
 	if code == 400 || code == 404 || code == 405 || code == 422 {
-		for _, hint := range []string{"not found", "does not exist", "unsupported", "not supported", "not a chat", "invalid model", "unknown model", "no such model", "not available in this"} {
+		// These errors usually describe a limitation of the probe (a non-chat
+		// model, an unsupported operation, a route the provider does not expose)
+		// rather than a broken model.
+		for _, hint := range []string{"not a chat", "unsupported", "not supported", "does not support", "not available in this", "method not allowed"} {
 			if strings.Contains(message, hint) {
 				return true
 			}
+		}
+		// A 404 that does not mention a model is a route/endpoint problem.
+		// A 404/400 that names the model is a real "this model does not exist"
+		// answer and should be marked unavailable.
+		if code == 404 && !strings.Contains(message, "model") {
+			return true
 		}
 	}
 	return false
