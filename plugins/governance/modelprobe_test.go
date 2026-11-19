@@ -171,3 +171,47 @@ func TestModelProbeAppliesToRequestType(t *testing.T) {
 		}
 	}
 }
+
+func TestModelProbeProviderExempt(t *testing.T) {
+	vk := &configstoreTables.TableVirtualKey{
+		ModelProbeEnabled:           true,
+		ModelProbeAvailableModels:   schemas.WhiteList{"shangtang/deepseek-v4-flash"},
+		ModelProbeUnavailableModels: schemas.WhiteList{"shangtang/kimi-k2"},
+		ModelProbeExemptProviders:   schemas.WhiteList{"shangtang"},
+	}
+
+	if !modelProbeProviderExempt(vk, schemas.ModelProvider("shangtang")) {
+		t.Fatal("expected shangtang to be exempt")
+	}
+	if modelProbeProviderExempt(vk, schemas.ModelProvider("ShangtangX")) {
+		t.Fatal("exemption must require an exact provider-name match (case-insensitive)")
+	}
+	if modelProbeProviderExempt(vk, schemas.OpenAI) {
+		t.Fatal("openai must not be exempt")
+	}
+
+	if modelProbeUnavailable(vk, schemas.ModelProvider("shangtang"), "kimi-k2") {
+		t.Fatal("exempt provider models must never be blocked by probe results")
+	}
+	if modelProbeUnavailable(vk, schemas.ModelProvider("shangtang"), "never-probed") {
+		t.Fatal("exempt provider models must not require a probe")
+	}
+	if !modelProbeUnavailable(vk, schemas.OpenAI, "never-probed") {
+		t.Fatal("non-exempt providers must still be gated")
+	}
+
+	if modelProbeUnavailableInList(vk, "shangtang/kimi-k2") {
+		t.Fatal("exempt provider must stay listed even with an unavailable probe entry")
+	}
+	if modelProbeUnavailableInList(vk, "shangtang/unlisted-model") {
+		t.Fatal("exempt provider models must never be hidden from model lists")
+	}
+	if !modelProbeUnavailableInList(vk, "openai/gpt-4o") {
+		t.Fatal("non-exempt providers must still be gated in lists")
+	}
+
+	vk.ModelProbeExemptProviders = nil
+	if !modelProbeUnavailable(vk, schemas.ModelProvider("shangtang"), "kimi-k2") {
+		t.Fatal("removing the exemption must restore gating")
+	}
+}

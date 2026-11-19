@@ -471,6 +471,7 @@ var configstoreMigrationSteps = []migrationStep{
 	{IDs: []string{"add_cost_per_request_pricing_column"}, run: migrationAddCostPerRequestPricingColumn},
 	{IDs: []string{"add_vk_model_probe_columns"}, run: migrationAddVKModelProbeColumns},
 	{IDs: []string{"reset_legacy_vk_model_probe_results"}, run: migrationResetLegacyVKModelProbeResults},
+	{IDs: []string{"add_vk_model_probe_exempt_providers"}, run: migrationAddVKModelProbeExemptProviders},
 }
 
 // quoteSQLiteIdentifier quotes a SQLite identifier, escaping any double quotes.
@@ -11019,6 +11020,29 @@ func migrationAddVKModelProbeColumns(ctx context.Context, db *gorm.DB, logger sc
 				}
 			}
 			return nil
+		},
+	}})
+	if err := m.Migrate(); err != nil {
+		return fmt.Errorf("error running %s migration: %w", migrationName, err)
+	}
+	return nil
+}
+
+// migrationAddVKModelProbeExemptProviders adds the model-probe provider exemption
+// whitelist to virtual keys.
+func migrationAddVKModelProbeExemptProviders(ctx context.Context, db *gorm.DB, logger schemas.Logger) error {
+	migrationName := "add_vk_model_probe_exempt_providers"
+	logger.Info("[configstore] starting migration %s", migrationName)
+	defer logger.Info("[configstore] finished migration %s", migrationName)
+	m := migrator.New(db, migrator.DefaultOptions, []*migrator.Migration{{
+		ID: migrationName,
+		Migrate: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			return addColumnIfNotExists(tx, logger, &tables.TableVirtualKey{}, "model_probe_exempt_providers")
+		},
+		Rollback: func(tx *gorm.DB) error {
+			tx = tx.WithContext(ctx)
+			return dropColumnIfExists(tx, logger, &tables.TableVirtualKey{}, "model_probe_exempt_providers")
 		},
 	}})
 	if err := m.Migrate(); err != nil {

@@ -94066,6 +94066,13 @@
             "type": "string",
             "description": "Human-readable error summary from the last probe run, when any model or provider failed."
           },
+          "model_probe_exempt_providers": {
+            "type": "array",
+            "description": "Provider names exempt from automatic model probing. Their models are never probed and never gated by probe results.",
+            "items": {
+              "type": "string"
+            }
+          },
           "team": {
             "$ref": "#/components/schemas/Team"
           },
@@ -94546,6 +94553,13 @@
             "type": "boolean",
             "description": "Enable daily model availability probing for this virtual key."
           },
+          "model_probe_exempt_providers": {
+            "type": "array",
+            "description": "Providers exempt from automatic model probing; their models are always allowed regardless of probe results.",
+            "items": {
+              "type": "string"
+            }
+          },
           "expires_at": {
             "type": "string",
             "format": "date-time",
@@ -94657,6 +94671,13 @@
           "model_probe_enabled": {
             "type": "boolean",
             "description": "Enable or disable daily model availability probing for this virtual key. Disabling clears the stored probe result."
+          },
+          "model_probe_exempt_providers": {
+            "type": "array",
+            "description": "Providers exempt from automatic model probing; their models are always allowed regardless of probe results.",
+            "items": {
+              "type": "string"
+            }
           },
           "reset_budget_usage": {
             "type": "boolean",

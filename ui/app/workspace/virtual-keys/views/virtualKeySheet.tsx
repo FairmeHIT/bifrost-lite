@@ -160,6 +160,7 @@ const buildFormSchema = (t: TFunc) => {
 			userId: z.string().optional(),
 			isActive: z.boolean(),
 			modelProbeEnabled: z.boolean(),
+			modelProbeExemptProviders: z.array(z.string()).optional(),
 			expiresAt: z.string().nullable().optional(), // ISO 8601 datetime-local string, or null to clear
 			// Budget
 			budgetCalendarAligned: z.boolean(),
@@ -441,6 +442,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 			userId: "",
 			isActive: virtualKey?.is_active ?? true,
 			modelProbeEnabled: virtualKey?.model_probe_enabled ?? false,
+			modelProbeExemptProviders: virtualKey?.model_probe_exempt_providers ?? [],
 			expiresAt: virtualKey?.expires_at
 				? (() => {
 						const d = new Date(virtualKey.expires_at);
@@ -907,6 +909,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 					is_active: data.isActive,
 					calendar_aligned: data.budgetCalendarAligned,
 					model_probe_enabled: data.modelProbeEnabled,
+					model_probe_exempt_providers: data.modelProbeExemptProviders,
 					reset_budget_usage: resetBudgetUsage,
 					...expiryPayload,
 				};
@@ -970,6 +973,7 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 					// VK-level setting that governs both budget and rate-limit calendar alignment.
 					calendar_aligned: data.budgetCalendarAligned,
 					model_probe_enabled: data.modelProbeEnabled,
+					model_probe_exempt_providers: data.modelProbeExemptProviders,
 					// Optional expiry: send as UTC ISO string, or omit for no expiry
 					...(data.expiresAt ? { expires_at: new Date(data.expiresAt).toISOString() } : {}),
 				};
@@ -1327,6 +1331,29 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 											data-testid="vk-model-probe-toggle"
 										/>
 									</div>
+									{watchedModelProbeEnabled ? (
+										<div className="space-y-1.5 border-t pt-3" data-testid="vk-model-probe-exempt">
+											<Label className="text-sm font-medium">
+												{t("virtualKeys.modelProbeExemptProviders")}
+											</Label>
+											<p className="text-muted-foreground text-xs">
+												{t("virtualKeys.modelProbeExemptProvidersDescription")}
+											</p>
+											<MultiSelect
+												options={availableProviders.map((provider) => ({
+													label: provider.name,
+													value: provider.name,
+												}))}
+												defaultValue={form.getValues("modelProbeExemptProviders")}
+												onValueChange={(values) =>
+													form.setValue("modelProbeExemptProviders", values, { shouldDirty: true })
+												}
+												placeholder={t("virtualKeys.modelProbeExemptProvidersPlaceholder")}
+												maxCount={5}
+												variant="secondary"
+											/>
+										</div>
+									) : null}
 									{isEditing && virtualKey?.model_probe_enabled ? (
 										<div className="space-y-2 border-t pt-3">
 											<div className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">

@@ -877,6 +877,17 @@ The endpoint returns `409` when a probe for the same key is already running, and
 </Tab>
 </Tabs>
 
+**Exempt providers (白名单).** Providers listed in `model_probe_exempt_providers` are exempt from automatic probing: Bifrost never lists or probes their models, and their models are always allowed regardless of probe results. Adding a provider to the list (or removing it later) takes effect immediately for enforcement; stale probe entries for a newly exempted provider are dropped.
+
+```bash
+# Exempt providers from the probe (create or update)
+curl -X PUT http://localhost:8080/api/governance/virtual-keys/<VK_ID> \
+  -H "Content-Type: application/json" \
+  -d '{"model_probe_enabled": true, "model_probe_exempt_providers": ["openai", "mycustomprovider"]}'
+```
+
+In the Web UI, enable **Model availability probe**, then pick providers under **Exempt providers (whitelist)** before saving.
+
 **Enforcement.** When enabled, the probe uses a strict allowlist: models that have not passed the probe are hidden from `GET /v1/models` and rejected for model inference requests with `403` and error type `model_unavailable`. This includes untested models and transient failures such as 503 or timeout. The chat probe also gates non-chat inference, such as embeddings and image generation, which may not support chat and therefore may be blocked. Run the probe again after recovery to restore access. Enabling the feature before a successful probe can block all inference. On upgrade, results produced by the former 2xx-only criterion are cleared and must be probed again. Disabling the feature clears the stored outcome and restores the normal governance rules.
 
 > **Tip:** The probe calls the gateway's core routing path as the virtual key, but does not consume the key's budgets, rate limits, or usage tracking. Probes run up to 16 in parallel, time out per model after 10 seconds, and probe at most 2,000 models per run.

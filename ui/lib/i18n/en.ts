@@ -969,6 +969,10 @@ export const en: Dict = {
 		modelProbeSummary: "{available} available · {unavailable} unavailable",
 		modelProbeAvailableHeading: "Available models",
 		modelProbeUnavailableHeading: "Unavailable models",
+		modelProbeExemptProviders: "Exempt providers (whitelist)",
+		modelProbeExemptProvidersDescription:
+			"Providers on this list are never probed and their models are always allowed, regardless of probe results.",
+		modelProbeExemptProvidersPlaceholder: "Select providers to exempt from probing",
 		modelTitle: "Model: {model}",
 		namePlaceholder: "e.g., Production API Key",
 		nameRequired: "Virtual key name is required",

@@ -245,6 +245,7 @@ type CreateVirtualKeyRequest struct {
 	IsActive          *bool                   `json:"is_active,omitempty"`
 	CalendarAligned   bool                    `json:"calendar_aligned,omitempty"`    // When true, all budgets reset at clean calendar boundaries
 	ModelProbeEnabled *bool                   `json:"model_probe_enabled,omitempty"` // Enable daily model availability probing for this virtual key
+	ModelProbeExemptProviders *schemas.WhiteList `json:"model_probe_exempt_providers,omitempty"` // Providers exempt from automatic model probing; their models are never gated by probe results
 	ExpiresAt         *time.Time              `json:"expires_at,omitempty"`          // Optional expiry; nil means never expires
 }
 
@@ -291,6 +292,7 @@ type UpdateVirtualKeyRequest struct {
 	IsActive          *bool                        `json:"is_active,omitempty"`
 	CalendarAligned   *bool                        `json:"calendar_aligned,omitempty"`    // When true, all budgets reset at clean calendar boundaries
 	ModelProbeEnabled *bool                        `json:"model_probe_enabled,omitempty"` // Enable or disable daily model availability probing
+	ModelProbeExemptProviders *schemas.WhiteList   `json:"model_probe_exempt_providers,omitempty"` // Providers exempt from automatic model probing; their models are never gated by probe results
 	ResetBudgetUsage  *bool                        `json:"reset_budget_usage,omitempty"`
 	ExpiresAt         *string                      `json:"expires_at,omitempty"` // RFC3339 timestamp sets a new expiry, "" clears it, omitted leaves it unchanged
 }
@@ -1767,6 +1769,14 @@ func (h *GovernanceHandler) createVirtualKey(ctx *fasthttp.RequestCtx) {
 		}
 	}
 	var vk configstoreTables.TableVirtualKey
+	var exemptProviders schemas.WhiteList
+	if req.ModelProbeExemptProviders != nil {
+		exemptProviders = *req.ModelProbeExemptProviders
+		if err := exemptProviders.Validate(); err != nil {
+			SendError(ctx, 400, fmt.Sprintf("invalid model_probe_exempt_providers: %v", err))
+			return
+		}
+	}
 	if err := h.configStore.ExecuteTransaction(ctx, func(tx *gorm.DB) error {
 		vk = configstoreTables.TableVirtualKey{
 			ID:                uuid.NewString(),
@@ -1778,6 +1788,7 @@ func (h *GovernanceHandler) createVirtualKey(ctx *fasthttp.RequestCtx) {
 			IsActive:          isActive,
 			CalendarAligned:   req.CalendarAligned,
 			ModelProbeEnabled: req.ModelProbeEnabled != nil && *req.ModelProbeEnabled,
+			ModelProbeExemptProviders: exemptProviders,
 			ExpiresAt:         req.ExpiresAt,
 		}
 		if err := h.configStore.CreateVirtualKey(ctx, &vk, tx); err != nil {
@@ -2174,6 +2185,16 @@ func (h *GovernanceHandler) updateVirtualKey(ctx *fasthttp.RequestCtx) {
 				vk.ModelProbeCheckedAt = nil
 				vk.ModelProbeError = ""
 			}
+		}
+		if req.ModelProbeExemptProviders != nil {
+			exemptProviders := *req.ModelProbeExemptProviders
+			if err := exemptProviders.Validate(); err != nil {
+				return &badRequestError{err: fmt.Errorf("invalid model_probe_exempt_providers: %w", err)}
+			}
+			vk.ModelProbeExemptProviders = exemptProviders
+			// Newly exempted providers must not stay gated by stale probe results.
+			vk.ModelProbeAvailableModels = filterVKModelProbeEntriesForExemptProviders(vk, vk.ModelProbeAvailableModels)
+			vk.ModelProbeUnavailableModels = filterVKModelProbeEntriesForExemptProviders(vk, vk.ModelProbeUnavailableModels)
 		}
 		// VK top-level and per-provider budgets/rate-limits are stored in VK-scoped model
 		// configs (the single source of truth), written by syncVKGovernanceToModelConfigs
@@ -5577,4 +5598,21 @@ func (h *GovernanceHandler) getVirtualKeyQuota(ctx *fasthttp.RequestCtx) {
 		"provider_configs": vk.ProviderConfigs,
 		"model_configs":    models,
 	})
+}
+
+// filterVKModelProbeEntriesForExemptProviders removes provider-qualified probe
+// entries whose provider is on the virtual key's model-probe exemption list, so
+// newly exempted providers are not gated by stale probe results.
+func filterVKModelProbeEntriesForExemptProviders(vk *configstoreTables.TableVirtualKey, entries schemas.WhiteList) schemas.WhiteList {
+	if len(vk.ModelProbeExemptProviders) == 0 || len(entries) == 0 {
+		return entries
+	}
+	kept := make(schemas.WhiteList, 0, len(entries))
+	for _, entry := range entries {
+		if idx := strings.Index(entry, "/"); idx > 0 && vk.ModelProbeExemptProviders.Contains(entry[:idx]) {
+			continue
+		}
+		kept = append(kept, entry)
+	}
+	return kept
 }

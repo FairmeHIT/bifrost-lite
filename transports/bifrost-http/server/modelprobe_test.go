@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/maximhq/bifrost/core/schemas"
+	configstoreTables "github.com/maximhq/bifrost/framework/configstore/tables"
 )
 
 func TestPersistModelProbeResultRejectsNilVirtualKey(t *testing.T) {
@@ -69,5 +70,23 @@ func TestModelProbeResponseContainsOK(t *testing.T) {
 				t.Fatalf("got %v, want %v", got, tc.want)
 			}
 		})
+	}
+}
+
+func TestFilterExemptProbeEntries(t *testing.T) {
+	vk := &configstoreTables.TableVirtualKey{
+		ModelProbeExemptProviders: schemas.WhiteList{"shangtang"},
+	}
+	entries := []string{"openai/gpt-4o", "shangtang/kimi-k2", "ShangTang/deepseek-v4-flash"}
+	kept := filterExemptProbeEntries(vk, entries)
+	if len(kept) != 1 || kept[0] != "openai/gpt-4o" {
+		t.Fatalf("expected only the non-exempt entry to survive, got %v", kept)
+	}
+	if got := filterExemptProbeEntries(vk, nil); got != nil {
+		t.Fatal("nil input must stay nil")
+	}
+	none := &configstoreTables.TableVirtualKey{}
+	if got := filterExemptProbeEntries(none, entries); len(got) != 3 {
+		t.Fatal("no exemptions must keep all entries")
 	}
 }

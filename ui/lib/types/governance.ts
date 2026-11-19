@@ -113,6 +113,8 @@ export interface VirtualKey {
 	model_probe_unavailable_models?: string[];
 	model_probe_checked_at?: string | null;
 	model_probe_error?: string;
+	// Providers exempt from automatic probing (白名单); never probed, never gated by probe results
+	model_probe_exempt_providers?: string[];
 	created_at: string;
 	updated_at: string;
 	// Populated relationships
@@ -235,6 +237,7 @@ export interface CreateVirtualKeyRequest {
 	is_active?: boolean;
 	calendar_aligned?: boolean;
 	model_probe_enabled?: boolean;
+	model_probe_exempt_providers?: string[];
 	expires_at?: string; // RFC3339 UTC timestamp; omit for a key that never expires
 }
 
@@ -250,6 +253,7 @@ export interface UpdateVirtualKeyRequest {
 	is_active?: boolean;
 	calendar_aligned?: boolean;
 	model_probe_enabled?: boolean;
+	model_probe_exempt_providers?: string[];
 	reset_budget_usage?: boolean;
 	expires_at?: string; // RFC3339 UTC timestamp sets a new expiry, "" clears it, omit to leave unchanged
 }

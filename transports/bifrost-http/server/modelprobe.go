@@ -235,6 +235,12 @@ func (s *BifrostHTTPServer) collectModelProbeCandidates(ctx *schemas.BifrostCont
 			continue
 		}
 		providerSeen[provider] = struct{}{}
+		if modelProbeProviderExemptServer(vk, provider) {
+			// Exempt providers are not probed at all: no listing, no catalog
+			// fallback, no chat calls. Their models are never gated by probe
+			// results.
+			continue
+		}
 		providerUnrestricted[provider] = pc.AllowedModels.IsUnrestricted()
 		providerOrder = append(providerOrder, provider)
 		for _, model := range pc.AllowedModels {
@@ -279,6 +285,9 @@ func (s *BifrostHTTPServer) collectModelProbeCandidates(ctx *schemas.BifrostCont
 		}
 		provider := schemas.ModelProvider(entry[:idx])
 		if _, configured := providerSeen[provider]; !configured {
+			continue
+		}
+		if modelProbeProviderExemptServer(vk, provider) {
 			continue
 		}
 		add(provider, entry[idx+1:])
@@ -420,6 +429,37 @@ func summarizeProbeErrors(errorsByModel map[string]string) string {
 	return strings.Join(parts, "; ")
 }
 
+// modelProbeProviderExemptServer mirrors the governance plugin's exemption check
+// locally: providers on the VK's model-probe exemption list are never probed.
+func modelProbeProviderExemptServer(vk *configstoreTables.TableVirtualKey, provider schemas.ModelProvider) bool {
+	if vk == nil || len(vk.ModelProbeExemptProviders) == 0 {
+		return false
+	}
+	for _, exempt := range vk.ModelProbeExemptProviders {
+		if strings.EqualFold(strings.TrimSpace(exempt), string(provider)) {
+			return true
+		}
+	}
+	return false
+}
+
+// filterExemptProbeEntries removes provider-qualified entries whose provider is
+// on the exemption list. Returns nil when the input is nil.
+func filterExemptProbeEntries(vk *configstoreTables.TableVirtualKey, entries []string) []string {
+	if entries == nil || len(vk.ModelProbeExemptProviders) == 0 {
+		return entries
+	}
+	kept := make([]string, 0, len(entries))
+	for _, entry := range entries {
+		idx := strings.Index(entry, "/")
+		if idx > 0 && modelProbeProviderExemptServer(vk, schemas.ModelProvider(entry[:idx])) {
+			continue
+		}
+		kept = append(kept, entry)
+	}
+	return kept
+}
+
 func (s *BifrostHTTPServer) persistModelProbeResult(ctx context.Context, vk *configstoreTables.TableVirtualKey, available, unavailable []string, checkedAt *time.Time, errorMessage string) error {
 	if vk == nil {
 		return errors.New("cannot persist model probe result for nil virtual key")
@@ -440,6 +480,12 @@ func (s *BifrostHTTPServer) persistModelProbeResult(ctx context.Context, vk *con
 		return handlers.ErrModelProbeDisabled
 	}
 	vk = fresh
+	// Drop entries for providers that became exempt since the probe ran, so a
+	// newly-exempted provider's stale probe outcome cannot gate its models.
+	if len(vk.ModelProbeExemptProviders) > 0 && (available != nil || unavailable != nil) {
+		available = filterExemptProbeEntries(vk, available)
+		unavailable = filterExemptProbeEntries(vk, unavailable)
+	}
 	if checkedAt != nil {
 		vk.ModelProbeCheckedAt = checkedAt
 	}

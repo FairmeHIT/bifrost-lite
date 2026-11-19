@@ -82,9 +82,27 @@ func modelProbeEntryMatches(entry string, provider schemas.ModelProvider, model 
 		strings.EqualFold(entryModel, requestModel)
 }
 
+// modelProbeProviderExempt reports whether the provider is on the model-probe
+// exemption list. Exempt providers are never probed and never gated by probe
+// results — their models are always treated as available.
+func modelProbeProviderExempt(vk *configstoreTables.TableVirtualKey, provider schemas.ModelProvider) bool {
+	if vk == nil || len(vk.ModelProbeExemptProviders) == 0 {
+		return false
+	}
+	for _, exempt := range vk.ModelProbeExemptProviders {
+		if strings.EqualFold(strings.TrimSpace(exempt), string(provider)) {
+			return true
+		}
+	}
+	return false
+}
+
 // modelProbeUnavailable enforces the latest available provider/model whitelist.
 func modelProbeUnavailable(vk *configstoreTables.TableVirtualKey, provider schemas.ModelProvider, model string) bool {
 	if vk == nil || !vk.ModelProbeEnabled {
+		return false
+	}
+	if modelProbeProviderExempt(vk, provider) {
 		return false
 	}
 	if strings.TrimSpace(model) == "" {
@@ -112,6 +130,9 @@ func modelProbeUnavailableInList(vk *configstoreTables.TableVirtualKey, modelID 
 		return false
 	}
 	modelID = strings.TrimSpace(modelID)
+	if provider, _, ok := splitProbeEntry(modelID); ok && modelProbeProviderExempt(vk, provider) {
+		return false
+	}
 	if provider, model, ok := splitProbeEntry(modelID); ok {
 		for _, pc := range vk.ProviderConfigs {
 			if strings.EqualFold(pc.Provider, string(provider)) {

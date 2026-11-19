@@ -258,6 +258,10 @@ type TableVirtualKey struct {
 	ModelProbeUnavailableModels schemas.WhiteList `gorm:"type:text;serializer:json" json:"model_probe_unavailable_models,omitempty"`
 	ModelProbeCheckedAt         *time.Time        `gorm:"type:timestamp;null" json:"model_probe_checked_at,omitempty"`
 	ModelProbeError             string            `gorm:"type:text" json:"model_probe_error,omitempty"`
+	// ModelProbeExemptProviders lists provider names exempt from automatic model
+	// probing. Providers on this list are never probed, and their models are not
+	// gated by previous probe results (always treated as available).
+	ModelProbeExemptProviders schemas.WhiteList `gorm:"type:text;serializer:json" json:"model_probe_exempt_providers,omitempty"`
 
 	// Relationships
 	Team      *TableTeam      `gorm:"foreignKey:TeamID" json:"team,omitempty"`
