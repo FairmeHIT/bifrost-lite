@@ -124,7 +124,6 @@ function SheetContent({
 					)}
 					{...props}
 				>
-					<span className="corner-brackets-bottom" aria-hidden="true" />
 					{children}
 				</SheetPrimitive.Content>
 			</SheetPortal>

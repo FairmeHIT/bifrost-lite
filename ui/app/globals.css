@@ -322,68 +322,70 @@
 }
 
 /* Corner brackets — the signature sci-fi frame. Set --corner to recolor.
- * Top corners come from ::before/::after; bottom corners need a companion
- * element with the `corner-brackets-bottom` utility (see Card for the usage).
- * Uses 0 instead of -1px offsets so corners work inside overflow:auto containers. */
+ *
+ * All four corners are painted as background layers on the element itself, not
+ * as ::before/::after or a companion <span>. Pseudo-elements and absolutely
+ * positioned children are laid out inside the scrollable content, so on any
+ * frame that scrolls (SheetContent, the app shell, a Card inside an overflow
+ * container) they slide up with the content: the bottom pair leaves the bottom
+ * edge and surfaces mid-box. Background layers are painted on the element's own
+ * box and stay pinned to it at every scroll offset.
+ *
+ * One pair of layers per corner: a horizontal arm and a vertical arm. */
 @utility corner-brackets {
 	--corner: var(--accent-bright);
+	--corner-size: 16px;
+	--corner-weight: 2px;
+	--corner-halo: 20px;
 	position: relative;
-	&::before,
-	&::after {
-		content: "";
-		position: absolute;
-		width: 16px;
-		height: 16px;
-		pointer-events: none;
-		z-index: 2;
-		border: 0 solid var(--corner);
-		filter: drop-shadow(0 0 4px color-mix(in srgb, var(--corner) 70%, transparent));
-	}
-	&::before {
-		top: 0;
-		left: 0;
-		border-top-width: 2px;
-		border-left-width: 2px;
-		border-top-left-radius: 2px;
-	}
-	&::after {
-		top: 0;
-		right: 0;
-		border-top-width: 2px;
-		border-right-width: 2px;
-		border-top-right-radius: 2px;
-	}
+	background-image:
+		/* glow, one radial per corner */
+		radial-gradient(circle at 0 0, color-mix(in srgb, var(--corner) 25%, transparent), transparent var(--corner-halo)),
+		radial-gradient(circle at 100% 0, color-mix(in srgb, var(--corner) 25%, transparent), transparent var(--corner-halo)),
+		radial-gradient(circle at 0 100%, color-mix(in srgb, var(--corner) 25%, transparent), transparent var(--corner-halo)),
+		radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--corner) 25%, transparent), transparent var(--corner-halo)),
+		/* arms: horizontal then vertical, per corner */ linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner)),
+		linear-gradient(var(--corner), var(--corner));
+	background-size:
+		var(--corner-halo) var(--corner-halo),
+		var(--corner-halo) var(--corner-halo),
+		var(--corner-halo) var(--corner-halo),
+		var(--corner-halo) var(--corner-halo),
+		var(--corner-size) var(--corner-weight),
+		var(--corner-weight) var(--corner-size),
+		var(--corner-size) var(--corner-weight),
+		var(--corner-weight) var(--corner-size),
+		var(--corner-size) var(--corner-weight),
+		var(--corner-weight) var(--corner-size),
+		var(--corner-size) var(--corner-weight),
+		var(--corner-weight) var(--corner-size);
+	background-position:
+		left top,
+		right top,
+		left bottom,
+		right bottom,
+		left top,
+		left top,
+		right top,
+		right top,
+		left bottom,
+		left bottom,
+		right bottom,
+		right bottom;
+	background-repeat: no-repeat;
 }
 
-/* Bottom corners companion — render <span class="corner-brackets-bottom" aria-hidden /> */
+/* Deprecated no-op: the corners are painted by `corner-brackets` alone, so the
+ * companion <span> is no longer needed. Kept as display:none so stale markup
+ * (which would otherwise become an empty flex item and add a gap) stays inert. */
 @utility corner-brackets-bottom {
-	position: absolute;
-	inset: 0;
-	pointer-events: none;
-	z-index: 2;
-	&::before,
-	&::after {
-		content: "";
-		position: absolute;
-		width: 16px;
-		height: 16px;
-		border: 0 solid var(--corner);
-		filter: drop-shadow(0 0 4px color-mix(in srgb, var(--corner) 70%, transparent));
-	}
-	&::before {
-		bottom: 0;
-		left: 0;
-		border-bottom-width: 2px;
-		border-left-width: 2px;
-		border-bottom-left-radius: 2px;
-	}
-	&::after {
-		bottom: 0;
-		right: 0;
-		border-bottom-width: 2px;
-		border-right-width: 2px;
-		border-bottom-right-radius: 2px;
-	}
+	display: none;
 }
 
 @utility text-glow {

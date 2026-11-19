@@ -136,7 +136,6 @@ export function PromoCardStack({ cards, className = "", onCardsEmpty, onDismiss 
 							<CardContent className="text-muted-foreground mt-0 flex-1 overflow-y-auto px-1 pt-0 pb-1 text-xs">
 								{typeof card.description === "string" ? card.description : card.description}
 							</CardContent>
-							<span className="corner-brackets-bottom" aria-hidden="true" />
 						</Card>
 					</div>
 				);

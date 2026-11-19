@@ -13,7 +13,6 @@ function Card({ className, children, ...props }: React.ComponentProps<"div">) {
 			{...props}
 		>
 			{children}
-			<span className="corner-brackets-bottom" aria-hidden="true" />
 		</div>
 	);
 }

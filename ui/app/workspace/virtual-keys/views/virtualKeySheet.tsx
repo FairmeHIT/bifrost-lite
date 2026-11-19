@@ -1333,21 +1333,15 @@ export default function VirtualKeySheet({ virtualKey, defaultTeamId, onSave, onC
 									</div>
 									{watchedModelProbeEnabled ? (
 										<div className="space-y-1.5 border-t pt-3" data-testid="vk-model-probe-exempt">
-											<Label className="text-sm font-medium">
-												{t("virtualKeys.modelProbeExemptProviders")}
-											</Label>
-											<p className="text-muted-foreground text-xs">
-												{t("virtualKeys.modelProbeExemptProvidersDescription")}
-											</p>
+											<Label className="text-sm font-medium">{t("virtualKeys.modelProbeExemptProviders")}</Label>
+											<p className="text-muted-foreground text-xs">{t("virtualKeys.modelProbeExemptProvidersDescription")}</p>
 											<MultiSelect
 												options={availableProviders.map((provider) => ({
 													label: provider.name,
 													value: provider.name,
 												}))}
 												defaultValue={form.getValues("modelProbeExemptProviders")}
-												onValueChange={(values) =>
-													form.setValue("modelProbeExemptProviders", values, { shouldDirty: true })
-												}
+												onValueChange={(values) => form.setValue("modelProbeExemptProviders", values, { shouldDirty: true })}
 												placeholder={t("virtualKeys.modelProbeExemptProvidersPlaceholder")}
 												maxCount={5}
 												variant="secondary"
