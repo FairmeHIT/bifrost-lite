@@ -34,6 +34,7 @@ var reservedKeys = []any{
 	BifrostContextKeyUpstreamLatency,
 	BifrostContextKeyRoutingInfo,
 	BifrostContextKeyMCPInboundBearer,
+	BifrostContextKeyOpencodeSession,
 }
 
 // pluginLogStore holds plugin log entries accumulated during request processing.
@@ -416,6 +417,64 @@ func (bc *BifrostContext) setReservedValue(key, value any) {
 // post-hook. Bifrost-internal (set by core - DO NOT SET THIS MANUALLY).
 func (bc *BifrostContext) SetRoutingInfoSnapshot(ri RoutingInfo) {
 	bc.setReservedValue(BifrostContextKeyRoutingInfo, ri)
+}
+
+// getOrStoreReservedValue returns the value already stored under the reserved
+// key, or stores and returns the result of valueFn. The valueFn runs outside
+// the lock, because valueFn may itself read the context and valuesMu is not
+// reentrant. Two first callers racing on an empty key may therefore both run
+// valueFn, but only the first result is stored and every caller returns that
+// stored value. Writes bypass the restricted-writes guard the same way
+// setReservedValue does, and are always routed to the root via valueDelegate so
+// every scoped context observes the same resolved value. Bifrost-internal.
+func (bc *BifrostContext) getOrStoreReservedValue(key any, valueFn func() (any, error)) (any, error) {
+	if bc.valueDelegate != nil {
+		return bc.valueDelegate.getOrStoreReservedValue(key, valueFn)
+	}
+	bc.valuesMu.RLock()
+	if v, ok := bc.userValues[key]; ok && v != nil {
+		bc.valuesMu.RUnlock()
+		return v, nil
+	}
+	bc.valuesMu.RUnlock()
+
+	v, err := valueFn()
+	if err != nil {
+		return nil, err
+	}
+
+	bc.valuesMu.Lock()
+	defer bc.valuesMu.Unlock()
+	// Re-check: a concurrent caller may have stored a value while we computed.
+	if stored, ok := bc.userValues[key]; ok && stored != nil {
+		return stored, nil
+	}
+	if bc.userValues == nil {
+		bc.userValues = make(map[any]any)
+	}
+	bc.userValues[key] = v
+	return v, nil
+}
+
+// GetOrStoreOpencodeSession resolves the x-opencode-session value for the
+// request exactly once and caches it on the root context. The opencode provider
+// family (Go and Zen variants) reads it for every inference call, including
+// retry and fallback attempts, so the same session ID is shared across all
+// attempts of one request. Bifrost-internal (set by the opencode provider - DO
+// NOT SET MANUALLY).
+func (bc *BifrostContext) GetOrStoreOpencodeSession(valueFn func() (string, error)) (string, error) {
+	v, err := bc.getOrStoreReservedValue(BifrostContextKeyOpencodeSession, func() (any, error) {
+		s, serr := valueFn()
+		if serr != nil {
+			return nil, serr
+		}
+		return any(s), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	s, _ := v.(string)
+	return s, nil
 }
 
 // ClearValue clears a value from the internal userValues map.
